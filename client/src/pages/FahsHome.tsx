@@ -53,6 +53,9 @@ export default function FahsHome() {
 
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
+              <Link to="/" className="px-4 py-2 text-white text-sm font-medium rounded" style={{ backgroundColor: '#18754d' }}>
+                الرئيسية
+              </Link>
               <a href="#" className="px-4 py-2 text-gray-700 text-sm font-medium hover:text-[#18754d]">
                 استعلام عن حالة الفحص
               </a>
