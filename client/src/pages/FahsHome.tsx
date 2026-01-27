@@ -75,7 +75,7 @@ export default function FahsHome() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-gray-50 to-white py-12 lg:py-20">
+      <section className="relative py-12 lg:py-20" style={{ backgroundColor: '#e8ecef' }}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row-reverse items-center gap-8">
             {/* Hero Image - Left Side */}
@@ -83,7 +83,7 @@ export default function FahsHome() {
               <img 
                 src="/images/hero-inspection.png" 
                 alt="الفحص الفني الدوري" 
-                className="w-full max-w-lg mx-auto"
+                className="w-full max-w-2xl mx-auto"
               />
             </div>
 
