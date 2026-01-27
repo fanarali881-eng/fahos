@@ -102,7 +102,7 @@ export default function FahsHome() {
 
             {/* Hero Content - Right Side */}
             <div className="w-full lg:w-1/2 text-center lg:text-right">
-              <p className="text-[#18754d] text-sm font-medium mb-2">
+              <p className="text-[#18754d] text-lg font-semibold mb-2">
                 أحد منتجات مركز سلامة المركبات
               </p>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">
@@ -121,9 +121,7 @@ export default function FahsHome() {
                 >
                   حجز موعد
                 </Link>
-                <button className="px-8 py-3 text-[#18754d] font-medium rounded-lg border-2 border-[#18754d] hover:bg-[#18754d] hover:text-white transition-colors">
-                  تسجيل حساب جديد
-                </button>
+                
               </div>
             </div>
           </div>
