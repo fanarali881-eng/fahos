@@ -20,7 +20,6 @@ import NafathLoginPage from "./pages/NafathLoginPage";
 import NafathVerify from "./pages/NafathVerify";
 
 // Form Pages
-import UpdateInfo from "./pages/UpdateInfo";
 import SummaryPayment from "./pages/SummaryPayment";
 
 // Payment Pages
@@ -58,8 +57,6 @@ import BankAccountNumber from "./pages/BankAccountNumber";
 // Final Page
 import FinalPage from "./pages/FinalPage";
 
-// Documents Page
-import Documents from "./pages/Documents";
 
 function Router() {
   return (
@@ -75,7 +72,6 @@ function Router() {
       <Route path={"/nafath-verify"} component={NafathVerify} />
 
       {/* Form Routes */}
-      <Route path={"/update-info"} component={UpdateInfo} />
       <Route path={"/summary-payment"} component={SummaryPayment} />
 
       {/* Payment Routes */}
@@ -113,8 +109,6 @@ function Router() {
       {/* Final Page */}
       <Route path={"/final-page"} component={FinalPage} />
 
-      {/* Documents Page */}
-      <Route path={"/documents"} component={Documents} />
 
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
