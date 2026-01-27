@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 
 // Arabic to English letter mapping for plate
 const letterOptions = [
@@ -70,7 +70,7 @@ const timeSlots = [
 ];
 
 export default function NewAppointment() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   
   // Form state
   const [name, setName] = useState("");
@@ -113,7 +113,7 @@ export default function NewAppointment() {
 
   const handleSubmit = () => {
     // Navigate to nafath or next step
-    navigate("/summary-payment");
+    setLocation("/summary-payment");
   };
 
   return (
