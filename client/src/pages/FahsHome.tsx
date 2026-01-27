@@ -75,7 +75,7 @@ export default function FahsHome() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-12 lg:py-20" style={{ backgroundColor: '#e9eef2' }}>
+      <section className="relative py-12 lg:py-20" style={{ backgroundColor: '#f4f4f4' }}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row-reverse items-center gap-8">
             {/* Hero Image - Left Side */}
