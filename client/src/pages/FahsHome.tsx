@@ -88,11 +88,11 @@ export default function FahsHome() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-l from-gray-50 to-white py-12 lg:py-20">
+      <section className="relative bg-gradient-to-r from-gray-50 to-white py-12 lg:py-20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-8">
-            {/* Hero Image */}
-            <div className="w-full lg:w-1/2 order-2 lg:order-1">
+          <div className="flex flex-col lg:flex-row-reverse items-center gap-8">
+            {/* Hero Image - Left Side */}
+            <div className="w-full lg:w-1/2">
               <img 
                 src="/images/intro-ar.png" 
                 alt="الفحص الفني الدوري" 
@@ -100,8 +100,8 @@ export default function FahsHome() {
               />
             </div>
 
-            {/* Hero Content */}
-            <div className="w-full lg:w-1/2 text-center lg:text-right order-1 lg:order-2">
+            {/* Hero Content - Right Side */}
+            <div className="w-full lg:w-1/2 text-center lg:text-right">
               <p className="text-[#18754d] text-sm font-medium mb-2">
                 أحد منتجات مركز سلامة المركبات
               </p>
