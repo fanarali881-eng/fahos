@@ -49,17 +49,10 @@ export default function FahsHome() {
                   e.currentTarget.src = "/images/login-logo.png";
                 }}
               />
-              <div className="hidden md:block">
-                <p className="text-sm font-bold text-gray-800">مركز سلامة المركبات</p>
-                <p className="text-xs text-gray-500">Vehicles Safety Center</p>
-              </div>
             </div>
 
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              <a href="#" className="px-4 py-2 text-white text-sm font-medium rounded" style={{ backgroundColor: '#18754d' }}>
-                الرئيسية
-              </a>
               <a href="#" className="px-4 py-2 text-gray-700 text-sm font-medium hover:text-[#18754d]">
                 استعلام عن حالة الفحص
               </a>
@@ -76,12 +69,6 @@ export default function FahsHome() {
               <button className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
                 English
               </button>
-              <a href="#" className="flex items-center gap-2 text-sm text-[#18754d] font-medium">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                تسجيل دخول
-              </a>
             </div>
           </div>
         </div>
