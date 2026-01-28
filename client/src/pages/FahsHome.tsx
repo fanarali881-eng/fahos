@@ -118,68 +118,7 @@ export default function FahsHome() {
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              البحث عن الحجوزات للفحص الفني الدوري
-            </h2>
-            <p className="text-gray-600">
-              اختر المنطقة والتاريخ والوقت المناسب للبحث عن المواقع المتاحة
-            </p>
-          </div>
 
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
-              {/* Region Select */}
-              <div className="w-full md:w-auto">
-                <select 
-                  value={selectedRegion}
-                  onChange={(e) => setSelectedRegion(e.target.value)}
-                  className="w-full md:w-48 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-[#18754d]"
-                >
-                  {regions.map((region) => (
-                    <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Vehicle Type Select */}
-              <div className="w-full md:w-auto">
-                <select 
-                  value={selectedVehicle}
-                  onChange={(e) => setSelectedVehicle(e.target.value)}
-                  className="w-full md:w-48 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-[#18754d]"
-                >
-                  {vehicleTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Date Time Input */}
-              <div className="w-full md:w-auto">
-                <input 
-                  type="text"
-                  placeholder="التاريخ والوقت"
-                  value={dateTime}
-                  onChange={(e) => setDateTime(e.target.value)}
-                  className="w-full md:w-48 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-[#18754d]"
-                />
-              </div>
-
-              {/* Search Button */}
-              <button 
-                className="w-full md:w-auto px-8 py-3 text-white font-medium rounded-lg"
-                style={{ backgroundColor: '#18754d' }}
-              >
-                بحث
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* When to Inspect Section */}
       <section className="py-16 bg-[#18754d]">
