@@ -92,10 +92,10 @@ export default function FahsHome() {
 
             {/* Hero Content - Right Side */}
             <div className="w-full lg:w-1/2 text-center lg:text-right">
-              <p className="text-[#18754d] text-xl font-semibold mb-2">
+              <p className="text-[#18754d] text-2xl font-semibold mb-3">
                 أحد منتجات مركز سلامة المركبات
               </p>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-6">
                 المنصة الموحدة لمواعيد<br />
                 الفحص الفني الدوري<br />
                 للمركبات
