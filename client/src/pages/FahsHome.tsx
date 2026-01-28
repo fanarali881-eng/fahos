@@ -119,7 +119,9 @@ export default function FahsHome() {
                 أحد منتجات مركز سلامة المركبات
               </p>
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-6">
-                المنصة الموحدة لمواعيد الفحص الفني الدوري للمركبات
+                المنصة الموحدة لمواعيد<br />
+                الفحص الفني الدوري<br />
+                للمركبات
               </h1>
               <p className="text-gray-600 text-base mb-8 leading-relaxed">
                 تتيح المنصة حجز وإدارة مواعيد الفحص الفني الدوري للمركبات لدى جميع الجهات المرخصة من المواصفات السعودية لتقديم الخدمة
