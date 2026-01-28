@@ -354,6 +354,55 @@ export default function FahsHome() {
         </div>
       </section>
 
+      {/* Licensed Entities Section - الجهات المرخصة */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-[#18754d] mb-4">
+            الجهات المرخصة
+          </h2>
+          <p className="text-[#18754d] mb-10">
+            الجهات المرخصة من المواصفات السعودية لممارسة نشاط الفحص الفني الدوري
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-6">
+            {/* Logo 1 - مركز سلامة المركبات */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm w-40 h-28 flex items-center justify-center">
+              <img src="/images/logo-mvsc.png" alt="مركز سلامة المركبات" className="max-h-16 max-w-full object-contain" onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<div class="text-[#18754d] font-bold text-sm">مركز سلامة<br/>المركبات</div>';
+              }} />
+            </div>
+            {/* Logo 2 - الكاملي للخدمات الفنية */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm w-40 h-28 flex items-center justify-center">
+              <img src="/images/logo-alkamli.png" alt="الكاملي للخدمات الفنية" className="max-h-16 max-w-full object-contain" onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<div class="text-gray-700 font-bold text-sm">الكاملي<br/>للخدمات الفنية</div>';
+              }} />
+            </div>
+            {/* Logo 3 - Applus */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm w-40 h-28 flex items-center justify-center">
+              <img src="/images/logo-applus.png" alt="Applus Vehicle Inspection" className="max-h-16 max-w-full object-contain" onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<div class="text-orange-500 font-bold text-lg">Applus<sup>+</sup><br/><span class="text-xs text-gray-500">Vehicle Inspection</span></div>';
+              }} />
+            </div>
+            {/* Logo 4 - مسار الجودة */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm w-40 h-28 flex items-center justify-center">
+              <img src="/images/logo-masar.png" alt="مسار الجودة" className="max-h-16 max-w-full object-contain" onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<div class="text-gray-700 font-bold text-sm">مسار الجودة</div>';
+              }} />
+            </div>
+            {/* Logo 5 - DEKRA */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm w-40 h-28 flex items-center justify-center">
+              <img src="/images/logo-dekra.png" alt="DEKRA" className="max-h-16 max-w-full object-contain" onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<div class="text-green-700 font-bold text-xl">DEKRA</div>';
+              }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* App Download Section */}
       <section className="py-12 bg-[#18754d]">
         <div className="container mx-auto px-4">
