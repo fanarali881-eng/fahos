@@ -246,6 +246,65 @@ export default function FahsHome() {
         </div>
       </section>
 
+      {/* Map Section - مواقع الفحص الفني الدوري */}
+      <section className="py-16 bg-[#e8ece9]">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-start gap-8">
+            {/* Map Image */}
+            <div className="flex-1 relative">
+              <img 
+                src="/images/saudi-map.png" 
+                alt="خريطة مواقع الفحص الفني الدوري" 
+                className="w-full max-w-2xl"
+              />
+              {/* Counter Box */}
+              <div className="absolute bottom-8 left-8 bg-white rounded-xl p-4 shadow-lg">
+                <div className="text-5xl font-bold text-[#18754d]">58</div>
+                <div className="text-sm text-gray-600">موقع للفحص الفني الدوري</div>
+                <div className="text-sm text-gray-600">داخل المملكة العربية السعودية</div>
+              </div>
+            </div>
+            
+            {/* Search Panel */}
+            <div className="bg-white rounded-xl p-6 shadow-lg w-full lg:w-96">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-[#e8f5f0] rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <h3 className="font-bold text-gray-900 text-lg">مواقع الفحص الفني الدوري</h3>
+                  <p className="text-gray-500 text-sm">ابحث عن أقرب موقع فحص لك، أو ابحث باسم المدينة أو نوع المركبة</p>
+                </div>
+              </div>
+              
+              {/* Search Input */}
+              <div className="relative mt-6">
+                <input 
+                  type="text" 
+                  placeholder="البحث عن مواقع" 
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-right focus:outline-none focus:border-[#18754d]"
+                />
+                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              
+              {/* Nearest Location Button */}
+              <button className="flex items-center gap-2 mt-4 text-[#18754d] hover:underline">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>أقرب المواقع لموقعي</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Steps Section */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
