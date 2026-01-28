@@ -177,63 +177,69 @@ export default function FahsHome() {
       </section>
 
       {/* Services Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+          <h2 className="text-3xl font-bold text-[#18754d] text-right mb-10">
             خدمات منصة الفحص الفني الدوري
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Service 1 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="w-12 h-12 mb-4 bg-[#e8f5f0] rounded-lg flex items-center justify-center">
-                <img src="/images/service-1.svg" alt="" className="w-6 h-6" onError={(e) => e.currentTarget.style.display = 'none'} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Service 1 - حجز موعد الفحص */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm text-right">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">حجز موعد الفحص</h3>
-              <p className="text-gray-600 text-sm mb-4">
+              <h3 className="font-bold text-gray-900 text-xl mb-3">حجز موعد الفحص</h3>
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
                 تتيح المنصة لأصحاب المركبات حجز ومتابعة مواعيد الفحص وإعادة الفحص للمركبات الخاصة بهم.
               </p>
-              <div className="flex gap-2 mb-4">
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أفراد</span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أعمال</span>
+              <div className="flex gap-2 mb-6 justify-end">
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أفراد</span>
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أعمال</span>
               </div>
-              <Link to="/new-appointment" className="text-[#18754d] font-medium text-sm hover:underline">
-                حجز موعد ←
+              <Link to="/new-appointment" className="inline-block w-full px-6 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+                حجز موعد
               </Link>
             </div>
 
-            {/* Service 2 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="w-12 h-12 mb-4 bg-[#e8f5f0] rounded-lg flex items-center justify-center">
-                <img src="/images/service-2.svg" alt="" className="w-6 h-6" onError={(e) => e.currentTarget.style.display = 'none'} />
+            {/* Service 2 - التحقق من حالة الفحص */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm text-right">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">التحقق من حالة الفحص</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                تتيح للأفراد والمنشآت التحقق من سريان فحص المركبة عن طريق بيانات رخصة السير (الاستمارة) أو البطاقة الجمركية.
+              <h3 className="font-bold text-gray-900 text-xl mb-3">التحقق من حالة الفحص</h3>
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                تتيح للأفراد والمنشآت التحقق من سريان فحص المركبة عن طريق بيانات رخصة السير (الاستمارة) أو البطاقة الجمركية، وفي حال كانت المركبة غير سعودية يمكن الاستعلام عن طريق رقم الهيكل.
               </p>
-              <div className="flex gap-2 mb-4">
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أفراد</span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أعمال</span>
+              <div className="flex gap-2 mb-6 justify-end">
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أفراد</span>
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أعمال</span>
               </div>
-              <a href="#" className="text-[#18754d] font-medium text-sm hover:underline">
-                التحقق من حالة الفحص ←
+              <a href="#" className="inline-block w-full px-6 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+                التحقق من حالة الفحص
               </a>
             </div>
 
-            {/* Service 3 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="w-12 h-12 mb-4 bg-[#e8f5f0] rounded-lg flex items-center justify-center">
-                <img src="/images/service-3.svg" alt="" className="w-6 h-6" onError={(e) => e.currentTarget.style.display = 'none'} />
+            {/* Service 3 - تحميل وثيقة الفحص */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm text-right">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">تحميل وثيقة الفحص</h3>
-              <p className="text-gray-600 text-sm mb-4">
+              <h3 className="font-bold text-gray-900 text-xl mb-3">تحميل وثيقة الفحص</h3>
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
                 يمكن لأصحاب المركبات من أفراد ومؤسسات الاطلاع على وثيقة الفحص وتحميلها من خلال المنصة.
               </p>
-              <div className="flex gap-2 mb-4">
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أفراد</span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">أعمال</span>
+              <div className="flex gap-2 mb-6 justify-end">
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أفراد</span>
+                <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-lg">أعمال</span>
               </div>
-              <a href="#" className="text-[#18754d] font-medium text-sm hover:underline">
-                الدخول للمنصة ←
+              <a href="#" className="inline-block w-full px-6 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+                الدخول للمنصة
               </a>
             </div>
           </div>
