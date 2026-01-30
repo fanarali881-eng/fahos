@@ -62,13 +62,11 @@ export default function FahsHome() {
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <svg viewBox="0 0 50 50" className="w-12 h-12">
-                  <polygon points="25,5 45,42 5,42" fill="#18754d" />
-                  <polygon points="25,12 38,38 12,38" fill="white" />
-                  <polygon points="25,18 32,32 18,32" fill="#18754d" />
-                  <circle cx="25" cy="26" r="4" fill="white" />
-                  <circle cx="25" cy="26" r="2" fill="#18754d" />
-                </svg>
+                <img 
+                  src="/images/vsc-logo-icon.png" 
+                  alt="مركز سلامة المركبات" 
+                  className="w-12 h-12 object-contain"
+                />
                 <div className="text-right">
                   <div className="text-sm font-bold text-gray-800">مركز سلامة المركبات</div>
                   <div className="text-xs text-gray-500">Vehicles Safety Center</div>
