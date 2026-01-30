@@ -117,7 +117,7 @@ export default function FahsHome() {
           <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* Hero Content - Right Side */}
             <div className="w-full lg:w-2/5 text-right">
-              <p className="text-xl lg:text-2xl font-medium mb-4" style={{ color: '#2e9e5e', letterSpacing: '0.5px' }}>
+              <p className="text-xl lg:text-2xl font-semibold mb-4" style={{ color: '#2e9e5e' }}>
                 أحد منتجات مركز سلامة المركبات
               </p>
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-6" style={{ whiteSpace: 'nowrap' }}>
