@@ -219,7 +219,7 @@ export default function FahsHome() {
       </section>
 
       {/* When to Inspect Section */}
-      <section className="py-16" style={{ backgroundColor: '#f5f7f9' }}>
+      <section className="py-16" style={{ backgroundColor: '#e8f5f0' }}>
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 text-right mb-12">
             متى يجب فحص المركبة
@@ -227,7 +227,7 @@ export default function FahsHome() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6">
+              <div className="w-16 h-16 mx-auto mb-6">
                 <img src="/images/icon-calendar.png" alt="بشكل دوري" className="w-full h-full object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-2xl mb-3">بشكل دوري</h3>
@@ -238,7 +238,7 @@ export default function FahsHome() {
 
             {/* Card 2 */}
             <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6">
+              <div className="w-16 h-16 mx-auto mb-6">
                 <img src="/images/icon-transfer.png" alt="عند نقل ملكية المركبة" className="w-full h-full object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-2xl mb-3">عند نقل ملكية المركبة</h3>
@@ -249,7 +249,7 @@ export default function FahsHome() {
 
             {/* Card 3 */}
             <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6">
+              <div className="w-16 h-16 mx-auto mb-6">
                 <img src="/images/icon-foreign.png" alt="المركبات الأجنبية" className="w-full h-full object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-2xl mb-3">المركبات الأجنبية</h3>
