@@ -267,63 +267,57 @@ export default function FahsHome() {
           <h2 className="text-2xl font-bold text-gray-900 text-right mb-12">
             خدمات منصة الفحص الفني الدوري
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Service 1 - حجز موعد الفحص */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right">
-              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center">
-                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <img src="/images/icon-booking.png" alt="حجز موعد" className="w-8 h-8 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">حجز موعد الفحص</h3>
-              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 تتيح المنصة لأصحاب المركبات حجز ومتابعة مواعيد الفحص وإعادة الفحص للمركبات الخاصة بهم.
               </p>
               <div className="flex gap-2 mb-6 justify-end">
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أفراد</span>
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أعمال</span>
               </div>
-              <Link to="/new-appointment" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+              <Link to="/new-appointment" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 حجز موعد
               </Link>
             </div>
 
             {/* Service 2 - التحقق من حالة الفحص */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right">
-              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center">
-                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <img src="/images/icon-verify.png" alt="التحقق" className="w-8 h-8 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">التحقق من حالة الفحص</h3>
-              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 تتيح للأفراد والمنشآت التحقق من سريان فحص المركبة عن طريق بيانات رخصة السير (الاستمارة) أو البطاقة الجمركية، وفي حال كانت المركبة غير سعودية يمكن الاستعلام عن طريق رقم الهيكل.
               </p>
               <div className="flex gap-2 mb-6 justify-end">
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أفراد</span>
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أعمال</span>
               </div>
-              <a href="#" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+              <a href="#" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 التحقق من حالة الفحص
               </a>
             </div>
 
             {/* Service 3 - تحميل وثيقة الفحص */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right">
-              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center">
-                <svg className="w-7 h-7 text-[#18754d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
+              <div className="w-14 h-14 mb-6 bg-[#e8f5f0] rounded-xl flex items-center justify-center mr-auto">
+                <img src="/images/icon-download.png" alt="تحميل" className="w-8 h-8 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">تحميل وثيقة الفحص</h3>
-              <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+              <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 يمكن لأصحاب المركبات من أفراد ومؤسسات الاطلاع على وثيقة الفحص وتحميلها من خلال المنصة.
               </p>
               <div className="flex gap-2 mb-6 justify-end">
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أفراد</span>
                 <span className="px-4 py-1.5 border border-[#18754d] text-[#18754d] text-sm rounded-md">أعمال</span>
               </div>
-              <a href="#" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e]">
+              <a href="#" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 الدخول للمنصة
               </a>
             </div>
