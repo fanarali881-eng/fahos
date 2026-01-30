@@ -64,7 +64,8 @@ export default function FahsHome() {
               <img 
                 src="/images/vsc-logo.png" 
                 alt="مركز سلامة المركبات" 
-                className="h-12"
+                className="h-12 w-auto"
+                style={{ minWidth: '200px' }}
                 onError={(e) => {
                   e.currentTarget.src = 'https://pti.saso.gov.sa/apt/static/media/logo.png';
                 }}
