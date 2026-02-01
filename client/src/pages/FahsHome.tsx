@@ -384,21 +384,21 @@ export default function FahsHome() {
           <p className="text-[#18754d] mb-10">
             الجهات المرخصة من المواصفات السعودية لممارسة نشاط الفحص الفني الدوري
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-4">
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
-              <img src="/images/logo-salamah.jpg" alt="مركز سلامة المركبات" className="max-h-14 object-contain" />
+          <div className="flex flex-wrap justify-center items-center gap-3">
+            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
+              <img src="/vsc-logo.jpg" alt="مركز سلامة المركبات" className="max-h-10 object-contain" />
             </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
-              <img src="/images/logo-alkamli.jpg" alt="الكاملي للخدمات الفنية" className="max-h-14 object-contain" />
+            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
+              <img src="/salamah-logo.jpg" alt="الكاملي للخدمات الفنية" className="max-h-10 object-contain" />
             </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
-              <img src="/images/logo-applus.png" alt="Applus" className="max-h-14 object-contain" />
+            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
+              <img src="/applus-logo.png" alt="Applus" className="max-h-10 object-contain" />
             </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
-              <img src="/images/logo-masar.jpg" alt="مسار الجودة" className="max-h-14 object-contain" />
+            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
+              <img src="/masarat-logo.jpg" alt="مسار الجودة" className="max-h-10 object-contain" />
             </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
-              <img src="/images/logo-dekra.jpg" alt="DEKRA" className="max-h-14 object-contain" />
+            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
+              <img src="/dekra-logo.png" alt="DEKRA" className="max-h-10 object-contain" />
             </div>
           </div>
         </div>
