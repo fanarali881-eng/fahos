@@ -385,20 +385,20 @@ export default function FahsHome() {
             الجهات المرخصة من المواصفات السعودية لممارسة نشاط الفحص الفني الدوري
           </p>
           <div className="flex flex-wrap justify-center items-center gap-4">
-            <div className="bg-white rounded-xl p-4 border border-gray-200 w-36 h-24 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">مركز سلامة المركبات</span>
+            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
+              <img src="/images/logo-salamah.jpg" alt="مركز سلامة المركبات" className="max-h-14 object-contain" />
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 w-36 h-24 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">الكاملي للخدمات الفنية</span>
+            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
+              <img src="/images/logo-alkamli.jpg" alt="الكاملي للخدمات الفنية" className="max-h-14 object-contain" />
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 w-36 h-24 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">Applus</span>
+            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
+              <img src="/images/logo-applus.png" alt="Applus" className="max-h-14 object-contain" />
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 w-36 h-24 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">مسار الجودة</span>
+            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
+              <img src="/images/logo-masar.jpg" alt="مسار الجودة" className="max-h-14 object-contain" />
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 w-36 h-24 flex items-center justify-center">
-              <span className="text-gray-600 text-xs">DEKRA</span>
+            <div className="bg-white rounded-2xl p-4 border border-gray-200 w-44 h-20 flex items-center justify-center">
+              <img src="/images/logo-dekra.jpg" alt="DEKRA" className="max-h-14 object-contain" />
             </div>
           </div>
         </div>
