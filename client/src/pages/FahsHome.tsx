@@ -270,14 +270,14 @@ export default function FahsHome() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Service 1 - حجز موعد الفحص */}
             <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
-              <div className="w-full flex justify-end mb-6">
+              <div className="w-full flex justify-start mb-6">
                 <img src="/images/icon-booking.png" alt="حجز موعد" className="w-12 h-12 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">حجز موعد الفحص</h3>
               <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 تتيح المنصة لأصحاب المركبات حجز ومتابعة مواعيد الفحص وإعادة الفحص للمركبات الخاصة بهم.
               </p>
-              <div className="flex gap-0 mb-6 justify-end">
+              <div className="flex gap-0 mb-6 justify-start">
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
@@ -288,14 +288,14 @@ export default function FahsHome() {
 
             {/* Service 2 - التحقق من حالة الفحص */}
             <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
-              <div className="w-full flex justify-end mb-6">
+              <div className="w-full flex justify-start mb-6">
                 <img src="/images/icon-verify.png" alt="التحقق" className="w-12 h-12 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">التحقق من حالة الفحص</h3>
               <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 تتيح للأفراد والمنشآت التحقق من سريان فحص المركبة عن طريق بيانات رخصة السير (الاستمارة) أو البطاقة الجمركية، وفي حال كانت المركبة غير سعودية يمكن الاستعلام عن طريق رقم الهيكل.
               </p>
-              <div className="flex gap-0 mb-6 justify-end">
+              <div className="flex gap-0 mb-6 justify-start">
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
@@ -306,14 +306,14 @@ export default function FahsHome() {
 
             {/* Service 3 - تحميل وثيقة الفحص */}
             <div className="bg-white rounded-2xl p-6 border border-gray-200 text-right flex flex-col">
-              <div className="w-full flex justify-end mb-6">
+              <div className="w-full flex justify-start mb-6">
                 <img src="/images/icon-download.png" alt="تحميل" className="w-12 h-12 object-contain" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-3">تحميل وثيقة الفحص</h3>
               <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow">
                 يمكن لأصحاب المركبات من أفراد ومؤسسات الاطلاع على وثيقة الفحص وتحميلها من خلال المنصة.
               </p>
-              <div className="flex gap-0 mb-6 justify-end">
+              <div className="flex gap-0 mb-6 justify-start">
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
