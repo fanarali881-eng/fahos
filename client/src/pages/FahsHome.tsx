@@ -406,18 +406,18 @@ export default function FahsHome() {
               <p className="text-gray-600 text-lg mb-8">
                 بسهولة وبساطة يمكنك حجز موعد الفحص في أقرب مركز لموقعك من خلال تطبيق الجوال
               </p>
-            </div>
-            
-            {/* Phone Mockup + Store Buttons */}
-            <div className="flex items-end gap-4 flex-shrink-0 mb-0">
-              <div className="flex flex-col gap-3 pb-8">
+              <div className="flex gap-4 justify-end">
                 <a href="#">
-                  <img src="/appstore-btn.png" alt="Download on App Store" className="h-[45px] object-contain" />
+                  <img src="/googleplay-btn.png" alt="Get it on Google Play" className="h-[50px] object-contain" />
                 </a>
                 <a href="#">
-                  <img src="/googleplay-btn.png" alt="Get it on Google Play" className="h-[45px] object-contain" />
+                  <img src="/appstore-btn.png" alt="Download on App Store" className="h-[50px] object-contain" />
                 </a>
               </div>
+            </div>
+            
+            {/* Phone Mockup */}
+            <div className="flex-shrink-0 mb-0">
               <img 
                 src="/phone-mockup.png" 
                 alt="تطبيق الفحص الفني الدوري" 
