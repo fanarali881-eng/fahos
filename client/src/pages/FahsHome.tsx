@@ -78,7 +78,7 @@ export default function FahsHome() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/fahs" className="flex items-center gap-3 cursor-pointer">
+            <Link to="/" className="flex items-center gap-3 cursor-pointer">
               <div className="flex items-center gap-2">
                 <img 
                   src="/images/vsc-logo-icon.png" 
@@ -94,7 +94,7 @@ export default function FahsHome() {
 
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              <Link to="/fahs" className="px-4 py-2 text-white text-sm font-medium rounded" style={{ backgroundColor: '#18754d' }}>
+              <Link to="/" className="px-4 py-2 text-white text-sm font-medium rounded" style={{ backgroundColor: '#18754d' }}>
                 الرئيسية
               </Link>
               <a href="#" className="px-4 py-2 text-gray-700 text-sm font-medium hover:text-[#18754d]">
