@@ -108,12 +108,9 @@ export default function FahsHome() {
                 </svg>
                 English
               </button>
-              <a href="#" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#18754d]">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                تسجيل دخول
-              </a>
+              <Link to="/new-appointment" className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#18754d]">
+                حجز موعد
+              </Link>
             </div>
           </div>
         </div>
@@ -144,9 +141,7 @@ export default function FahsHome() {
                 >
                   حجز موعد
                 </Link>
-                <button className="px-8 py-3 text-[#18754d] font-medium rounded-lg border-2 border-[#18754d] bg-white hover:bg-[#18754d] hover:text-white transition-colors">
-                  تسجيل حساب جديد
-                </button>
+
               </div>
             </div>
 
