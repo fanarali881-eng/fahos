@@ -73,7 +73,7 @@ export default function FahsHome() {
   };
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+    <div className="min-h-screen bg-white overflow-x-hidden" dir="rtl" style={{ fontFamily: "'Tajawal', sans-serif" }}>
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="container mx-auto px-4 lg:px-8">
@@ -196,8 +196,7 @@ export default function FahsHome() {
               <img 
                 src="/images/hero-inspection.png" 
                 alt="الفحص الفني الدوري" 
-                className="w-full max-w-md lg:max-w-4xl"
-                style={{ transform: 'scale(1.05)' }}
+                className="w-full max-w-sm md:max-w-md lg:max-w-4xl"
                 onError={(e) => {
                   e.currentTarget.src = 'https://pti.saso.gov.sa/apt/static/media/hero.png';
                 }}
