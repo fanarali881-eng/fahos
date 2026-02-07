@@ -409,7 +409,7 @@ export default function FahsHome() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             {/* Text Content */}
-            <div className="text-right flex-1">
+            <div className="text-right flex-1 mr-16 lg:mr-32">
               <h2 className="text-3xl lg:text-4xl font-bold text-[#18754d] mb-4">
                 احجز موعد الفحص من جوالك
               </h2>
