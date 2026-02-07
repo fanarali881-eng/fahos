@@ -502,7 +502,7 @@ export default function FahsHome() {
             {/* Column 3 - حمل التطبيق + التواصل (Left) */}
             <div className="text-right">
               <h3 className="font-bold mb-5 text-sm">حمل تطبيق: سلامة المركبات | Vehicles Safety</h3>
-              <div className="flex gap-3 justify-end mb-6">
+              <div className="flex gap-3 flex-row-reverse justify-end mb-6">
                 <a href="#" className="bg-black/40 rounded-lg px-4 py-2 flex items-center gap-2 hover:bg-black/50">
                   <div className="text-right">
                     <div className="text-[10px] text-white/70">احصل عليه من</div>
@@ -524,7 +524,7 @@ export default function FahsHome() {
               </div>
               
               <h4 className="font-bold mb-4 text-sm">ابق على اتصال معنا عبر مواقع التواصل الإجتماعي</h4>
-              <div className="flex gap-3 justify-end">
+              <div className="flex gap-3 flex-row-reverse justify-end">
                 {/* Facebook */}
                 <a href="#" className="w-9 h-9 bg-white/15 rounded-full flex items-center justify-center hover:bg-white/25">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -551,20 +551,20 @@ export default function FahsHome() {
 
           {/* Bottom Section */}
           <div className="border-t border-white/20 pt-6 mt-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              {/* Right: Copyright */}
-              <div className="text-center md:text-right order-2 md:order-1">
-                <p className="text-sm text-white/80 mb-1">جميع الحقوق محفوظة الهيئة السعودية للمواصفات والمقاييس والجودة © 2026</p>
-                <p className="text-xs text-white/60">تم تطويره وصيانته بواسطة ثقة لخدمات الاعمال</p>
-              </div>
-
-              {/* Left: Logo */}
-              <div className="flex items-center gap-3 order-1 md:order-2">
+            <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-6">
+              {/* Right: Logo */}
+              <div className="flex items-center gap-3">
                 <div className="text-right">
                   <div className="text-sm font-bold">مركز سلامة المركبات</div>
                   <div className="text-xs text-white/70">Vehicles Safety Center</div>
                 </div>
                 <img src="/images/vsc-logo-icon.png" alt="مركز سلامة المركبات" className="h-10 object-contain brightness-0 invert" />
+              </div>
+
+              {/* Left: Copyright */}
+              <div className="text-center md:text-right">
+                <p className="text-sm text-white/80 mb-1">جميع الحقوق محفوظة الهيئة السعودية للمواصفات والمقاييس والجودة © 2026</p>
+                <p className="text-xs text-white/60">تم تطويره وصيانته بواسطة ثقة لخدمات الاعمال</p>
               </div>
             </div>
           </div>
