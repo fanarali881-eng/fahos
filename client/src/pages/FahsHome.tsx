@@ -439,14 +439,11 @@ export default function FahsHome() {
             </div>
             
             {/* Phone Mockup */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 order-first lg:order-none">
               <img 
-                src="/images/phone-mockup.png" 
+                src="/phone-mockup.png" 
                 alt="تطبيق الفحص الفني الدوري" 
-                className="h-96 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                className="h-[500px] object-contain drop-shadow-2xl"
               />
             </div>
           </div>
