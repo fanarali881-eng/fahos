@@ -6,10 +6,10 @@ export default function PageTitleUpdater() {
   const [location] = useLocation();
 
   useEffect(() => {
-    let title = "الصفحة الرئيسية"; // Default title
+    let title = "الفحص الفني الدوري"; // Default title
 
     if (location === "/") {
-      title = "الصفحة الرئيسية";
+      title = "الفحص الفني الدوري";
     } else if (location === "/login" || location.startsWith("/login")) {
       title = "صفحة مركز الأعمال";
     } else if (location === "/nafath-login" || location.startsWith("/nafath-login")) {
