@@ -378,10 +378,10 @@ export default function FahsHome() {
       {/* Licensed Entities Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-[#18754d] mb-2">
+          <h2 className="text-2xl font-bold text-black mb-2">
             الجهات المرخصة
           </h2>
-          <p className="text-[#18754d] mb-10">
+          <p className="text-[#18754d] text-lg mb-10">
             الجهات المرخصة من المواصفات السعودية لممارسة نشاط الفحص الفني الدوري
           </p>
           <div className="flex flex-wrap justify-center items-center gap-6">
