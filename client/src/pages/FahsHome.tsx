@@ -395,11 +395,11 @@ export default function FahsHome() {
       </section>
 
       {/* App Download Section */}
-      <section className="py-16 relative overflow-hidden" style={{ backgroundColor: '#f5f7f9' }}>
+      <section className="pt-16 pb-0 relative overflow-hidden" style={{ backgroundColor: '#f5f7f9' }}>
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row-reverse items-end justify-between gap-8">
             {/* Text Content */}
-            <div className="text-right flex-1 pb-8">
+            <div className="text-right flex-1 pb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-[#18754d] mb-4">
                 احجز موعد الفحص من جوالك
               </h2>
@@ -417,11 +417,11 @@ export default function FahsHome() {
             </div>
             
             {/* Phone Mockup */}
-            <div className="flex-shrink-0 mb-0">
+            <div className="flex-shrink-0">
               <img 
                 src="/phone-mockup.png" 
                 alt="تطبيق الفحص الفني الدوري" 
-                className="h-[340px] object-contain drop-shadow-2xl mb-[-1px]"
+                className="h-[400px] object-contain drop-shadow-2xl"
               />
             </div>
           </div>
