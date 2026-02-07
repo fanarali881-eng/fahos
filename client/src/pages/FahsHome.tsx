@@ -78,7 +78,7 @@ export default function FahsHome() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <Link to="/fahs" className="flex items-center gap-3 cursor-pointer">
               <div className="flex items-center gap-2">
                 <img 
                   src="/images/vsc-logo-icon.png" 
@@ -90,7 +90,7 @@ export default function FahsHome() {
                   <div className="text-xs text-gray-500">Vehicles Safety Center</div>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
