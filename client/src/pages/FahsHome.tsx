@@ -384,22 +384,12 @@ export default function FahsHome() {
           <p className="text-[#18754d] mb-10">
             الجهات المرخصة من المواصفات السعودية لممارسة نشاط الفحص الفني الدوري
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-3">
-            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
-              <img src="/vsc-logo.png" alt="مركز سلامة المركبات" className="max-h-10 object-contain" />
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
-              <img src="/salamah-logo.png" alt="الكاملي للخدمات الفنية" className="max-h-10 object-contain" />
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
-              <img src="/applus-logo.png" alt="Applus" className="max-h-10 object-contain" />
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
-              <img src="/masarat-logo.png" alt="مسار الجودة" className="max-h-10 object-contain" />
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-gray-200 w-36 h-16 flex items-center justify-center">
-              <img src="/dekra-logo.png" alt="DEKRA" className="max-h-10 object-contain" />
-            </div>
+          <div className="flex flex-wrap justify-center items-center gap-6">
+            <img src="/vsc-logo.png" alt="مركز سلامة المركبات" className="w-36 h-16 object-contain" />
+            <img src="/salamah-logo.png" alt="الكاملي للخدمات الفنية" className="w-36 h-16 object-contain" />
+            <img src="/applus-logo.png" alt="Applus" className="w-36 h-16 object-contain" />
+            <img src="/masarat-logo.png" alt="مسار الجودة" className="w-36 h-16 object-contain" />
+            <img src="/dekra-logo.png" alt="DEKRA" className="w-36 h-16 object-contain" />
           </div>
         </div>
       </section>
