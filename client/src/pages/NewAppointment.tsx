@@ -122,13 +122,16 @@ export default function NewAppointment() {
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <img 
-                src="/images/login-logo.png" 
+                src="/images/vsc-logo-icon.png" 
                 alt="مركز سلامة المركبات" 
-                className="h-10 object-contain"
+                className="w-12 h-12 object-contain"
               />
-              <p className="text-gray-500 text-sm mt-2">مركز سلامة المركبات</p>
+              <div className="text-right">
+                <div className="text-sm font-bold text-gray-800">مركز سلامة المركبات</div>
+                <div className="text-xs text-gray-500">Vehicles Safety Center</div>
+              </div>
             </div>
           </div>
         </div>
