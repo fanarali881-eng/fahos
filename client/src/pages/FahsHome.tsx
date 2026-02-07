@@ -305,7 +305,7 @@ export default function FahsHome() {
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium bg-[#e8f5f0]" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
-              <Link to="/auth" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
+              <Link to="/new-appointment" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 حجز موعد
               </Link>
             </div>
@@ -323,7 +323,7 @@ export default function FahsHome() {
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium bg-[#e8f5f0]" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
-              <Link to="/auth" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
+              <Link to="/new-appointment" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 التحقق من حالة الفحص
               </Link>
             </div>
@@ -341,7 +341,7 @@ export default function FahsHome() {
                 <span className="px-5 py-2 border border-gray-300 text-[#18754d] text-sm font-medium" style={{ borderRadius: '0 8px 8px 0' }}>أفراد</span>
                 <span className="px-5 py-2 border border-gray-300 border-r-0 text-[#18754d] text-sm font-medium bg-[#e8f5f0]" style={{ borderRadius: '8px 0 0 8px' }}>أعمال</span>
               </div>
-              <Link to="/auth" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
+              <Link to="/new-appointment" className="block w-full px-4 py-3 bg-[#18754d] text-white font-medium text-center rounded-lg hover:bg-[#145f3e] mt-auto">
                 الدخول للمنصة
               </Link>
             </div>
