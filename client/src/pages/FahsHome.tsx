@@ -406,7 +406,7 @@ export default function FahsHome() {
               <p className="text-gray-600 text-lg mb-8">
                 بسهولة وبساطة يمكنك حجز موعد الفحص في أقرب مركز لموقعك من خلال تطبيق الجوال
               </p>
-              <div className="flex gap-4 justify-end">
+              <div className="flex gap-4 flex-row-reverse justify-end">
                 <a href="#">
                   <img src="/googleplay-btn.png" alt="Get it on Google Play" className="h-[50px] object-contain" />
                 </a>
