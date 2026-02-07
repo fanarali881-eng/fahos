@@ -120,9 +120,9 @@ export default function AmerChat() {
           } ${hasNewAdminMessage ? "ring-2 ring-red-500 ring-offset-2" : ""}`}
         >
           <img
-            src="/amer-chat.png"
-            alt="آمر"
-            className="w-8 h-8 md:w-10 md:h-10 object-contain"
+            src="/images/chat-logo.png"
+            alt="مركز سلامة المركبات"
+            className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-full"
           />
           {isHovered && (
             <span className="text-gray-700 font-medium whitespace-nowrap animate-fade-in">
@@ -140,12 +140,12 @@ export default function AmerChat() {
             <div className="bg-gradient-to-r from-[#0d9488] to-[#0891b2] text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src="/amer-chat.png"
-                  alt="آمر"
+                  src="/images/chat-logo.png"
+                  alt="مركز سلامة المركبات"
                   className="w-10 h-10 object-contain bg-white rounded-full p-1"
                 />
                 <div>
-                  <h3 className="font-bold text-sm">المنصة الوطنية الموحدة</h3>
+                  <h3 className="font-bold text-sm">مركز سلامة المركبات</h3>
                   <p className="text-xs opacity-80">الدعم الفني</p>
                 </div>
               </div>
@@ -164,9 +164,9 @@ export default function AmerChat() {
               {messages.length === 0 ? (
                 <div className="text-center text-gray-500 mt-8">
                   <img
-                    src="/amer-chat.png"
-                    alt="آمر"
-                    className="w-16 h-16 mx-auto mb-4 opacity-50"
+                    src="/images/chat-logo.png"
+                    alt="مركز سلامة المركبات"
+                    className="w-16 h-16 mx-auto mb-4 opacity-50 rounded-full"
                   />
                   <p>مرحباً بك في خدمة الدعم</p>
                   <p className="text-sm">كيف يمكننا مساعدتك؟</p>
