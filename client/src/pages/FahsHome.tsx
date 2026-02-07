@@ -552,19 +552,19 @@ export default function FahsHome() {
           {/* Bottom Section */}
           <div className="border-t border-white/20 pt-6 mt-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              {/* Right: Logo + Thiqah + Badge */}
-              <div className="flex items-center gap-6 order-2 md:order-1">
-                <img src="/images/vsc-logo-icon.png" alt="مركز سلامة المركبات" className="h-10 object-contain brightness-0 invert" />
+              {/* Right: Copyright */}
+              <div className="text-center md:text-right order-2 md:order-1">
+                <p className="text-sm text-white/80 mb-1">جميع الحقوق محفوظة الهيئة السعودية للمواصفات والمقاييس والجودة © 2026</p>
+                <p className="text-xs text-white/60">تم تطويره وصيانته بواسطة ثقة لخدمات الاعمال</p>
+              </div>
+
+              {/* Left: Logo */}
+              <div className="flex items-center gap-3 order-1 md:order-2">
                 <div className="text-right">
                   <div className="text-sm font-bold">مركز سلامة المركبات</div>
                   <div className="text-xs text-white/70">Vehicles Safety Center</div>
                 </div>
-              </div>
-
-              {/* Left: Copyright */}
-              <div className="text-center md:text-left order-1 md:order-2">
-                <p className="text-sm text-white/80 mb-1">جميع الحقوق محفوظة الهيئة السعودية للمواصفات والمقاييس والجودة © 2026</p>
-                <p className="text-xs text-white/60">تم تطويره وصيانته بواسطة ثقة لخدمات الاعمال</p>
+                <img src="/images/vsc-logo-icon.png" alt="مركز سلامة المركبات" className="h-10 object-contain brightness-0 invert" />
               </div>
             </div>
           </div>
