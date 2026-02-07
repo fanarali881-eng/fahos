@@ -474,7 +474,7 @@ export default function FahsHome() {
       </section>
 
       {/* Footer */}
-      <footer className="text-white pt-12 pb-6" style={{ backgroundColor: '#18754d' }}>
+      <footer className="text-white pt-12 pb-6" style={{ backgroundColor: '#044c34' }}>
         <div className="container mx-auto px-4 lg:px-8">
           {/* Top Section - 3 Columns */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
