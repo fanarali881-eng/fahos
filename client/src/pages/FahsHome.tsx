@@ -554,9 +554,9 @@ export default function FahsHome() {
             <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-6">
               {/* Right: Logos - VSC + Thiqah + Registered */}
               <div className="flex items-center gap-4">
-                <img src="/images/registered-badge.png" alt="Registered as" className="h-10 object-contain" />
-                <img src="/images/thiqah-logo.png" alt="ثقة لخدمات الأعمال" className="h-10 object-contain" />
                 <img src="/images/vsc-footer-logo.png" alt="مركز سلامة المركبات" className="h-10 object-contain" />
+                <img src="/images/thiqah-logo.png" alt="ثقة لخدمات الأعمال" className="h-10 object-contain" />
+                <img src="/images/registered-badge.png" alt="Registered as" className="h-10 object-contain" />
               </div>
 
               {/* Left: Copyright */}
