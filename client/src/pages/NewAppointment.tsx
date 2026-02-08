@@ -160,6 +160,7 @@ export default function NewAppointment() {
   // Form state
   const [name, setName] = useState("");
   const [idNumber, setIdNumber] = useState("");
+  const [idError, setIdError] = useState("");
   const [nationality, setNationality] = useState("السعودية");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
@@ -201,6 +202,24 @@ export default function NewAppointment() {
   const getLetter = (value: string, type: "ar" | "en") => {
     const option = letterOptions.find(o => o.value === value);
     return option ? option[type] : "-";
+  };
+
+  // Saudi ID/Iqama validation (Luhn algorithm)
+  const validateSaudiId = (id: string): boolean => {
+    if (id.length !== 10) return false;
+    if (id[0] !== '1' && id[0] !== '2') return false;
+    
+    let sum = 0;
+    for (let i = 0; i < 10; i++) {
+      const digit = parseInt(id[i]);
+      if (i % 2 === 0) {
+        const doubled = digit * 2;
+        sum += doubled > 9 ? doubled - 9 : doubled;
+      } else {
+        sum += digit;
+      }
+    }
+    return sum % 10 === 0;
   };
 
   // Format plate number as-is (no padding)
@@ -302,7 +321,7 @@ export default function NewAppointment() {
               <label className="block mb-1 text-sm">رقم الهوية / الإقامة<span className="text-red-500">*</span></label>
               <input 
                 type="text" 
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className={`w-full px-3 py-2 border rounded focus:outline-none ${idError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
                 placeholder="رقم الهوية / الإقامة"
                 value={idNumber}
                 maxLength={10}
@@ -311,10 +330,28 @@ export default function NewAppointment() {
                   if (val === '' || /^\d+$/.test(val)) {
                     if (val.length <= 10) {
                       setIdNumber(val);
+                      if (val === '') {
+                        setIdError('');
+                      } else if (val.length === 10) {
+                        if (val[0] !== '1' && val[0] !== '2') {
+                          setIdError('رقم الهوية يجب أن يبدأ بـ 1 أو 2');
+                        } else if (!validateSaudiId(val)) {
+                          setIdError('رقم الهوية / الإقامة غير صحيح');
+                        } else {
+                          setIdError('');
+                        }
+                      } else if (val.length > 0 && val.length < 10) {
+                        if (val[0] !== '1' && val[0] !== '2') {
+                          setIdError('رقم الهوية يجب أن يبدأ بـ 1 أو 2');
+                        } else {
+                          setIdError('');
+                        }
+                      }
                     }
                   }
                 }}
               />
+              {idError && <p className="text-red-500 text-xs mt-1">{idError}</p>}
             </div>
           </div>
 
