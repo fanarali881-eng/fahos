@@ -341,20 +341,14 @@ export default function NewAppointment() {
 
           <div className="mb-4">
             <label className="block mb-1 text-sm">رقم الجوال<span className="text-red-500">*</span></label>
-            <div className="flex gap-2" style={{ direction: 'ltr' }}>
-              <select 
-                className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 max-w-[150px]"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-              >
-                <option value="966">966</option>
-                <option value="964">964</option>
-                <option value="961">961</option>
-              </select>
+            <div className="relative flex items-center border border-gray-300 rounded" style={{ direction: 'ltr' }}>
+              <div className="flex items-center pl-3 pr-2 py-2">
+                <img src="/images/sa-flag.png" alt="SA" className="w-8 h-5 object-cover rounded-sm" />
+              </div>
               <input 
                 type="text" 
-                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                placeholder="رقم الجوال"
+                className="flex-1 px-3 py-2 border-0 focus:outline-none focus:ring-0"
+                placeholder="أكتب رقم الجوال هنا..."
                 style={{ direction: 'rtl' }}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
