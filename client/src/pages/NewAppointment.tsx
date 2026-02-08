@@ -164,6 +164,7 @@ export default function NewAppointment() {
   const [nationality, setNationality] = useState("السعودية");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [email, setEmail] = useState("");
   const [delegateEnabled, setDelegateEnabled] = useState(false);
   const [delegateType, setDelegateType] = useState<"resident" | "gulf">("resident");
@@ -392,7 +393,7 @@ export default function NewAppointment() {
 
           <div className="mb-4">
             <label className="block mb-1 text-sm">رقم الجوال<span className="text-red-500">*</span></label>
-            <div className="relative flex items-center border border-gray-300 rounded" style={{ direction: 'ltr' }}>
+            <div className={`relative flex items-center border rounded ${phoneError ? 'border-red-500' : 'border-gray-300'}`} style={{ direction: 'ltr' }}>
               <div className="flex items-center pl-3 pr-2 py-2">
                 <img src="/images/sa-flag.png" alt="SA" className="w-8 h-5 object-cover rounded-sm" />
               </div>
@@ -402,9 +403,37 @@ export default function NewAppointment() {
                 placeholder="أكتب رقم الجوال هنا..."
                 style={{ direction: 'rtl' }}
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                maxLength={10}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d+$/.test(val)) {
+                    if (val.length <= 10) {
+                      setPhone(val);
+                      const validPrefixes = ['050','053','054','055','056','057','058','059'];
+                      if (val === '') {
+                        setPhoneError('');
+                      } else if (val.length >= 3) {
+                        const prefix = val.substring(0, 3);
+                        if (!validPrefixes.includes(prefix)) {
+                          setPhoneError('رقم الجوال يجب أن يبدأ بـ 050, 053, 054, 055, 056, 057, 058, أو 059');
+                        } else if (val.length === 10) {
+                          setPhoneError('');
+                        } else {
+                          setPhoneError('');
+                        }
+                      } else if (val.length >= 1 && val[0] !== '0') {
+                        setPhoneError('رقم الجوال يجب أن يبدأ بـ 05');
+                      } else if (val.length >= 2 && val[1] !== '5') {
+                        setPhoneError('رقم الجوال يجب أن يبدأ بـ 05');
+                      } else {
+                        setPhoneError('');
+                      }
+                    }
+                  }
+                }}
               />
             </div>
+            {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
           </div>
 
           <div className="mb-4">
