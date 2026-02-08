@@ -44,6 +44,18 @@ export default function NafathLoginPage() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
+  // Only allow digits in ID field
+  const handleIdInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    input.value = input.value.replace(/[^0-9]/g, '');
+  };
+
+  // Only allow English letters, numbers, and special characters in password
+  const handlePasswordInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    input.value = input.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/g, '');
+  };
+
   const {
     register,
     handleSubmit,
@@ -118,6 +130,13 @@ export default function NafathLoginPage() {
               placeholder="أدخل رقم الهوية"
               maxLength={10}
               {...register("idNumber")}
+              onInput={handleIdInput}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text');
+                if (/[^0-9]/.test(pasted)) {
+                  e.preventDefault();
+                }
+              }}
             />
             {errors.idNumber && (
               <p className="text-red-500 text-xs">{errors.idNumber.message}</p>
@@ -133,6 +152,13 @@ export default function NafathLoginPage() {
                 type={showPassword ? "text" : "password"}
                 placeholder="أدخل كلمة المرور"
                 {...register("password")}
+                onInput={handlePasswordInput}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text');
+                  if (/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pasted)) {
+                    e.preventDefault();
+                  }
+                }}
               />
               <button
                 type="button"
