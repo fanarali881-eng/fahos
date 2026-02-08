@@ -741,7 +741,7 @@ export default function NewAppointment() {
                     </select>
                     <input 
                       type="text" 
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-24"
+                      className="px-2 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-28 text-xs placeholder:text-[10px]"
                       placeholder="أدخل الأرقام"
                       maxLength={4}
                       value={plateNumber}
