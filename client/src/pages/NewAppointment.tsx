@@ -171,6 +171,7 @@ export default function NewAppointment() {
   const [delegateType, setDelegateType] = useState<"resident" | "gulf">("resident");
   const [delegateName, setDelegateName] = useState("");
   const [delegatePhone, setDelegatePhone] = useState("");
+  const [delegatePhoneError, setDelegatePhoneError] = useState("");
   const [delegateNationality, setDelegateNationality] = useState("");
   const [delegateIdNumber, setDelegateIdNumber] = useState("");
   const [delegateIdError, setDelegateIdError] = useState("");
@@ -505,34 +506,65 @@ export default function NewAppointment() {
                 <label className="block mb-1 text-sm text-gray-600">أسم المفوض</label>
                 <input 
                   type="text" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white"
                   placeholder="أكتب أسم المفوض هنا..."
                   value={delegateName}
-                  onChange={(e) => setDelegateName(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || /^[\u0600-\u06FF\s]+$/.test(val)) {
+                      setDelegateName(val);
+                    }
+                  }}
                 />
               </div>
 
               <div className="mb-4">
                 <label className="block mb-1 text-sm text-gray-600">رقم الجوال</label>
-                <div className="flex gap-2" style={{ direction: 'ltr' }}>
-                  <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded bg-white min-w-[80px]">
-                    <img src="/images/sa-flag.png" alt="SA" className="w-5 h-4 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <div className={`flex items-center border rounded bg-white ${delegatePhoneError ? 'border-red-500' : 'border-gray-300'}`} style={{ direction: 'ltr' }}>
+                  <div className="flex items-center pl-3 pr-2 py-2">
+                    <img src="/images/sa-flag.png" alt="SA" className="w-8 h-5 object-cover rounded-sm" />
                   </div>
                   <input 
                     type="text" 
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                    className="flex-1 px-3 py-2 border-0 focus:outline-none focus:ring-0 bg-white"
                     placeholder="أكتب رقم الجوال المفوض هنا..."
                     style={{ direction: 'rtl' }}
                     value={delegatePhone}
-                    onChange={(e) => setDelegatePhone(e.target.value)}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || /^\d+$/.test(val)) {
+                        if (val.length <= 10) {
+                          setDelegatePhone(val);
+                          const validPrefixes = ['050','053','054','055','056','057','058','059'];
+                          if (val === '') {
+                            setDelegatePhoneError('');
+                          } else if (val.length >= 3) {
+                            const prefix = val.substring(0, 3);
+                            if (!validPrefixes.includes(prefix)) {
+                              setDelegatePhoneError('رقم الجوال يجب أن يبدأ بـ 050, 053, 054, 055, 056, 057, 058, أو 059');
+                            } else {
+                              setDelegatePhoneError('');
+                            }
+                          } else if (val.length >= 1 && val[0] !== '0') {
+                            setDelegatePhoneError('رقم الجوال يجب أن يبدأ بـ 05');
+                          } else if (val.length >= 2 && val[1] !== '5') {
+                            setDelegatePhoneError('رقم الجوال يجب أن يبدأ بـ 05');
+                          } else {
+                            setDelegatePhoneError('');
+                          }
+                        }
+                      }
+                    }}
                   />
                 </div>
+                {delegatePhoneError && <p className="text-red-500 text-xs mt-1">{delegatePhoneError}</p>}
               </div>
 
               <div className="mb-4">
                 <label className="block mb-1 text-sm text-gray-600">جنسية المفوض</label>
                 <select 
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white"
                   value={delegateNationality}
                   onChange={(e) => setDelegateNationality(e.target.value)}
                 >
@@ -561,7 +593,7 @@ export default function NewAppointment() {
                 <label className="block mb-1 text-sm text-gray-600">رقم الهوية الوطنية / الاقامة المفوض</label>
                 <input 
                   type="text" 
-                  className={`w-full px-3 py-2 border rounded focus:outline-none ${delegateIdError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-[#027d95]'}`}
+                  className={`w-full px-3 py-2 border rounded focus:outline-none bg-white ${delegateIdError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-[#027d95]'}`}
                   placeholder="أكتب رقم الهوية الوطنية / الاقامة المفوض هنا..."
                   value={delegateIdNumber}
                   maxLength={10}
@@ -598,7 +630,7 @@ export default function NewAppointment() {
                 <label className="block mb-1 text-sm text-gray-600">تاريخ ميلاد المفوض</label>
                 <input 
                   type="date" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white"
                   value={delegateBirthDate}
                   onChange={(e) => setDelegateBirthDate(e.target.value)}
                 />
