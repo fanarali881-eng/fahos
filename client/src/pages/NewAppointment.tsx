@@ -1046,7 +1046,7 @@ export default function NewAppointment() {
       </section>
 
       {/* Footer */}
-      <footer className="text-white pt-8 md:pt-12 pb-6" style={{ backgroundColor: '#20744c' }}>
+      <footer className="text-white pt-8 md:pt-12 pb-6" style={{ backgroundColor: '#044c34' }}>
         <div className="container mx-auto px-4 lg:px-8">
           {/* Top Section - 3 Columns */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-10">
