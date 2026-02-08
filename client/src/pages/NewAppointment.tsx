@@ -393,7 +393,7 @@ export default function NewAppointment() {
               <div className="flex gap-2 justify-center mb-6">
                 <button 
                   type="button"
-                  className={`px-6 py-2 rounded-full border transition-all text-sm ${
+                  className={`px-6 py-2 rounded-[5px] border transition-all text-sm ${
                     delegateType === "resident" 
                       ? "bg-[#044c34] text-white border-[#044c34]" 
                       : "bg-white text-gray-600 border-gray-300"
@@ -404,7 +404,7 @@ export default function NewAppointment() {
                 </button>
                 <button 
                   type="button"
-                  className={`px-6 py-2 rounded-full border transition-all text-sm ${
+                  className={`px-6 py-2 rounded-[5px] border transition-all text-sm ${
                     delegateType === "gulf" 
                       ? "bg-[#044c34] text-white border-[#044c34]" 
                       : "bg-white text-gray-600 border-gray-300"
@@ -516,8 +516,8 @@ export default function NewAppointment() {
           <div className="flex flex-wrap gap-2 justify-center mb-6">
             <button 
               type="button"
-              className={`px-4 py-2 min-w-[200px] rounded-full border transition-all ${
-                vehicleType === "license" 
+           className={`px-4 py-2 min-w-[200px] rounded-[5px] border transition-all ${
+                vehicleDocType === "license" 
                   ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
                   : "bg-gray-100 border-gray-300"
               }`}
@@ -527,9 +527,8 @@ export default function NewAppointment() {
             </button>
             <button 
               type="button"
-              className={`px-4 py-2 min-w-[200px] rounded-full border transition-all ${
-                vehicleType === "customs" 
-                  ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
+              className={`px-4 py-2 min-w-[200px] rounded-[5px] border transition-all ${
+                vehicleDocType === "customs"                 ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
                   : "bg-gray-100 border-gray-300"
               }`}
               onClick={() => setVehicleType("customs")}
@@ -804,7 +803,7 @@ export default function NewAppointment() {
           <div className="flex justify-center">
             <button 
               type="button"
-              className="px-8 py-2 text-white rounded-full min-w-[150px]"
+              className="px-8 py-2 text-white rounded-[5px] min-w-[150px]"
               style={{ backgroundColor: '#044c34' }}
               onClick={handleSubmit}
             >
