@@ -105,12 +105,12 @@ export default function SummaryPayment() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] mx-auto overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Image */}
             <div className="w-full">
-              <img src="/images/cashback-cards.png" alt="\u0643\u0627\u0634 \u0628\u0627\u0643 30%" className="w-full object-cover" />
+              <img src="/images/cashback-cards.png" alt="كاش باك 30%" className="w-full object-cover" />
             </div>
             {/* Content */}
             <div className="p-6 text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">\u0633\u0627\u0631\u0639 \u0642\u0628\u0644 \u0646\u0647\u0627\u064a\u0629 \u0627\u0644\u0639\u0631\u0636!</h3>
-              <p className="text-gray-500 mb-4">\u064a\u062a\u0628\u0642\u0649 \u0639\u0644\u064a \u0625\u0646\u062a\u0647\u0627\u0621 \u0627\u0644\u0639\u0631\u0636</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">سارع قبل نهاية العرض!</h3>
+              <p className="text-gray-500 mb-4">يتبقى على إنتهاء العرض</p>
               {/* Countdown */}
               <div className="text-4xl font-bold text-[#20744c] mb-6" dir="ltr">
                 {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
@@ -120,7 +120,7 @@ export default function SummaryPayment() {
                 onClick={() => setShowPopup(false)}
                 className="w-3/4 py-3 bg-gray-600 text-white rounded-lg font-bold text-lg hover:bg-gray-700 transition-colors"
               >
-                \u0625\u063a\u0644\u0627\u0642
+                إغلاق
               </button>
             </div>
           </div>
