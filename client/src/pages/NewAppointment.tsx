@@ -294,7 +294,7 @@ export default function NewAppointment() {
       </header>
 
       {/* Title Section */}
-      <section className="pt-3 container mx-auto px-4" style={{ color: '#044c34', fontSize: '22px' }}>
+      <section className="pt-3 container mx-auto px-4" style={{ color: '#20744c', fontSize: '22px' }}>
         <p className="mb-1 font-bold">خدمة الفحص الفني الدوري</p>
         <p className="pt-1">حجز موعد</p>
       </section>
@@ -464,7 +464,7 @@ export default function NewAppointment() {
           <div className="flex items-start gap-4 mb-4">
             <input 
               type="checkbox" 
-              className="w-[25px] h-[25px] min-w-[25px] mt-1 accent-[#044c34]"
+              className="w-[25px] h-[25px] min-w-[25px] mt-1 accent-[#20744c]"
               checked={delegateEnabled}
               onChange={(e) => setDelegateEnabled(e.target.checked)}
             />
@@ -482,7 +482,7 @@ export default function NewAppointment() {
                   type="button"
                   className={`px-6 py-2 rounded-[5px] border transition-all text-sm ${
                     delegateType === "resident" 
-                      ? "bg-[#044c34] text-white border-[#044c34]" 
+                      ? "bg-[#20744c] text-white border-[#20744c]" 
                       : "bg-white text-gray-600 border-gray-300"
                   }`}
                   onClick={() => setDelegateType("resident")}
@@ -493,7 +493,7 @@ export default function NewAppointment() {
                   type="button"
                   className={`px-6 py-2 rounded-[5px] border transition-all text-sm ${
                     delegateType === "gulf" 
-                      ? "bg-[#044c34] text-white border-[#044c34]" 
+                      ? "bg-[#20744c] text-white border-[#20744c]" 
                       : "bg-white text-gray-600 border-gray-300"
                   }`}
                   onClick={() => setDelegateType("gulf")}
@@ -639,7 +639,7 @@ export default function NewAppointment() {
               <div className="flex items-start gap-3 mt-4">
                 <input 
                   type="checkbox" 
-                  className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#044c34]"
+                  className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#20744c]"
                   checked={delegateConsent}
                   onChange={(e) => setDelegateConsent(e.target.checked)}
                 />
@@ -948,7 +948,7 @@ export default function NewAppointment() {
             <button 
               type="button"
               className="px-8 py-2 text-white rounded-[5px] min-w-[150px]"
-              style={{ backgroundColor: '#044c34' }}
+              style={{ backgroundColor: '#20744c' }}
               onClick={handleSubmit}
             >
               التالي
