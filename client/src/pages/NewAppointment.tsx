@@ -588,7 +588,7 @@ export default function NewAppointment() {
             <button 
               type="button"
            className={`px-4 py-2 min-w-[200px] rounded-[5px] border transition-all ${
-                vehicleDocType === "license" 
+                vehicleType === "license" 
                   ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
                   : "bg-gray-100 border-gray-300"
               }`}
@@ -599,7 +599,7 @@ export default function NewAppointment() {
             <button 
               type="button"
               className={`px-4 py-2 min-w-[200px] rounded-[5px] border transition-all ${
-                vehicleDocType === "customs"                 ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
+                vehicleType === "customs"                 ? "bg-white border-[#1e9b3b] shadow-[0px_1px_5px_#1e9b3b]" 
                   : "bg-gray-100 border-gray-300"
               }`}
               onClick={() => setVehicleType("customs")}
