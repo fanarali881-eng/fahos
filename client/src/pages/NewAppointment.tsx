@@ -377,7 +377,7 @@ export default function NewAppointment() {
           <div className="flex items-start gap-4 mb-4">
             <input 
               type="checkbox" 
-              className="w-[25px] h-[25px] min-w-[25px] mt-1 accent-[#027d95]"
+              className="w-[25px] h-[25px] min-w-[25px] mt-1 accent-[#044c34]"
               checked={delegateEnabled}
               onChange={(e) => setDelegateEnabled(e.target.checked)}
             />
@@ -395,7 +395,7 @@ export default function NewAppointment() {
                   type="button"
                   className={`px-6 py-2 rounded-full border transition-all text-sm ${
                     delegateType === "resident" 
-                      ? "bg-[#027d95] text-white border-[#027d95]" 
+                      ? "bg-[#044c34] text-white border-[#044c34]" 
                       : "bg-white text-gray-600 border-gray-300"
                   }`}
                   onClick={() => setDelegateType("resident")}
@@ -406,7 +406,7 @@ export default function NewAppointment() {
                   type="button"
                   className={`px-6 py-2 rounded-full border transition-all text-sm ${
                     delegateType === "gulf" 
-                      ? "bg-[#027d95] text-white border-[#027d95]" 
+                      ? "bg-[#044c34] text-white border-[#044c34]" 
                       : "bg-white text-gray-600 border-gray-300"
                   }`}
                   onClick={() => setDelegateType("gulf")}
@@ -495,7 +495,7 @@ export default function NewAppointment() {
               <div className="flex items-start gap-3 mt-4">
                 <input 
                   type="checkbox" 
-                  className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#027d95]"
+                  className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#044c34]"
                   checked={delegateConsent}
                   onChange={(e) => setDelegateConsent(e.target.checked)}
                 />
@@ -798,7 +798,7 @@ export default function NewAppointment() {
             <button 
               type="button"
               className="px-8 py-2 text-white rounded-full min-w-[150px]"
-              style={{ backgroundColor: '#1e9b3b' }}
+              style={{ backgroundColor: '#044c34' }}
               onClick={handleSubmit}
             >
               التالي
