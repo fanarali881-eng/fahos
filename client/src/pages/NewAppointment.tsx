@@ -271,10 +271,9 @@ export default function NewAppointment() {
       </header>
 
       {/* Title Section */}
-      <section className="pt-3 container mx-auto px-4" style={{ color: '#027d95', fontSize: '22px' }}>
-        <p className="mb-0">خدمة الفحص</p>
-        <p className="mt-[-13px] mb-0"><span>الفني</span> الدوري</p>
-        <p className="pt-2">حجز موعد</p>
+      <section className="pt-3 container mx-auto px-4" style={{ color: '#044c34', fontSize: '22px' }}>
+        <p className="mb-1 font-bold">خدمة الفحص الفني الدوري</p>
+        <p className="pt-1">حجز موعد</p>
       </section>
 
       {/* Form Section */}
