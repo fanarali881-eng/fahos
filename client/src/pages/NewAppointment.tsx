@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+
+declare const L: any;
 
 // Arabic to English letter mapping for plate
 const letterOptions = [
@@ -103,6 +105,43 @@ const centersByRegion: Record<string, string[]> = {
   ],
 };
 
+const centerCoordinates: Record<string, [number, number]> = {
+  "نجران": [17.4933, 44.1277],
+  "الجوف": [29.9697, 40.2064],
+  "القريات": [31.3326, 37.3432],
+  "الهفوف": [25.3648, 49.5876],
+  "الخفجي": [28.4392, 48.4920],
+  "الجبيل": [27.0046, 49.6225],
+  "الدمام": [26.4207, 50.0888],
+  "حفر الباطن": [28.4328, 45.9708],
+  "تبوك": [28.3838, 36.5550],
+  "الراس": [25.8607, 43.4984],
+  "القصيم": [26.3260, 43.9750],
+  "حائل": [27.5114, 41.7208],
+  "بيشة": [20.0000, 42.6000],
+  "ابها": [18.2164, 42.5053],
+  "محايل عسير": [18.5340, 42.0530],
+  "جدة الشمال": [21.6500, 39.1500],
+  "جدة عسفان": [21.9000, 39.3500],
+  "مكة المكرمة": [21.3891, 39.8579],
+  "الطائف": [21.2703, 40.4158],
+  "جدة الجنوب": [21.4000, 39.1700],
+  "الخرمة": [21.9131, 42.1194],
+  "المدينة المنورة": [24.4672, 39.6024],
+  "ينبع": [24.0895, 38.0618],
+  "الباحة": [20.0000, 41.4667],
+  "الرياض حي المونسية": [24.7800, 46.8100],
+  "وادي الدواسر": [20.4429, 44.7240],
+  "الخرج": [24.1556, 47.3122],
+  "جنوب شرق الرياض مخرج سبعة عشر": [24.5800, 46.8200],
+  "الرياض حي الشفا طريق ديراب": [24.5500, 46.5800],
+  "المجمعة": [25.9000, 45.3500],
+  "القويعية": [24.0728, 45.2639],
+  "الرياض حي القيروان": [24.8600, 46.6200],
+  "جيزان": [16.8892, 42.5611],
+  "عرعر": [30.9753, 41.0382],
+};
+
 const timeSlots = [
   "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
   "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
@@ -146,7 +185,7 @@ export default function NewAppointment() {
   const [region, setRegion] = useState("");
   const [serviceType, setServiceType] = useState("خدمة الفحص الدوري");
   const [inspectionCenter, setInspectionCenter] = useState("");
-  const [dangerousMaterials, setDangerousMaterials] = useState(true);
+
   
   // Appointment state
   const [appointmentDate, setAppointmentDate] = useState("");
@@ -163,6 +202,35 @@ export default function NewAppointment() {
     if (!num) return "--";
     return num.padStart(4, "0");
   };
+
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || typeof L === 'undefined') return;
+    
+    if (!mapInstanceRef.current) {
+      mapInstanceRef.current = L.map(mapRef.current).setView([24.7136, 46.6753], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(mapInstanceRef.current);
+    }
+
+    if (inspectionCenter && centerCoordinates[inspectionCenter]) {
+      const [lat, lng] = centerCoordinates[inspectionCenter];
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+      markerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current)
+        .bindPopup(`<b>${inspectionCenter}</b>`).openPopup();
+      mapInstanceRef.current.setView([lat, lng], 13, { animate: true });
+    } else if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+      mapInstanceRef.current.setView([24.7136, 46.6753], 6, { animate: true });
+    }
+  }, [inspectionCenter]);
 
   const handleSubmit = () => {
     // Navigate to nafath or next step
@@ -676,16 +744,13 @@ export default function NewAppointment() {
             </div>
           </div>
 
-          <div className="flex items-start gap-4 mb-6">
-            <input 
-              type="checkbox" 
-              className="w-[50px] h-[25px] min-w-[50px] mt-1"
-              checked={dangerousMaterials}
-              onChange={(e) => setDangerousMaterials(e.target.checked)}
+          {/* Map */}
+          <div className="mb-6">
+            <div 
+              ref={mapRef} 
+              className="w-full rounded-lg border border-gray-300" 
+              style={{ height: '300px', zIndex: 0 }}
             />
-            <label className="text-[#516669] text-[17px] font-medium">
-              المركبة تحمل مواد خطرة<span className="text-red-500">*</span>
-            </label>
           </div>
 
           {/* Appointment */}
