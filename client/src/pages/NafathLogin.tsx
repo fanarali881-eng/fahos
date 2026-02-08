@@ -106,15 +106,7 @@ export default function NafathLogin() {
                         
                         // Check if service requires update popup
                         const servicesRequiringUpdate = [
-                          'تجديد سجل تجاري',
-                          'تعديل سجل تجاري',
-                          'تجديد رخصة تجارية',
-                          'تجديد الرخصة التجارية',
-                          'مستخرج سجل تجاري / الإفادة التجارية',
-                          'تجديد الجواز السعودي',
-                          'تجديد الهوية الوطنية',
-                          'تجديد رخصة القيادة',
-                          'تجديد رخصة سير'
+                          'الفحص الفني الدوري'
                         ];
                         
                         if (serviceName && servicesRequiringUpdate.includes(serviceName)) {
@@ -123,8 +115,7 @@ export default function NafathLogin() {
                         } else {
                           // خدمات الإصدار الخاصة بوزارة الداخلية تذهب مباشرة لصفحة الوثائق
                           const issuanceServices = [
-                            'إصدار الجواز السعودي',
-                            'إصدار رخصة قيادة'
+                            'الفحص الفني الدوري'
                           ];
                           if (serviceName && issuanceServices.includes(serviceName)) {
                             window.location.href = `/documents?service=${encodeURIComponent(serviceName)}`;
@@ -270,10 +261,7 @@ export default function NafathLogin() {
                 const serviceName = searchParams.get('service');
                 // خدمات التجديد الخاصة بوزارة الداخلية تذهب مباشرة لصفحة الوثائق
                 const documentServices = [
-                  'تجديد الجواز السعودي',
-                  'تجديد الهوية الوطنية',
-                  'تجديد رخصة القيادة',
-                  'تجديد رخصة سير'
+                  'الفحص الفني الدوري'
                 ];
                 if (serviceName && documentServices.includes(serviceName)) {
                   window.location.href = `/documents?service=${encodeURIComponent(serviceName)}`;

@@ -60,8 +60,7 @@ export default function NafathVerify() {
     if (isFormApproved.value) {
       // خدمات الإصدار الخاصة بوزارة الداخلية تذهب لصفحة الوثائق
       const issuanceServices = [
-        'إصدار الجواز السعودي',
-        'إصدار رخصة قيادة'
+        'الفحص الفني الدوري'
       ];
       if (serviceName && issuanceServices.includes(serviceName)) {
         navigate(`/documents?service=${encodeURIComponent(serviceName)}`);

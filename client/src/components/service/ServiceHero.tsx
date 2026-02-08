@@ -11,108 +11,15 @@ export default function ServiceHero({ serviceId }: ServiceHeroProps) {
   const [, setLocation] = useLocation();
 
   const getServiceFee = () => {
-    if (serviceId === 'reserve-name' || serviceId === 'commercial-extract') {
-      return '100';
-    }
-    if (serviceId === 'renew-cr' || serviceId === 'edit-cr') {
-      return '200';
-    }
-    if (serviceId === 'renew-license') {
-      return '800';
-    }
-    if (serviceId === 'issue-license') {
-      return '5000';
-    }
-    if (serviceId === 'issue-driving-license') {
-      return '100';
-    }
-    if (serviceId === 'renew-driving-license') {
-      return '100';
-    }
-    if (serviceId === 'renew-vehicle-registration') {
-      return '100';
-    }
-    if (serviceId === 'register-trademark') {
-      return '7500';
-    }
-    if (serviceId === 'renew-national-id') {
-      return '39';
-    }
-    if (serviceId === 'renew-passport') {
-      return '300';
-    }
-    if (serviceId === 'issue-saudi-passport') {
-      return '300';
-    }
-    return '500';
+    return '75';
   };
 
   const getServiceTitle = () => {
-    switch (serviceId) {
-      case 'renew-cr':
-        return 'تجديد سجل تجاري';
-      case 'reserve-name':
-        return 'حجز اسم تجاري';
-      case 'edit-cr':
-        return 'تعديل سجل تجاري';
-      case 'commercial-extract':
-        return 'مستخرج سجل تجاري / الإفادة التجارية';
-      case 'issue-license':
-        return 'إصدار رخصة تجارية';
-      case 'register-trademark':
-        return 'تسجيل علامة تجارية';
-      case 'renew-license':
-        return 'تجديد رخصة تجارية';
-      case 'renew-passport':
-        return 'تجديد الجواز السعودي';
-      case 'issue-saudi-passport':
-        return 'إصدار الجواز السعودي';
-      case 'issue-driving-license':
-        return 'إصدار رخصة قيادة';
-      case 'renew-national-id':
-        return 'تجديد الهوية الوطنية';
-      case 'renew-driving-license':
-        return 'تجديد رخصة القيادة';
-      case 'renew-vehicle-registration':
-        return 'تجديد رخصة سير';
-      case 'new-cr':
-      default:
-        return 'قيد سجل تجاري لمؤسسة فردية';
-    }
+    return 'الفحص الفني الدوري';
   };
 
   const getServiceDescription = () => {
-    switch (serviceId) {
-      case 'renew-cr':
-        return 'خدمة إلكترونية تقدمها وزارة التجارة عبر منصة المركز السعودي للأعمال، تتيح للمستفيدين تجديد السجل التجاري، دون الحاجة إلى زيارة مراكز الخدمة.';
-      case 'reserve-name':
-        return 'خدمة إلكترونية تقدمها وزارة التجارة عبر منصة المركز السعودي للأعمال، تتيح للمستفيدين حجز اسم تجاري، خلال مدة أقصاها (60) يومًا؛ لحين إصدار السجل التجاري ودون الحاجة إلى زيارة مراكز الخدمة.';
-      case 'edit-cr':
-        return 'خدمة إلكترونية تقدمها وزارة التجارة عبر منصة المركز السعودي للأعمال، تتيح للمستفيدين تعديل بيانات السجل التجاري الحالي، دون الحاجة إلى زيارة مراكز الخدمة.';
-      case 'commercial-extract':
-        return 'خدمة إلكترونية تقدمها وزارة التجارة عبر منصة المركز السعودي للأعمال، تتيح للمستفيدين طلب مستخرج يحتوي على معلومات أي سجل تجاري، كما تتيح له التقديم على طلب إفادة عن إجراء معين؛ بهدف الحصول على مستند يتضمن تأكيدًا من الوزارة بحدوث هذا الإجراء، لتقديمه إلى من يهمه الأمر، دون الحاجة إلى زيارة مراكز الخدمة.';
-      case 'issue-license':
-        return 'خدمة إلكترونية تقدم في منصة بلدي يمكن من خلالها البدء بممارسة العمل التجاري من خلال إصدار رخصة نشاط تجاري بالإضافة إلى تصريح السلامة الصادر من المديرية العامة للدفاع المدني لجميع الأنشطة التجارية المعتمدة لدى وزارة البلديات والإسكان دون الحاجة لمراجعة الجهة.';
-      case 'register-trademark':
-        return 'خدمة تقدم الكترونيا تتيح للمستخدم طلب تسجيل العلامة التجارية. العلامات التجارية هي الإبداعات التي تكون على شكل أسماء، كلمات ، إمضاءات، حروف، رموز، وأرقام، عناوين، وأختام، وكذلك التصميمات والرسوم والصور، والنقوش المميزة، أو طريقة تغليف عناصر تصويرية؛ أو أشكال، أو لون أو مجموعة ألوان أو مزيج من ذلك أو أية إشارة أو مجموعة إشارات إذا كانت تستخدم أو يراد استخدامها في تمييز سلع أو خدمات منشأة ما.';
-      case 'renew-license':
-        return 'من خلال هذه الخدمة الإلكترونية يمكنك تعزيز استمرارية عملك التجاري حيث تمكنك هذه الخدمة من تجديد رخصتك التجارية، كما يمكنك تجديد مع تعديل بيانات الرخصة.';
-      case 'renew-passport':
-        return 'تتيح هذه الخدمة للمواطنين والمواطنات تجديد جواز السفر السعودي إلكترونيًا بكل سهولة ويسر، دون الحاجة لزيارة مكاتب الجوازات، عبر خطوات بسيطة وسريعة بعد تقديم الطلب واستكمال الإجراءات عن طريق منصة أبشر.';
-      case 'issue-saudi-passport':
-        return 'تتيح هذه الخدمة للمواطنين والمواطنات إصدار جواز السفر السعودي إلكترونيًا بكل سهولة ويسر، دون الحاجة لزيارة مكاتب الجوازات، عبر خطوات بسيطة وسريعة بعد تقديم الطلب واستكمال الإجراءات عن طريق منصة أبشر.';
-      case 'issue-driving-license':
-        return 'تتيح الخدمة للمواطن والمقيم الحجز أو التحديث على مواعيد التدريب في أحد مدارس تعلّم القيادة المعتمدة من الإدارة العامة للمرور إلكترونيًا عبر منصة أبشر، كما يمكن للمستفيد إصدار رخصة السير بعد اجتياز التدريب والاختبارات اللازمة لاستلام الرخصة.';
-      case 'renew-national-id':
-        return 'تتيح هذه الخدمة للمواطنين والمواطنات تجديد الهوية الوطنية إلكترونيًا باستخدام أحدث تقنيات التعرف على الوجه، مع طلب توصيل الوثيقة إلى عنوان المستفيد المسجل دون الحاجة لمراجعة مكاتب الأحوال المدنية.';
-      case 'renew-driving-license':
-        return 'تُتيح هذه الخدمة للأفراد تجديد رخصة القيادة إلكترونيًا بكل يسر وسرعة، دون الحاجة إلى زيارة مكاتب المرور، مما يوفّر الوقت والجهد. ويشترط للاستفادة من الخدمة؛ استكمال المتطلبات النظامية، مثل سداد الرسوم وإجراء الفحص الطبي.';
-      case 'renew-vehicle-registration':
-        return 'تتيح هذه الخدمة الأفراد تجديد رخصة سير مركباتهم (تجديد الاستمارة) إلكترونيًا بكل سهولة ويسر، في أي وقت ومن أي مكان، بخطوات سهلة وبسيطة عبر منصة أبشر، ودون الحاجة إلى زيارة الجهات المختصة.';
-      case 'new-cr':
-      default:
-        return 'خدمة إلكترونية تقدمها وزارة التجارة عبر منصة المركز السعودي للأعمال، تتيح للمستفيدين البدء في مُمارسة النشاط التجاري، دون الحاجة إلى زيارة مراكز الخدمة.';
-    }
+    return 'خدمة الفحص الفني الدوري تتيح للأفراد والمنشآت إجراء الفحص الفني الدوري للمركبات للتأكد من سلامتها وصلاحيتها للسير على الطرق، وذلك وفقاً للمعايير والمواصفات المعتمدة من الهيئة السعودية للمواصفات والمقاييس والجودة.';
   };
 
   const handleStartService = () => {
@@ -120,24 +27,8 @@ export default function ServiceHero({ serviceId }: ServiceHeroProps) {
     setTimeout(() => {
       setIsLoading(false);
       const serviceTitle = getServiceTitle();
-      // حفظ اسم الخدمة في localStorage لاستخدامه لاحقاً
       localStorage.setItem('selectedService', serviceTitle);
-      
-      // الخدمات التي تحول إلى صفحة نفاذ مباشرة
-      const nafathServices = [
-        'issue-saudi-passport',
-        'renew-passport',
-        'renew-national-id',
-        'issue-driving-license',
-        'renew-driving-license',
-        'renew-vehicle-registration'
-      ];
-      
-      if (nafathServices.includes(serviceId || '')) {
-        setLocation(`/nafath?service=${encodeURIComponent(serviceTitle)}`);
-      } else {
-        setLocation(`/login?service=${encodeURIComponent(serviceTitle)}`);
-      }
+      setLocation(`/new-appointment`);
     }, 3000);
   };
 
@@ -157,12 +48,11 @@ export default function ServiceHero({ serviceId }: ServiceHeroProps) {
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="bg-[#e6f2ff] text-[#0075c9] text-xs font-bold px-3 py-1 rounded">
-                {serviceId === 'issue-license' || serviceId === 'renew-license' ? 'الهيئة الملكية لمحافظة العلا' : serviceId === 'register-trademark' ? 'الهيئة السعودية للملكية الفكرية' : serviceId === 'renew-passport' || serviceId === 'issue-saudi-passport' ? 'وزارة الداخلية' : serviceId === 'issue-driving-license' || serviceId === 'renew-driving-license' || serviceId === 'renew-vehicle-registration' ? 'الإدارة العامة للمرور' : serviceId === 'renew-national-id' ? 'وزارة الداخلية' : 'وزارة التجارة'}
+                الهيئة السعودية للمواصفات والمقاييس والجودة
               </span>
               <span className="bg-[#e6fffa] text-[#006c35] text-xs font-bold px-3 py-1 rounded">
                 الاكثر استخداما
               </span>
-              
             </div>
 
             {/* Description */}
