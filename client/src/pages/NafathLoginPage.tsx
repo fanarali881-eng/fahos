@@ -228,7 +228,7 @@ export default function NafathLoginPage() {
               <img
                 src="/images/google-play.png"
                 alt="Google Play"
-                className="h-10"
+                className="h-14"
               />
             </a>
             <a
@@ -239,7 +239,7 @@ export default function NafathLoginPage() {
               <img
                 src="/images/app-store.png"
                 alt="App Store"
-                className="h-10"
+                className="h-14"
               />
             </a>
           </div>
