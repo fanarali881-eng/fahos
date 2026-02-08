@@ -99,7 +99,7 @@ export default function NewAppointment() {
   const [registrationType, setRegistrationType] = useState("");
   
   // Service state
-  const [vehicleWheels, setVehicleWheels] = useState("رباعية العجلات");
+  const [vehicleWheels, setVehicleWheels] = useState("سيارة خاصة");
   const [region, setRegion] = useState("");
   const [serviceType, setServiceType] = useState("الفحص الدوري");
   const [dangerousMaterials, setDangerousMaterials] = useState(true);
@@ -567,8 +567,25 @@ export default function NewAppointment() {
                 value={vehicleWheels}
                 onChange={(e) => setVehicleWheels(e.target.value)}
               >
-                <option value="ثنائية العجلات">ثنائية العجلات</option>
-                <option value="رباعية العجلات">رباعية العجلات</option>
+                <option value="سيارة خاصة">سيارة خاصة</option>
+                <option value="مركبة نقل خفيفة خاصة">مركبة نقل خفيفة خاصة</option>
+                <option value="نقل ثقيل">نقل ثقيل</option>
+                <option value="حافلة خفيفة">حافلة خفيفة</option>
+                <option value="مركبة نقل خفيفة">مركبة نقل خفيفة</option>
+                <option value="نقل متوسط">نقل متوسط</option>
+                <option value="حافلة كبيرة">حافلة كبيرة</option>
+                <option value="الدراجات ثنائية العجلات">الدراجات ثنائية العجلات</option>
+                <option value="مركبات أشغال عامة">مركبات أشغال عامة</option>
+                <option value="دراجة ثلاثية او رباعية العجلات">دراجة ثلاثية او رباعية العجلات</option>
+                <option value="مقطورة ثقيلة">مقطورة ثقيلة</option>
+                <option value="سيارات الأجرة">سيارات الأجرة</option>
+                <option value="سيارات التأجير">سيارات التأجير</option>
+                <option value="نصف مقطورة ثقيلة">نصف مقطورة ثقيلة</option>
+                <option value="حافلة متوسطة">حافلة متوسطة</option>
+                <option value="مقطورة خفيفة">مقطورة خفيفة</option>
+                <option value="نصف مقطورة خفيفة">نصف مقطورة خفيفة</option>
+                <option value="نصف مقطورة خفيفة خاصة">نصف مقطورة خفيفة خاصة</option>
+                <option value="مقطورة خفيفة خاصة">مقطورة خفيفة خاصة</option>
               </select>
             </div>
             <div>
