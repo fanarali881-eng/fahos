@@ -290,7 +290,12 @@ export default function NewAppointment() {
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="إدخل الإسم"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^[\u0600-\u06FF\s]+$/.test(val)) {
+                    setName(val);
+                  }
+                }}
               />
             </div>
             <div>
