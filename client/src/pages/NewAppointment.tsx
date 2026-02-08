@@ -143,12 +143,15 @@ const centerCoordinates: Record<string, [number, number]> = {
 };
 
 const timeSlots = [
-  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 AM", "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-  "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-  "06:00 PM",
+  "07:00 ص", "07:30 ص", "08:00 ص", "08:30 ص",
+  "09:00 ص", "09:30 ص", "10:00 ص", "10:30 ص",
+  "11:00 ص", "11:30 ص", "12:00 م", "12:30 م",
+  "01:00 م", "01:30 م", "02:00 م", "02:30 م",
+  "03:00 م", "03:30 م", "04:00 م", "04:30 م",
+  "05:00 م", "05:30 م", "06:00 م", "06:30 م",
+  "07:00 م", "07:30 م", "08:00 م", "08:30 م",
+  "09:00 م", "09:30 م", "10:00 م", "10:30 م",
+  "11:00 م",
 ];
 
 export default function NewAppointment() {
@@ -188,8 +191,11 @@ export default function NewAppointment() {
 
   
   // Appointment state
-  const [appointmentDate, setAppointmentDate] = useState("");
-  const [appointmentTime, setAppointmentTime] = useState("08:00 AM");
+  const [appointmentDate, setAppointmentDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [appointmentTime, setAppointmentTime] = useState("07:00 ص");
 
   // Get letter parts for plate display
   const getLetter = (value: string, type: "ar" | "en") => {
