@@ -548,8 +548,15 @@ export default function NewAppointment() {
                   onChange={(e) => setCountryReg(e.target.value)}
                 >
                   <option value="السعودية">السعودية</option>
-                  <option value="البحرين">البحرين</option>
+                  <option value="الإمارات">الإمارات</option>
                   <option value="مصر">مصر</option>
+                  <option value="الأردن">الأردن</option>
+                  <option value="سوريا">سوريا</option>
+                  <option value="عمان">عمان</option>
+                  <option value="الكويت">الكويت</option>
+                  <option value="العراق">العراق</option>
+                  <option value="البحرين">البحرين</option>
+                  <option value="قطر">قطر</option>
                 </select>
               </div>
 
