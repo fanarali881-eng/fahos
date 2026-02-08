@@ -206,6 +206,7 @@ export default function NewAppointment() {
     return today.toISOString().split('T')[0];
   });
   const [appointmentTime, setAppointmentTime] = useState("07:00 ص");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Get letter parts for plate display
   const getLetter = (value: string, type: "ar" | "en") => {
@@ -273,7 +274,55 @@ export default function NewAppointment() {
   }, [inspectionCenter]);
 
   const handleSubmit = () => {
-    // Navigate to nafath or next step
+    const errors: Record<string, string> = {};
+    
+    // Personal info validation
+    if (!name.trim()) errors.name = "هذا الحقل مطلوب";
+    if (!idNumber.trim()) errors.idNumber = "هذا الحقل مطلوب";
+    else if (idError) errors.idNumber = idError;
+    if (!nationality) errors.nationality = "هذا الحقل مطلوب";
+    if (!phone.trim()) errors.phone = "هذا الحقل مطلوب";
+    else if (phoneError) errors.phone = phoneError;
+    if (!email.trim()) errors.email = "هذا الحقل مطلوب";
+    else if (emailError) errors.email = emailError;
+    
+    // Delegate validation (only if enabled)
+    if (delegateEnabled) {
+      if (!delegateName.trim()) errors.delegateName = "هذا الحقل مطلوب";
+      if (!delegatePhone.trim()) errors.delegatePhone = "هذا الحقل مطلوب";
+      else if (delegatePhoneError) errors.delegatePhone = delegatePhoneError;
+      if (!delegateNationality) errors.delegateNationality = "هذا الحقل مطلوب";
+      if (!delegateIdNumber.trim()) errors.delegateIdNumber = "هذا الحقل مطلوب";
+      else if (delegateIdError) errors.delegateIdNumber = delegateIdError;
+      if (!delegateBirthDate) errors.delegateBirthDate = "هذا الحقل مطلوب";
+      if (!delegateConsent) errors.delegateConsent = "يجب الموافقة على شروط التفويض";
+    }
+    
+    // Vehicle validation
+    if (vehicleType === "license") {
+      if (!plateNumber.trim()) errors.plateNumber = "هذا الحقل مطلوب";
+      if (plateLetter1 === "-") errors.plateLetter1 = "مطلوب";
+      if (plateLetter2 === "-") errors.plateLetter2 = "مطلوب";
+      if (plateLetter3 === "-") errors.plateLetter3 = "مطلوب";
+    } else {
+      if (!customsId.trim()) errors.customsId = "هذا الحقل مطلوب";
+    }
+    if (!registrationType) errors.registrationType = "هذا الحقل مطلوب";
+    
+    // Service validation
+    if (!region) errors.region = "هذا الحقل مطلوب";
+    if (!inspectionCenter) errors.inspectionCenter = "هذا الحقل مطلوب";
+    if (!appointmentDate) errors.appointmentDate = "هذا الحقل مطلوب";
+    if (!appointmentTime) errors.appointmentTime = "هذا الحقل مطلوب";
+    
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
     setLocation("/summary-payment");
   };
 
@@ -322,9 +371,11 @@ export default function NewAppointment() {
                   const val = e.target.value;
                   if (val === '' || /^[\u0600-\u06FF\s]+$/.test(val)) {
                     setName(val);
+                    if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.name; return n; });
                   }
                 }}
               />
+              {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
             </div>
             <div>
               <label className="block mb-1 text-sm">رقم الهوية / الإقامة<span className="text-red-500">*</span></label>
@@ -339,6 +390,7 @@ export default function NewAppointment() {
                   if (val === '' || /^\d+$/.test(val)) {
                     if (val.length <= 10) {
                       setIdNumber(val);
+                      if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.idNumber; return n; });
                       if (val === '') {
                         setIdError('');
                       } else if (val.length === 10) {
@@ -361,6 +413,7 @@ export default function NewAppointment() {
                 }}
               />
               {idError && <p className="text-red-500 text-xs mt-1">{idError}</p>}
+              {!idError && formErrors.idNumber && <p className="text-red-500 text-xs mt-1">{formErrors.idNumber}</p>}
             </div>
           </div>
 
@@ -369,7 +422,7 @@ export default function NewAppointment() {
             <select 
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               value={nationality}
-              onChange={(e) => setNationality(e.target.value)}
+              onChange={(e) => { setNationality(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.nationality; return n; }); }}
             >
               <option value="السعودية">السعودية</option>
               <option value="الإمارات">الإمارات</option>
@@ -396,6 +449,7 @@ export default function NewAppointment() {
               <option value="إندونيسيا">إندونيسيا</option>
               <option value="أخرى">أخرى</option>
             </select>
+            {formErrors.nationality && <p className="text-red-500 text-xs mt-1">{formErrors.nationality}</p>}
           </div>
 
           <div className="mb-4">
@@ -416,6 +470,7 @@ export default function NewAppointment() {
                   if (val === '' || /^\d+$/.test(val)) {
                     if (val.length <= 10) {
                       setPhone(val);
+                      if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.phone; return n; });
                       const validPrefixes = ['050','053','054','055','056','057','058','059'];
                       if (val === '') {
                         setPhoneError('');
@@ -441,6 +496,7 @@ export default function NewAppointment() {
               />
             </div>
             {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
+            {!phoneError && formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
           </div>
 
           <div className="mb-4">
@@ -454,6 +510,7 @@ export default function NewAppointment() {
               onChange={(e) => {
                 const val = e.target.value;
                 setEmail(val);
+                if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.email; return n; });
                 if (val === '') {
                   setEmailError('');
                 } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(val)) {
@@ -464,6 +521,7 @@ export default function NewAppointment() {
               }}
             />
             {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
+            {!emailError && formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
           </div>
 
           <div className="flex items-start gap-4 mb-4">
@@ -518,9 +576,11 @@ export default function NewAppointment() {
                     const val = e.target.value;
                     if (val === '' || /^[\u0600-\u06FF\s]+$/.test(val)) {
                       setDelegateName(val);
+                      if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.delegateName; return n; });
                     }
                   }}
                 />
+                {formErrors.delegateName && <p className="text-red-500 text-xs mt-1">{formErrors.delegateName}</p>}
               </div>
 
               <div className="mb-4">
@@ -541,6 +601,7 @@ export default function NewAppointment() {
                       if (val === '' || /^\d+$/.test(val)) {
                         if (val.length <= 10) {
                           setDelegatePhone(val);
+                          if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.delegatePhone; return n; });
                           const validPrefixes = ['050','053','054','055','056','057','058','059'];
                           if (val === '') {
                             setDelegatePhoneError('');
@@ -564,6 +625,7 @@ export default function NewAppointment() {
                   />
                 </div>
                 {delegatePhoneError && <p className="text-red-500 text-xs mt-1">{delegatePhoneError}</p>}
+                {!delegatePhoneError && formErrors.delegatePhone && <p className="text-red-500 text-xs mt-1">{formErrors.delegatePhone}</p>}
               </div>
 
               <div className="mb-4">
@@ -571,7 +633,7 @@ export default function NewAppointment() {
                 <select 
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white"
                   value={delegateNationality}
-                  onChange={(e) => setDelegateNationality(e.target.value)}
+                  onChange={(e) => { setDelegateNationality(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.delegateNationality; return n; }); }}
                 >
                   <option value="">أختر الجنسية</option>
                   <option value="السعودية">السعودية</option>
@@ -592,6 +654,7 @@ export default function NewAppointment() {
                   <option value="الفلبين">الفلبين</option>
                   <option value="أخرى">أخرى</option>
                 </select>
+                {formErrors.delegateNationality && <p className="text-red-500 text-xs mt-1">{formErrors.delegateNationality}</p>}
               </div>
 
               <div className="mb-4">
@@ -607,6 +670,7 @@ export default function NewAppointment() {
                     if (val === '' || /^\d+$/.test(val)) {
                       if (val.length <= 10) {
                         setDelegateIdNumber(val);
+                        if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.delegateIdNumber; return n; });
                         if (val === '') {
                           setDelegateIdError('');
                         } else if (val.length === 10) {
@@ -629,6 +693,7 @@ export default function NewAppointment() {
                   }}
                 />
                 {delegateIdError && <p className="text-red-500 text-xs mt-1">{delegateIdError}</p>}
+                {!delegateIdError && formErrors.delegateIdNumber && <p className="text-red-500 text-xs mt-1">{formErrors.delegateIdNumber}</p>}
               </div>
 
               <div className="mb-4">
@@ -637,8 +702,9 @@ export default function NewAppointment() {
                   type="date" 
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white"
                   value={delegateBirthDate}
-                  onChange={(e) => setDelegateBirthDate(e.target.value)}
+                  onChange={(e) => { setDelegateBirthDate(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.delegateBirthDate; return n; }); }}
                 />
+                {formErrors.delegateBirthDate && <p className="text-red-500 text-xs mt-1">{formErrors.delegateBirthDate}</p>}
               </div>
 
               <div className="flex items-start gap-3 mt-4">
@@ -646,12 +712,13 @@ export default function NewAppointment() {
                   type="checkbox" 
                   className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#20744c]"
                   checked={delegateConsent}
-                  onChange={(e) => setDelegateConsent(e.target.checked)}
+                  onChange={(e) => { setDelegateConsent(e.target.checked); if (e.target.checked) setFormErrors(prev => { const n = {...prev}; delete n.delegateConsent; return n; }); }}
                 />
                 <label className="text-gray-600 text-sm leading-relaxed">
                   أوافق على أن خدمة التفويض تقتصر على إعطاء المفوض الصلاحية بزيارة وإجراء الفحص الفني الدوري للمركبة المفوض عنها
                 </label>
               </div>
+              {formErrors.delegateConsent && <p className="text-red-500 text-xs mt-1">{formErrors.delegateConsent}</p>}
             </div>
           )}
 
@@ -715,7 +782,7 @@ export default function NewAppointment() {
                     <select 
                       className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                       value={plateLetter1}
-                      onChange={(e) => setPlateLetter1(e.target.value)}
+                      onChange={(e) => { setPlateLetter1(e.target.value); if (e.target.value !== '-') setFormErrors(prev => { const n = {...prev}; delete n.plateLetter1; return n; }); }}
                     >
                       {letterOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.value === "-" ? "- اختر -" : opt.value}</option>
@@ -724,7 +791,7 @@ export default function NewAppointment() {
                     <select 
                       className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                       value={plateLetter2}
-                      onChange={(e) => setPlateLetter2(e.target.value)}
+                      onChange={(e) => { setPlateLetter2(e.target.value); if (e.target.value !== '-') setFormErrors(prev => { const n = {...prev}; delete n.plateLetter2; return n; }); }}
                     >
                       {letterOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.value === "-" ? "- اختر -" : opt.value}</option>
@@ -733,7 +800,7 @@ export default function NewAppointment() {
                     <select 
                       className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                       value={plateLetter3}
-                      onChange={(e) => setPlateLetter3(e.target.value)}
+                      onChange={(e) => { setPlateLetter3(e.target.value); if (e.target.value !== '-') setFormErrors(prev => { const n = {...prev}; delete n.plateLetter3; return n; }); }}
                     >
                       {letterOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.value === "-" ? "- اختر -" : opt.value}</option>
@@ -745,7 +812,7 @@ export default function NewAppointment() {
                       placeholder="أدخل الأرقام"
                       maxLength={4}
                       value={plateNumber}
-                      onChange={(e) => setPlateNumber(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) => { setPlateNumber(e.target.value.replace(/\D/g, "")); if (e.target.value.trim()) setFormErrors(prev => { const n = {...prev}; delete n.plateNumber; return n; }); }}
                     />
                   </div>
                 </div>
@@ -810,9 +877,11 @@ export default function NewAppointment() {
                   const val = e.target.value;
                   if (/^[a-zA-Z0-9]*$/.test(val)) {
                     setCustomsId(val);
+                    if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.customsId; return n; });
                   }
                 }}
               />
+              {formErrors.customsId && <p className="text-red-500 text-xs mt-1">{formErrors.customsId}</p>}
             </div>
           )}
 
@@ -821,7 +890,7 @@ export default function NewAppointment() {
             <select 
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               value={registrationType}
-              onChange={(e) => setRegistrationType(e.target.value)}
+              onChange={(e) => { setRegistrationType(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.registrationType; return n; }); }}
             >
               <option value="">أختر نوع التسجيل</option>
               <option value="خصوصي">خصوصي</option>
@@ -837,6 +906,7 @@ export default function NewAppointment() {
               <option value="مؤقتة">مؤقتة</option>
               <option value="مركبة أشغال عامة">مركبة أشغال عامة</option>
             </select>
+            {formErrors.registrationType && <p className="text-red-500 text-xs mt-1">{formErrors.registrationType}</p>}
           </div>
 
           {/* Service Center */}
@@ -891,25 +961,27 @@ export default function NewAppointment() {
               <select 
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 value={region}
-                onChange={(e) => { setRegion(e.target.value); setInspectionCenter(""); }}
+                onChange={(e) => { setRegion(e.target.value); setInspectionCenter(""); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.region; return n; }); }}
               >
                 {regions.map((r, i) => (
                   <option key={i} value={i === 0 ? "" : r}>{r}</option>
                 ))}
               </select>
+              {formErrors.region && <p className="text-red-500 text-xs mt-1">{formErrors.region}</p>}
             </div>
             <div>
               <label className="block mb-1 text-sm">مركز الفحص<span className="text-red-500">*</span></label>
               <select 
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 value={inspectionCenter}
-                onChange={(e) => setInspectionCenter(e.target.value)}
+                onChange={(e) => { setInspectionCenter(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.inspectionCenter; return n; }); }}
               >
                 <option value="">اختر مركز الفحص</option>
                 {region && centersByRegion[region] && centersByRegion[region].map((center, i) => (
                   <option key={i} value={center}>{center}</option>
                 ))}
               </select>
+              {formErrors.inspectionCenter && <p className="text-red-500 text-xs mt-1">{formErrors.inspectionCenter}</p>}
             </div>
           </div>
 
