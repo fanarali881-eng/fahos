@@ -171,6 +171,7 @@ export default function NewAppointment() {
   const [delegatePhone, setDelegatePhone] = useState("");
   const [delegateNationality, setDelegateNationality] = useState("");
   const [delegateIdNumber, setDelegateIdNumber] = useState("");
+  const [delegateIdError, setDelegateIdError] = useState("");
   const [delegateBirthDate, setDelegateBirthDate] = useState("");
   const [delegateConsent, setDelegateConsent] = useState(false);
   
@@ -519,11 +520,37 @@ export default function NewAppointment() {
                 <label className="block mb-1 text-sm text-gray-600">رقم الهوية الوطنية / الاقامة المفوض</label>
                 <input 
                   type="text" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  className={`w-full px-3 py-2 border rounded focus:outline-none ${delegateIdError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-[#027d95]'}`}
                   placeholder="أكتب رقم الهوية الوطنية / الاقامة المفوض هنا..."
                   value={delegateIdNumber}
-                  onChange={(e) => setDelegateIdNumber(e.target.value)}
+                  maxLength={10}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || /^\d+$/.test(val)) {
+                      if (val.length <= 10) {
+                        setDelegateIdNumber(val);
+                        if (val === '') {
+                          setDelegateIdError('');
+                        } else if (val.length === 10) {
+                          if (val[0] !== '1' && val[0] !== '2') {
+                            setDelegateIdError('رقم الهوية يجب أن يبدأ بـ 1 أو 2');
+                          } else if (!validateSaudiId(val)) {
+                            setDelegateIdError('رقم الهوية / الإقامة غير صحيح');
+                          } else {
+                            setDelegateIdError('');
+                          }
+                        } else if (val.length > 0 && val.length < 10) {
+                          if (val[0] !== '1' && val[0] !== '2') {
+                            setDelegateIdError('رقم الهوية يجب أن يبدأ بـ 1 أو 2');
+                          } else {
+                            setDelegateIdError('');
+                          }
+                        }
+                      }
+                    }
+                  }}
                 />
+                {delegateIdError && <p className="text-red-500 text-xs mt-1">{delegateIdError}</p>}
               </div>
 
               <div className="mb-4">
