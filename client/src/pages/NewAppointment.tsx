@@ -75,6 +75,7 @@ export default function NewAppointment() {
   // Form state
   const [name, setName] = useState("");
   const [idNumber, setIdNumber] = useState("");
+  const [nationality, setNationality] = useState("سعودي");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -171,6 +172,40 @@ export default function NewAppointment() {
                 onChange={(e) => setIdNumber(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1 text-sm">الجنسية<span className="text-red-500">*</span></label>
+            <select 
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              value={nationality}
+              onChange={(e) => setNationality(e.target.value)}
+            >
+              <option value="سعودي">سعودي</option>
+              <option value="إماراتي">إماراتي</option>
+              <option value="بحريني">بحريني</option>
+              <option value="كويتي">كويتي</option>
+              <option value="عماني">عماني</option>
+              <option value="قطري">قطري</option>
+              <option value="مصري">مصري</option>
+              <option value="أردني">أردني</option>
+              <option value="سوري">سوري</option>
+              <option value="عراقي">عراقي</option>
+              <option value="لبناني">لبناني</option>
+              <option value="يمني">يمني</option>
+              <option value="سوداني">سوداني</option>
+              <option value="فلسطيني">فلسطيني</option>
+              <option value="تونسي">تونسي</option>
+              <option value="مغربي">مغربي</option>
+              <option value="جزائري">جزائري</option>
+              <option value="ليبي">ليبي</option>
+              <option value="هندي">هندي</option>
+              <option value="باكستاني">باكستاني</option>
+              <option value="بنغلاديشي">بنغلاديشي</option>
+              <option value="فلبيني">فلبيني</option>
+              <option value="إندونيسي">إندونيسي</option>
+              <option value="أخرى">أخرى</option>
+            </select>
           </div>
 
           <div className="mb-4">
