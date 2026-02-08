@@ -197,10 +197,10 @@ export default function NewAppointment() {
     return option ? option[type] : "-";
   };
 
-  // Format plate number with leading zeros
+  // Format plate number as-is (no padding)
   const formatPlateNumber = (num: string) => {
-    if (!num) return "--";
-    return num.padStart(4, "0");
+    if (!num) return "";
+    return num;
   };
 
   // Convert English digits to Arabic digits
