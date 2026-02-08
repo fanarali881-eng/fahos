@@ -12,14 +12,14 @@ export default function SummaryPayment() {
 
   // Get service name from URL params
   const searchParams = new URLSearchParams(window.location.search);
-  const serviceName = searchParams.get('service') || 'الفحص الفني الدوري';
+  const serviceName = searchParams.get('service') || 'خدمة الفحص الفني الدوري';
 
   // Service prices
   const servicePrices: Record<string, number> = {
-    'الفحص الفني الدوري': 75,
+    'خدمة الفحص الفني الدوري': 100,
   };
 
-  const servicePrice = servicePrices[serviceName] || 75;
+  const servicePrice = servicePrices[serviceName] || 100;
   const vatAmount = Math.round(servicePrice * 0.15);
   const totalAmount = servicePrice + vatAmount;
 
