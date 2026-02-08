@@ -96,6 +96,7 @@ export default function NewAppointment() {
   const [plateLetter3, setPlateLetter3] = useState("-");
   const [plateNumber, setPlateNumber] = useState("");
   const [customsId, setCustomsId] = useState("");
+  const [registrationType, setRegistrationType] = useState("");
   
   // Service state
   const [vehicleWheels, setVehicleWheels] = useState("رباعية العجلات");
@@ -531,6 +532,29 @@ export default function NewAppointment() {
               />
             </div>
           )}
+
+          <div className="mb-4">
+            <label className="block mb-1 text-sm">نوع التسجيل<span className="text-red-500">*</span></label>
+            <select 
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              value={registrationType}
+              onChange={(e) => setRegistrationType(e.target.value)}
+            >
+              <option value="">أختر نوع التسجيل</option>
+              <option value="خصوصي">خصوصي</option>
+              <option value="نقل عام">نقل عام</option>
+              <option value="نقل خاص">نقل خاص</option>
+              <option value="مقطورة">مقطورة</option>
+              <option value="دراجة نارية">دراجة نارية</option>
+              <option value="مركبة أجرة">مركبة أجرة</option>
+              <option value="تصدير">تصدير</option>
+              <option value="دراجة نارية ترفيهيه">دراجة نارية ترفيهيه</option>
+              <option value="هيئة دبلوماسية">هيئة دبلوماسية</option>
+              <option value="حافلة خاصة">حافلة خاصة</option>
+              <option value="مؤقتة">مؤقتة</option>
+              <option value="مركبة أشغال عامة">مركبة أشغال عامة</option>
+            </select>
+          </div>
 
           {/* Service Center */}
           <h5 className="font-semibold mb-4 mt-8" style={{ color: '#233f48' }}>مركز الخدمة</h5>
