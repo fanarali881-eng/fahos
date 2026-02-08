@@ -166,6 +166,7 @@ export default function NewAppointment() {
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [delegateEnabled, setDelegateEnabled] = useState(false);
   const [delegateType, setDelegateType] = useState<"resident" | "gulf">("resident");
   const [delegateName, setDelegateName] = useState("");
@@ -440,12 +441,23 @@ export default function NewAppointment() {
             <label className="block mb-1 text-sm">البريد الإلكتروني</label>
             <input 
               type="email" 
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              className={`w-full px-3 py-2 border rounded focus:outline-none ${emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
               placeholder="البريد الإلكتروني"
               style={{ direction: 'ltr' }}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setEmail(val);
+                if (val === '') {
+                  setEmailError('');
+                } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(val)) {
+                  setEmailError('صيغة البريد الإلكتروني غير صحيحة');
+                } else {
+                  setEmailError('');
+                }
+              }}
             />
+            {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
           </div>
 
           <div className="flex items-start gap-4 mb-4">
