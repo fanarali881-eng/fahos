@@ -710,9 +710,7 @@ export default function NewAppointment() {
                 <option value="خدمة الفحص الدوري">خدمة الفحص الدوري</option>
                 <option value="خدمة إعادة الفحص">خدمة إعادة الفحص</option>
               </select>
-              <p className="mt-1 text-sm text-gray-500">
-                هذه الخدمة مخصصة لمن قام بإجراء فحص مسبق خلال 14 يوم عمل الماضية ولم يستنفد جميع محاولات إعادة الفحص
-              </p>
+
             </div>
           </div>
 
