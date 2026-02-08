@@ -305,7 +305,15 @@ export default function NewAppointment() {
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                 placeholder="رقم الهوية / الإقامة"
                 value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
+                maxLength={10}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d+$/.test(val)) {
+                    if (val.length <= 10) {
+                      setIdNumber(val);
+                    }
+                  }
+                }}
               />
             </div>
           </div>
