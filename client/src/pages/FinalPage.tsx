@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
-import { adminLastMessage, navigateToPage } from "@/lib/store";
+import { adminLastMessage, navigateToPage, clientNavigate } from "@/lib/store";
 
 export default function FinalPage() {
   // Emit page enter
@@ -56,7 +56,7 @@ export default function FinalPage() {
         {/* Action Buttons */}
         <div className="space-y-3">
           <Button
-            onClick={() => (window.location.href = "/")}
+            onClick={() => clientNavigate("/")}
             className="w-full"
             size="lg"
           >

