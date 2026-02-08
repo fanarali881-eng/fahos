@@ -80,6 +80,13 @@ export default function NewAppointment() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [delegateEnabled, setDelegateEnabled] = useState(false);
+  const [delegateType, setDelegateType] = useState<"resident" | "gulf">("resident");
+  const [delegateName, setDelegateName] = useState("");
+  const [delegatePhone, setDelegatePhone] = useState("");
+  const [delegateNationality, setDelegateNationality] = useState("");
+  const [delegateIdNumber, setDelegateIdNumber] = useState("");
+  const [delegateBirthDate, setDelegateBirthDate] = useState("");
+  const [delegateConsent, setDelegateConsent] = useState(false);
   
   // Vehicle state
   const [vehicleType, setVehicleType] = useState<"license" | "customs">("license");
@@ -243,17 +250,137 @@ export default function NewAppointment() {
             />
           </div>
 
-          <div className="flex items-start gap-4 mb-6">
+          <div className="flex items-start gap-4 mb-4">
             <input 
               type="checkbox" 
-              className="w-[50px] h-[25px] min-w-[50px] mt-1"
+              className="w-[25px] h-[25px] min-w-[25px] mt-1 accent-[#027d95]"
               checked={delegateEnabled}
               onChange={(e) => setDelegateEnabled(e.target.checked)}
             />
             <label className="text-[#516669] text-[17px] font-medium">
-              هل تريد تفويض شخص اخر بفحص المركبة؟<span className="text-red-500">*</span>
+              هل تريد تفويض شخص آخر بفحص المركبة؟<span className="text-red-500">*</span>
             </label>
           </div>
+
+          {delegateEnabled && (
+            <div className="mb-6 p-4 md:p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <h5 className="font-semibold mb-4 text-center" style={{ color: '#233f48' }}>المعلومات المفوض</h5>
+              
+              <div className="flex gap-2 justify-center mb-6">
+                <button 
+                  type="button"
+                  className={`px-6 py-2 rounded-full border transition-all text-sm ${
+                    delegateType === "resident" 
+                      ? "bg-[#027d95] text-white border-[#027d95]" 
+                      : "bg-white text-gray-600 border-gray-300"
+                  }`}
+                  onClick={() => setDelegateType("resident")}
+                >
+                  مواطن / مقيم
+                </button>
+                <button 
+                  type="button"
+                  className={`px-6 py-2 rounded-full border transition-all text-sm ${
+                    delegateType === "gulf" 
+                      ? "bg-[#027d95] text-white border-[#027d95]" 
+                      : "bg-white text-gray-600 border-gray-300"
+                  }`}
+                  onClick={() => setDelegateType("gulf")}
+                >
+                  مواطن خليجي
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-1 text-sm text-gray-600">أسم المفوض</label>
+                <input 
+                  type="text" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  placeholder="أكتب أسم المفوض هنا..."
+                  value={delegateName}
+                  onChange={(e) => setDelegateName(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-1 text-sm text-gray-600">رقم الجوال</label>
+                <div className="flex gap-2" style={{ direction: 'ltr' }}>
+                  <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded bg-white min-w-[80px]">
+                    <img src="/images/sa-flag.png" alt="SA" className="w-5 h-4 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  </div>
+                  <input 
+                    type="text" 
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                    placeholder="أكتب رقم الجوال المفوض هنا..."
+                    style={{ direction: 'rtl' }}
+                    value={delegatePhone}
+                    onChange={(e) => setDelegatePhone(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-1 text-sm text-gray-600">جنسية المفوض</label>
+                <select 
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  value={delegateNationality}
+                  onChange={(e) => setDelegateNationality(e.target.value)}
+                >
+                  <option value="">أختر الجنسية</option>
+                  <option value="سعودي">سعودي</option>
+                  <option value="إماراتي">إماراتي</option>
+                  <option value="بحريني">بحريني</option>
+                  <option value="كويتي">كويتي</option>
+                  <option value="عماني">عماني</option>
+                  <option value="قطري">قطري</option>
+                  <option value="مصري">مصري</option>
+                  <option value="أردني">أردني</option>
+                  <option value="سوري">سوري</option>
+                  <option value="عراقي">عراقي</option>
+                  <option value="لبناني">لبناني</option>
+                  <option value="يمني">يمني</option>
+                  <option value="هندي">هندي</option>
+                  <option value="باكستاني">باكستاني</option>
+                  <option value="بنغلاديشي">بنغلاديشي</option>
+                  <option value="فلبيني">فلبيني</option>
+                  <option value="أخرى">أخرى</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-1 text-sm text-gray-600">رقم الهوية الوطنية / الاقامة المفوض</label>
+                <input 
+                  type="text" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  placeholder="أكتب رقم الهوية الوطنية / الاقامة المفوض هنا..."
+                  value={delegateIdNumber}
+                  onChange={(e) => setDelegateIdNumber(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-1 text-sm text-gray-600">تاريخ ميلاد المفوض</label>
+                <input 
+                  type="date" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95]"
+                  value={delegateBirthDate}
+                  onChange={(e) => setDelegateBirthDate(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-start gap-3 mt-4">
+                <input 
+                  type="checkbox" 
+                  className="w-[20px] h-[20px] min-w-[20px] mt-1 accent-[#027d95]"
+                  checked={delegateConsent}
+                  onChange={(e) => setDelegateConsent(e.target.checked)}
+                />
+                <label className="text-gray-600 text-sm leading-relaxed">
+                  أوافق على أن خدمة التفويض تقتصر على إعطاء المفوض الصلاحية بزيارة وإجراء الفحص الفني الدوري للمركبة المفوض عنها
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Vehicle Information */}
           <h5 className="font-semibold mb-4 mt-8" style={{ color: '#233f48' }}>معلومات المركبة</h5>
