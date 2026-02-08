@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+
+// Set page title
+if (typeof document !== 'undefined') {
+  document.title = 'صفحة التسجيل';
+}
 import { useLocation, Link } from "wouter";
 
 declare const L: any;
@@ -296,7 +301,7 @@ export default function NewAppointment() {
       {/* Title Section */}
       <section className="pt-3 container mx-auto px-4" style={{ color: '#20744c', fontSize: '22px' }}>
         <p className="mb-1 font-bold">خدمة الفحص الفني الدوري</p>
-        <p className="pt-1">حجز موعد</p>
+        <p className="pt-1">صفحة التسجيل</p>
       </section>
 
       {/* Form Section */}
