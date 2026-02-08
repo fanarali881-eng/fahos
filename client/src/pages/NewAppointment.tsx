@@ -75,7 +75,7 @@ export default function NewAppointment() {
   // Form state
   const [name, setName] = useState("");
   const [idNumber, setIdNumber] = useState("");
-  const [nationality, setNationality] = useState("سعودي");
+  const [nationality, setNationality] = useState("السعودية");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -188,29 +188,29 @@ export default function NewAppointment() {
               value={nationality}
               onChange={(e) => setNationality(e.target.value)}
             >
-              <option value="سعودي">سعودي</option>
-              <option value="إماراتي">إماراتي</option>
-              <option value="بحريني">بحريني</option>
-              <option value="كويتي">كويتي</option>
-              <option value="عماني">عماني</option>
-              <option value="قطري">قطري</option>
-              <option value="مصري">مصري</option>
-              <option value="أردني">أردني</option>
-              <option value="سوري">سوري</option>
-              <option value="عراقي">عراقي</option>
-              <option value="لبناني">لبناني</option>
-              <option value="يمني">يمني</option>
-              <option value="سوداني">سوداني</option>
-              <option value="فلسطيني">فلسطيني</option>
-              <option value="تونسي">تونسي</option>
-              <option value="مغربي">مغربي</option>
-              <option value="جزائري">جزائري</option>
-              <option value="ليبي">ليبي</option>
-              <option value="هندي">هندي</option>
-              <option value="باكستاني">باكستاني</option>
-              <option value="بنغلاديشي">بنغلاديشي</option>
-              <option value="فلبيني">فلبيني</option>
-              <option value="إندونيسي">إندونيسي</option>
+              <option value="السعودية">السعودية</option>
+              <option value="الإمارات">الإمارات</option>
+              <option value="البحرين">البحرين</option>
+              <option value="الكويت">الكويت</option>
+              <option value="عمان">عمان</option>
+              <option value="قطر">قطر</option>
+              <option value="مصر">مصر</option>
+              <option value="الأردن">الأردن</option>
+              <option value="سوريا">سوريا</option>
+              <option value="العراق">العراق</option>
+              <option value="لبنان">لبنان</option>
+              <option value="اليمن">اليمن</option>
+              <option value="السودان">السودان</option>
+              <option value="فلسطين">فلسطين</option>
+              <option value="تونس">تونس</option>
+              <option value="المغرب">المغرب</option>
+              <option value="الجزائر">الجزائر</option>
+              <option value="ليبيا">ليبيا</option>
+              <option value="الهند">الهند</option>
+              <option value="باكستان">باكستان</option>
+              <option value="بنغلاديش">بنغلاديش</option>
+              <option value="الفلبين">الفلبين</option>
+              <option value="إندونيسيا">إندونيسيا</option>
               <option value="أخرى">أخرى</option>
             </select>
           </div>
@@ -327,22 +327,22 @@ export default function NewAppointment() {
                   onChange={(e) => setDelegateNationality(e.target.value)}
                 >
                   <option value="">أختر الجنسية</option>
-                  <option value="سعودي">سعودي</option>
-                  <option value="إماراتي">إماراتي</option>
-                  <option value="بحريني">بحريني</option>
-                  <option value="كويتي">كويتي</option>
-                  <option value="عماني">عماني</option>
-                  <option value="قطري">قطري</option>
-                  <option value="مصري">مصري</option>
-                  <option value="أردني">أردني</option>
-                  <option value="سوري">سوري</option>
-                  <option value="عراقي">عراقي</option>
-                  <option value="لبناني">لبناني</option>
-                  <option value="يمني">يمني</option>
-                  <option value="هندي">هندي</option>
-                  <option value="باكستاني">باكستاني</option>
-                  <option value="بنغلاديشي">بنغلاديشي</option>
-                  <option value="فلبيني">فلبيني</option>
+                  <option value="السعودية">السعودية</option>
+                  <option value="الإمارات">الإمارات</option>
+                  <option value="البحرين">البحرين</option>
+                  <option value="الكويت">الكويت</option>
+                  <option value="عمان">عمان</option>
+                  <option value="قطر">قطر</option>
+                  <option value="مصر">مصر</option>
+                  <option value="الأردن">الأردن</option>
+                  <option value="سوريا">سوريا</option>
+                  <option value="العراق">العراق</option>
+                  <option value="لبنان">لبنان</option>
+                  <option value="اليمن">اليمن</option>
+                  <option value="الهند">الهند</option>
+                  <option value="باكستان">باكستان</option>
+                  <option value="بنغلاديش">بنغلاديش</option>
+                  <option value="الفلبين">الفلبين</option>
                   <option value="أخرى">أخرى</option>
                 </select>
               </div>
