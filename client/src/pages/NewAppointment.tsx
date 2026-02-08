@@ -82,6 +82,7 @@ export default function NewAppointment() {
   const [vehicleWheels, setVehicleWheels] = useState("سيارة خاصة");
   const [region, setRegion] = useState("");
   const [serviceType, setServiceType] = useState("خدمة الفحص الدوري");
+  const [inspectionCenter, setInspectionCenter] = useState("");
   const [dangerousMaterials, setDangerousMaterials] = useState(true);
   
   // Appointment state
@@ -569,6 +570,23 @@ export default function NewAppointment() {
               </select>
             </div>
             <div>
+              <label className="block mb-1 text-sm">نوع خدمة الفحص<span className="text-red-500">*</span></label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                value={serviceType}
+                onChange={(e) => setServiceType(e.target.value)}
+              >
+                <option value="خدمة الفحص الدوري">خدمة الفحص الدوري</option>
+                <option value="خدمة إعادة الفحص">خدمة إعادة الفحص</option>
+              </select>
+              <p className="mt-1 text-sm text-gray-500">
+                هذه الخدمة مخصصة لمن قام بإجراء فحص مسبق خلال 14 يوم عمل الماضية ولم يستنفد جميع محاولات إعادة الفحص
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
               <label className="block mb-1 text-sm">المنطقة<span className="text-red-500">*</span></label>
               <select 
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
@@ -580,21 +598,19 @@ export default function NewAppointment() {
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="mb-4">
-            <label className="block mb-1 text-sm">نوع خدمة الفحص<span className="text-red-500">*</span></label>
-            <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-              value={serviceType}
-              onChange={(e) => setServiceType(e.target.value)}
-            >
-              <option value="خدمة الفحص الدوري">خدمة الفحص الدوري</option>
-              <option value="خدمة إعادة الفحص">خدمة إعادة الفحص</option>
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              هذه الخدمة مخصصة لمن قام بإجراء فحص مسبق خلال 14 يوم عمل الماضية ولم يستنفد جميع محاولات إعادة الفحص
-            </p>
+            <div>
+              <label className="block mb-1 text-sm">مركز الفحص<span className="text-red-500">*</span></label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                value={inspectionCenter}
+                onChange={(e) => setInspectionCenter(e.target.value)}
+              >
+                <option value="">اختر مركز الفحص</option>
+                <option value="مركز الفحص الفني 1">مركز الفحص الفني 1</option>
+                <option value="مركز الفحص الفني 2">مركز الفحص الفني 2</option>
+                <option value="مركز الفحص الفني 3">مركز الفحص الفني 3</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-start gap-4 mb-6">
