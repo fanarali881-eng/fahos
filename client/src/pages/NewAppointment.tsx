@@ -939,9 +939,14 @@ export default function NewAppointment() {
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 mb-6">
-            الحضور على الموعد يسهم في سرعة وجودة الخدمة وفي حالة عدم الحضور، لن يسمح بحجز اخر إلا بعد 48 ساعة وحسب الإوقات المحددة
-          </p>
+          <div className="flex items-center gap-2 text-sm text-red-600 mb-6 px-4 py-3 rounded" style={{ backgroundColor: '#fff5f5' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 min-w-[24px] text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>الحضور على الموعد يسهم في سرعة وجودة الخدمة وفي حالة عدم الحضور، لن يسمح بحجز اخر إلا بعد 48 ساعة وحسب الإوقات المحددة</span>
+          </div>
 
           {/* Submit Button */}
           <div className="flex justify-center">
