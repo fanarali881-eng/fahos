@@ -203,6 +203,12 @@ export default function NewAppointment() {
     return num.padStart(4, "0");
   };
 
+  // Convert English digits to Arabic digits
+  const toArabicDigits = (str: string) => {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return str.replace(/[0-9]/g, (d) => arabicDigits[parseInt(d)]);
+  };
+
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -606,7 +612,7 @@ export default function NewAppointment() {
                         {/* Numbers */}
                         <div className="w-1/2 flex flex-col h-full" style={{ borderRight: '1px solid black', direction: 'ltr' }}>
                           <div className="h-1/2 flex justify-center items-center gap-1 font-bold text-lg" style={{ borderBottom: '1px solid black' }}>
-                            {formatPlateNumber(plateNumber).split("").map((n, i) => <span key={i}>{n}</span>)}
+                            {toArabicDigits(formatPlateNumber(plateNumber)).split("").map((n, i) => <span key={i}>{n}</span>)}
                           </div>
                           <div className="h-1/2 flex justify-center items-center gap-1 font-bold text-lg">
                             {formatPlateNumber(plateNumber).split("").map((n, i) => <span key={i}>{n}</span>)}
