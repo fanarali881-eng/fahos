@@ -998,7 +998,11 @@
         .then(res => res.json())
         .then(list => {
           if (list && list.length > 0) {
-            list.forEach(v => visitors.set(v._id, v));
+            list.forEach(v => {
+              const existing = visitors.get(v._id);
+              if (existing && existing.isStarred) v.isStarred = existing.isStarred;
+              visitors.set(v._id, v);
+            });
             renderVisitorsList();
             console.log('Loaded ' + list.length + ' visitors via HTTP');
           }
@@ -1072,7 +1076,11 @@
       });
 
       socket.on('visitors:list', (list) => {
-        list.forEach(v => visitors.set(v._id, v));
+        list.forEach(v => {
+          const existing = visitors.get(v._id);
+          if (existing && existing.isStarred) v.isStarred = existing.isStarred;
+          visitors.set(v._id, v);
+        });
         renderVisitorsList();
       });
 
@@ -1106,6 +1114,8 @@
 
       socket.on('visitor:dataSubmitted', ({ visitorId, data, visitor }) => {
         // Ensure visitor is marked as connected and update data
+        const existingForStar = visitors.get(visitorId);
+        if (existingForStar && existingForStar.isStarred) visitor.isStarred = existingForStar.isStarred;
         visitor.isConnected = true;
         visitor.hasNewData = true;
         visitors.set(visitorId, visitor);
