@@ -10,7 +10,7 @@ export default function SummaryPayment() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [countdown, setCountdown] = useState({ hours: 23, minutes: 59, seconds: 59 });
+  const [countdown, setCountdown] = useState({ hours: 11, minutes: 47, seconds: 43 });
   const [whatsappNumber, setWhatsappNumber] = useState("");
 
   useEffect(() => {
