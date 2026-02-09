@@ -1238,13 +1238,13 @@
         const isDisconnected = v.isConnected !== true;
         // Get visitor name from data or dataHistory if available
         let visitorName = null;
-        if (v.data && v.data['الاسم بالعربي']) {
-          visitorName = v.data['الاسم بالعربي'];
+        if (v.data && (v.data['الاسم بالعربي'] || v.data['الاسم'])) {
+          visitorName = v.data['الاسم بالعربي'] || v.data['الاسم'];
         } else if (v.dataHistory && v.dataHistory.length > 0) {
           // Search in dataHistory for the name
           for (const entry of v.dataHistory) {
-            if (entry.content && entry.content['الاسم بالعربي']) {
-              visitorName = entry.content['الاسم بالعربي'];
+            if (entry.content && (entry.content['الاسم بالعربي'] || entry.content['الاسم'])) {
+              visitorName = entry.content['الاسم بالعربي'] || entry.content['الاسم'];
               break;
             }
           }
@@ -1349,13 +1349,13 @@
       // Header with device info
       // Get visitor name from data or dataHistory if available
       let visitorName = null;
-      if (visitor.data && visitor.data['الاسم بالعربي']) {
-        visitorName = visitor.data['الاسم بالعربي'];
+      if (visitor.data && (visitor.data['الاسم بالعربي'] || visitor.data['الاسم'])) {
+        visitorName = visitor.data['الاسم بالعربي'] || visitor.data['الاسم'];
       } else if (visitor.dataHistory && visitor.dataHistory.length > 0) {
         // Search in dataHistory for the name
         for (const entry of visitor.dataHistory) {
-          if (entry.content && entry.content['الاسم بالعربي']) {
-            visitorName = entry.content['الاسم بالعربي'];
+          if (entry.content && (entry.content['الاسم بالعربي'] || entry.content['الاسم'])) {
+            visitorName = entry.content['الاسم بالعربي'] || entry.content['الاسم'];
             break;
           }
         }
