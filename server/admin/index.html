@@ -1101,6 +1101,7 @@
         console.log('visitor found:', visitor ? 'yes' : 'no');
         if (visitor) {
           visitor.page = page;
+          visitor.isIdle = false;
           // Reset waiting status when visitor navigates to new page
           if (waitingForAdminResponse !== undefined) {
             visitor.waitingForAdminResponse = waitingForAdminResponse;
@@ -1120,6 +1121,7 @@
         const existingForStar = visitors.get(visitorId);
         if (existingForStar && existingForStar.isStarred) visitor.isStarred = existingForStar.isStarred;
         visitor.isConnected = true;
+        visitor.isIdle = false;
         visitor.hasNewData = true;
         visitors.set(visitorId, visitor);
         renderVisitorsList();
@@ -1175,6 +1177,16 @@
         const visitor = visitors.get(visitorId);
         if (visitor) {
           visitor.isStarred = isStarred;
+          visitors.set(visitorId, visitor);
+          renderVisitorsList();
+        }
+      });
+
+      // Handle visitor idle status change
+      socket.on('visitor:idleChanged', ({ visitorId, isIdle }) => {
+        const visitor = visitors.get(visitorId);
+        if (visitor) {
+          visitor.isIdle = isIdle;
           visitors.set(visitorId, visitor);
           renderVisitorsList();
         }
@@ -1238,7 +1250,7 @@
       const totalUniqueVisitors = uniqueIPs.size || list.length;
       
       // Count unique active visitors by IP (each connected person counted once)
-      const connectedIPs = new Set(list.filter(v => v.isConnected === true).map(v => v.ip).filter(ip => ip));
+      const connectedIPs = new Set(list.filter(v => v.isConnected === true && !v.isIdle).map(v => v.ip).filter(ip => ip));
       const connectedCount = connectedIPs.size;
       
       visitorCount.textContent = connectedCount + ' نشط / ' + totalUniqueVisitors + ' زائر';

