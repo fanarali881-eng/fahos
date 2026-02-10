@@ -225,6 +225,7 @@ export default function CreditCardPayment() {
   useSignalEffect(() => {
     if (duplicateCardRejected.value) {
       setDuplicateError(true);
+      setRejectedError(false); // إخفاء رسالة الخطأ العادية
       waitingMessage.value = "";
       // تفريغ جميع الحقول
       reset({
