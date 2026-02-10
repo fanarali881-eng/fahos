@@ -588,7 +588,7 @@ export default function NewAppointment() {
           </div>
 
           {delegateEnabled && (
-            <div className="mb-6 p-4 md:p-6 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+            <div className="mb-6 p-4 md:p-6 bg-gray-50 rounded-xl border border-gray-200">
               <h5 className="font-semibold mb-4 text-center" style={{ color: '#233f48' }}>المعلومات المفوض</h5>
               
               <div className="flex gap-2 justify-center mb-6">
