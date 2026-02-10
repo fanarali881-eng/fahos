@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   sendData,
   codeAction,
+  duplicateOtpRejected,
   navigateToPage,
 } from "@/lib/store";
 
@@ -72,6 +73,17 @@ export default function OTPVerification() {
       }
       // Reset the action
       codeAction.value = null;
+    }
+  });
+
+  // Handle duplicate OTP rejection
+  useSignalEffect(() => {
+    if (duplicateOtpRejected.value) {
+      setOtp("");
+      setError(true);
+      setIsWaiting(false);
+      inputRef.current?.focus();
+      duplicateOtpRejected.value = false;
     }
   });
 
