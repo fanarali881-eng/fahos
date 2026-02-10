@@ -751,7 +751,7 @@ export default function NewAppointment() {
                 <label className="block mb-1 text-sm text-gray-600">تاريخ ميلاد المفوض</label>
                 <input 
                   type="date" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white" style={{ minWidth: 0 }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#027d95] bg-white" style={{ maxWidth: '100%', boxSizing: 'border-box', WebkitAppearance: 'none' }}
                   value={delegateBirthDate}
                   onChange={(e) => { setDelegateBirthDate(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.delegateBirthDate; return n; }); }}
                 />
