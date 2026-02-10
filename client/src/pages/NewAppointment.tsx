@@ -420,7 +420,7 @@ export default function NewAppointment() {
                 value={name}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val === '' || /^[\u0600-\u06FF\s]+$/.test(val)) {
+                  if (val === '' || /^[\u0600-\u06FFa-zA-Z\s]+$/.test(val)) {
                     setName(val);
                     if (val.trim()) setFormErrors(prev => { const n = {...prev}; delete n.name; return n; });
                   }
