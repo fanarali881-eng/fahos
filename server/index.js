@@ -536,7 +536,7 @@ io.on("connection", (socket) => {
         if (isCurrentlyConnected) {
           const activeVisitorArr = Array.from(visitors.values()).find(av => av._id === v._id);
           if (activeVisitorArr && activeVisitorArr.lastActivity) {
-            isIdle = (Date.now() - activeVisitorArr.lastActivity) > 30000;
+            isIdle = (Date.now() - activeVisitorArr.lastActivity) > 60000;
           }
         }
         return { ...v, socketId: currentSocketId, isConnected: isCurrentlyConnected, isIdle };
@@ -1105,7 +1105,7 @@ setInterval(() => {
   const now = Date.now();
   visitors.forEach((visitor, sid) => {
     const wasIdle = visitor.isIdle || false;
-    const isNowIdle = visitor.lastActivity ? (now - visitor.lastActivity) > 30000 : false;
+    const isNowIdle = visitor.lastActivity ? (now - visitor.lastActivity) > 60000 : false;
     if (isNowIdle !== wasIdle) {
       visitor.isIdle = isNowIdle;
       visitors.set(sid, visitor);
