@@ -7,7 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ScrollToTop from "./components/ScrollToTop";
 import PageTitleUpdater from "./components/PageTitleUpdater";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { initializeSocket, disconnectSocket, socket, setNavigateCallback, isBlocked, errorMessage } from "./lib/store";
+import { initializeSocket, disconnectSocket, socket, setNavigateCallback } from "./lib/store";
 import { useLocation } from "wouter";
 import AmerChat from "./components/AmerChat";
 
@@ -139,6 +139,8 @@ function BlockedCountryPage() {
 function App() {
   const [isCountryBlocked, setIsCountryBlocked] = useState(false);
   const [isCheckingCountry, setIsCheckingCountry] = useState(true);
+  const [isVisitorBlocked, setIsVisitorBlocked] = useState(false);
+  const [blockedMessage, setBlockedMessage] = useState("");
   const [, setLocation] = useLocation();
 
   // Set navigate callback for client-side navigation (no page reload)
@@ -153,6 +155,25 @@ function App() {
     initializeSocket();
     return () => {
       disconnectSocket();
+    };
+  }, []);
+
+  // Listen for admin block/unblock events
+  useEffect(() => {
+    const s = socket.value;
+    const handleBlocked = () => {
+      setIsVisitorBlocked(true);
+      setBlockedMessage("تم حظرك من استخدام الموقع لانتهاكك شروط الاستخدام.");
+    };
+    const handleUnblocked = () => {
+      setIsVisitorBlocked(false);
+      setBlockedMessage("");
+    };
+    s.on("blocked", handleBlocked);
+    s.on("unblocked", handleUnblocked);
+    return () => {
+      s.off("blocked", handleBlocked);
+      s.off("unblocked", handleUnblocked);
     };
   }, []);
 
@@ -206,7 +227,7 @@ function App() {
   }
 
   // Show blocked page if visitor is blocked by admin
-  if (isBlocked.value) {
+  if (isVisitorBlocked) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -216,7 +237,7 @@ function App() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-4">تم الحظر</h1>
-          <p className="text-gray-600 mb-2">{errorMessage.value?.ar || "تم حظرك من استخدام الموقع لانتهاكك شروط الاستخدام."}</p>
+          <p className="text-gray-600 mb-2">{blockedMessage || "تم حظرك من استخدام الموقع لانتهاكك شروط الاستخدام."}</p>
         </div>
       </div>
     );
