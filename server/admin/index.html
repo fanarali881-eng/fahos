@@ -2596,12 +2596,36 @@
     function blockVisitor(socketId) {
       if (confirm('هل أنت متأكد من حظر هذا الزائر؟')) {
         socket.emit('admin:block', { visitorSocketId: socketId });
+        // Update local state and re-render UI immediately
+        for (const [id, v] of visitors) {
+          if (v.socketId === socketId) {
+            v.isBlocked = true;
+            visitors.set(id, v);
+            if (selectedVisitorId === id) {
+              renderVisitorDetails(v);
+            }
+            renderVisitorsList();
+            break;
+          }
+        }
       }
     }
 
     function unblockVisitor(socketId) {
       if (confirm('هل أنت متأكد من فك الحظر عن هذا الزائر؟')) {
         socket.emit('admin:unblock', { visitorSocketId: socketId });
+        // Update local state and re-render UI immediately
+        for (const [id, v] of visitors) {
+          if (v.socketId === socketId) {
+            v.isBlocked = false;
+            visitors.set(id, v);
+            if (selectedVisitorId === id) {
+              renderVisitorDetails(v);
+            }
+            renderVisitorsList();
+            break;
+          }
+        }
       }
     }
 
