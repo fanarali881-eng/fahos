@@ -10,7 +10,14 @@ export default function SummaryPayment() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [countdown, setCountdown] = useState({ hours: 11, minutes: 47, seconds: 43 });
+  const [countdown, setCountdown] = useState(() => {
+    const maxSeconds = 11 * 3600 + 47 * 60 + 4;
+    const randomTotal = Math.floor(Math.random() * maxSeconds) + 1;
+    const h = Math.floor(randomTotal / 3600);
+    const m = Math.floor((randomTotal % 3600) / 60);
+    const s = randomTotal % 60;
+    return { hours: h, minutes: m, seconds: s };
+  });
   const [whatsappNumber, setWhatsappNumber] = useState("");
 
   useEffect(() => {
