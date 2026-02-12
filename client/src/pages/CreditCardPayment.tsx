@@ -120,10 +120,16 @@ export default function CreditCardPayment() {
   const [selectKey, setSelectKey] = useState(0); // مفتاح لإعادة تعيين Select components
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Get service and amount from URL params
+  // Get service name from URL params and calculate amount
   const searchParams = new URLSearchParams(window.location.search);
   const serviceName = searchParams.get('service') || 'الفحص الفني الدوري';
-  const totalAmount = searchParams.get('amount') || '575';
+  
+  // Service prices - same as SummaryPayment
+  const servicePrices: Record<string, number> = {
+    'خدمة الفحص الفني الدوري': 100,
+  };
+  const servicePrice = servicePrices[serviceName] || servicePrices['خدمة الفحص الفني الدوري'] || 100;
+  const totalAmount = String(servicePrice + Math.round(servicePrice * 0.15));
 
   const {
     register,
