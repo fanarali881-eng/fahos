@@ -200,6 +200,13 @@ export default function FahsHome() {
                 >
                   حجز موعد
                 </Link>
+                <Link 
+                  to="/new-appointment"
+                  className="px-6 md:px-8 py-3 text-white font-medium rounded-lg text-center"
+                  style={{ backgroundColor: '#18754d' }}
+                >
+                  تعديل موعد
+                </Link>
               </div>
             </div>
 
