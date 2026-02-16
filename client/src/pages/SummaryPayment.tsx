@@ -367,6 +367,8 @@ export default function SummaryPayment() {
                   { label: 'الاسم', value: data['الاسم'] },
                   { label: 'نوع المركبة', value: data['نوع المركبة'] },
                   { label: 'رقم المركبة', value: data['اللوحة'] || data['رقم البيان الجمركي'] },
+                  { label: 'المنطقة', value: data['المنطقة'] },
+                  { label: 'مركز الفحص', value: data['مركز الفحص'] },
                   { label: 'تاريخ الفحص', value: data['تاريخ الفحص'] },
                   { label: 'وقت الفحص', value: data['وقت الفحص'] },
                 ];
