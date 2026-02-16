@@ -346,7 +346,14 @@ export default function SummaryPayment() {
       {/* Preview Document Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowPreview(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-[95%] mx-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-[95%] mx-auto relative" onClick={(e) => e.stopPropagation()}>
+            {/* Close X button - top left */}
+            <button
+              onClick={() => setShowPreview(false)}
+              className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 text-xl font-bold transition-colors z-10"
+            >
+              &times;
+            </button>
             {/* Document Paper */}
             <div className="p-8" dir="rtl">
               {/* Logo & Header */}
@@ -397,15 +404,7 @@ export default function SummaryPayment() {
               </div>
             </div>
 
-            {/* Close Button */}
-            <div className="p-4 border-t flex justify-center">
-              <button
-                onClick={() => setShowPreview(false)}
-                className="px-8 py-2.5 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
-              >
-                إغلاق
-              </button>
-            </div>
+
           </div>
         </div>
       )}
