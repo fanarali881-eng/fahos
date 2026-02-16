@@ -291,8 +291,8 @@ export default function SummaryPayment() {
             {/* Sidebar - Order Summary */}
             <div className="lg:col-span-1">
               <Card className="sticky top-4">
-                <CardHeader className="bg-green-600 text-white rounded-t-lg">
-                  <CardTitle className="text-lg">ملخص الطلب</CardTitle>
+                <CardHeader className="bg-green-50 rounded-t-lg">
+                  <CardTitle className="text-lg text-green-700 font-bold">ملخص الطلب</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
                   <div className="space-y-3">
