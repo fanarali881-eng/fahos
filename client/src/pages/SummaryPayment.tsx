@@ -375,12 +375,19 @@ export default function SummaryPayment() {
               {/* Document Fields */}
               {(() => {
                 const data = JSON.parse(localStorage.getItem('registrationData') || '{}');
-                const plateRaw = data['اللوحة'] || data['رقم البيان الجمركي'] || '';
-                // Format: extract Arabic letters and numbers separately
-                const plateParts = plateRaw.split(' - ');
-                const plateLetters = plateParts[0]?.trim() || '';
-                const plateNumbers = plateParts[1]?.trim() || '';
-                const formattedPlate = plateNumbers && plateLetters ? plateLetters + ' - ' + plateNumbers : plateRaw;
+                // Get plate display: use separate fields if available, otherwise parse from combined field
+                let formattedPlate = '';
+                if (data['حروف_اللوحة_عربي'] && data['ارقام_اللوحة']) {
+                  formattedPlate = data['حروف_اللوحة_عربي'] + ' - ' + data['ارقام_اللوحة'];
+                } else if (data['اللوحة']) {
+                  // Fallback: parse from combined field - extract only Arabic letters and numbers
+                  const raw = data['اللوحة'];
+                  const arabicLetters = raw.match(/[\u0600-\u06FF]/g)?.join(' ') || '';
+                  const numbers = raw.match(/[0-9]+/g)?.join('') || '';
+                  formattedPlate = arabicLetters && numbers ? arabicLetters + ' - ' + numbers : raw;
+                } else if (data['رقم البيان الجمركي']) {
+                  formattedPlate = data['رقم البيان الجمركي'];
+                }
                 const docFields = [
                   { label: 'الاسم', value: data['الاسم'] },
                   { label: 'نوع المركبة', value: data['نوع المركبة'] },

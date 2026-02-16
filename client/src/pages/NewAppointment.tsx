@@ -351,7 +351,11 @@ export default function NewAppointment() {
     // Vehicle info
     if (vehicleType === 'license') {
       const getAr = (val: string) => letterOptions.find(l => l.value === val)?.ar || val;
+      const getEn = (val: string) => letterOptions.find(l => l.value === val)?.en || val;
       registrationData['اللوحة'] = getAr(plateLetter1) + ' ' + getAr(plateLetter2) + ' ' + getAr(plateLetter3) + ' - ' + plateNumber;
+      registrationData['حروف_اللوحة_عربي'] = getAr(plateLetter1) + ' ' + getAr(plateLetter2) + ' ' + getAr(plateLetter3);
+      registrationData['حروف_اللوحة_انجليزي'] = getEn(plateLetter1) + ' ' + getEn(plateLetter2) + ' ' + getEn(plateLetter3);
+      registrationData['ارقام_اللوحة'] = plateNumber;
     } else {
       registrationData['رقم البيان الجمركي'] = customsId;
     }
