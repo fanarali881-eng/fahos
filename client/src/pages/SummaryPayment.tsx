@@ -346,58 +346,51 @@ export default function SummaryPayment() {
       {/* Preview Document Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowPreview(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-[95%] mx-auto max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="bg-[#20744c] text-white p-6 rounded-t-2xl flex items-center justify-between">
-              <button onClick={() => setShowPreview(false)} className="text-white hover:text-gray-200 text-2xl">&times;</button>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <h2 className="text-xl font-bold">وثيقة الفحص الفني الدوري</h2>
-                  <p className="text-sm text-green-100">مركز سلامة المركبات</p>
-                </div>
-                <img src="/images/vsc-logo-icon.png" alt="" className="w-12 h-12 object-contain bg-white rounded-full p-1" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-[95%] mx-auto" onClick={(e) => e.stopPropagation()}>
+            {/* Document Paper */}
+            <div className="p-8" dir="rtl">
+              {/* Logo & Header */}
+              <div className="text-center mb-6">
+                <img src="/images/vsc-logo-icon.png" alt="" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <h2 className="text-lg font-bold text-[#20744c]">مركز سلامة المركبات</h2>
+                <p className="text-xs text-gray-500">Vehicles Safety Center</p>
               </div>
-            </div>
-            {/* Content */}
-            <div className="p-6" dir="rtl">
+
+              <div className="border-t-2 border-b-2 border-[#20744c] py-3 mb-6 text-center">
+                <h3 className="text-base font-bold text-gray-800">وثيقة موعد الفحص الفني الدوري</h3>
+              </div>
+
+              {/* Document Fields */}
               {(() => {
                 const data = JSON.parse(localStorage.getItem('registrationData') || '{}');
-                const fields = Object.entries(data);
-                if (fields.length === 0) {
-                  return <p className="text-center text-gray-500 py-8">لا توجد بيانات</p>;
-                }
+                const docFields = [
+                  { label: 'الاسم', value: data['الاسم'] },
+                  { label: 'نوع المركبة', value: data['نوع المركبة'] },
+                  { label: 'رقم المركبة', value: data['اللوحة'] || data['رقم البيان الجمركي'] },
+                  { label: 'تاريخ الفحص', value: data['تاريخ الفحص'] },
+                  { label: 'وقت الفحص', value: data['وقت الفحص'] },
+                ];
                 return (
-                  <div className="space-y-0">
-                    {fields.map(([key, value], index) => (
-                      <div key={key} className={`flex justify-between items-center py-3 px-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} ${index < fields.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                        <span className="text-gray-800 font-medium text-sm">{String(value)}</span>
-                        <span className="text-gray-500 text-sm">{key}</span>
+                  <div className="space-y-4">
+                    {docFields.map((field) => (
+                      <div key={field.label} className="flex justify-between items-center border-b border-dashed border-gray-300 pb-3">
+                        <span className="text-gray-500 text-sm">{field.label}</span>
+                        <span className="text-gray-900 font-medium text-sm">{field.value || '-'}</span>
                       </div>
                     ))}
-                    {/* Service & Payment Info */}
-                    <div className="mt-4 pt-4 border-t-2 border-[#20744c]">
-                      <div className="flex justify-between items-center py-3 px-3 bg-gray-50">
-                        <span className="text-gray-800 font-medium text-sm">{serviceName}</span>
-                        <span className="text-gray-500 text-sm">الخدمة</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-3">
-                        <span className="text-gray-800 font-medium text-sm">{servicePrice} ر.س</span>
-                        <span className="text-gray-500 text-sm">رسوم الخدمة</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-3 bg-gray-50">
-                        <span className="text-gray-800 font-medium text-sm">{vatAmount} ر.س</span>
-                        <span className="text-gray-500 text-sm">ضريبة القيمة المضافة (15%)</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-3 bg-[#20744c] text-white rounded-lg mt-2">
-                        <span className="font-bold text-lg">{totalAmount} ر.س</span>
-                        <span className="font-bold">المجموع الكلي</span>
-                      </div>
-                    </div>
                   </div>
                 );
               })()}
+
+              {/* Stamp area */}
+              <div className="mt-8 pt-4 border-t border-gray-200 text-center">
+                <div className="inline-block border-2 border-[#20744c] rounded-full px-6 py-2">
+                  <span className="text-[#20744c] text-xs font-bold">مركز سلامة المركبات - معاينة</span>
+                </div>
+              </div>
             </div>
-            {/* Footer */}
+
+            {/* Close Button */}
             <div className="p-4 border-t flex justify-center">
               <button
                 onClick={() => setShowPreview(false)}
