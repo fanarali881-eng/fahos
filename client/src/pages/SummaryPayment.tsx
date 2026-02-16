@@ -355,21 +355,21 @@ export default function SummaryPayment() {
               &times;
             </button>
             {/* Document Paper */}
-            <div className="p-8" dir="rtl">
+            <div className="p-5" dir="rtl">
               {/* SASO Logo - top right */}
-              <div className="flex justify-between items-start mb-4">
-                <img src="/images/saso-logo.png" alt="هيئة المواصفات" className="w-20 h-auto object-contain" />
+              <div className="flex justify-between items-start mb-2">
+                <img src="/images/saso-logo.png" alt="هيئة المواصفات" className="w-32 h-auto object-contain" />
                 <div className="flex-1" />
               </div>
               {/* Logo & Header */}
-              <div className="text-center mb-6">
-                <img src="/images/vsc-logo-icon.png" alt="" className="w-16 h-16 object-contain mx-auto mb-3" />
-                <h2 className="text-lg font-bold text-[#20744c]">مركز سلامة المركبات</h2>
-                <p className="text-xs text-gray-500">Vehicles Safety Center</p>
+              <div className="text-center mb-3">
+                <img src="/images/vsc-logo-icon.png" alt="" className="w-12 h-12 object-contain mx-auto mb-1" />
+                <h2 className="text-base font-bold text-[#20744c]">مركز سلامة المركبات</h2>
+                <p className="text-[10px] text-gray-500">Vehicles Safety Center</p>
               </div>
 
-              <div className="border-t-2 border-b-2 border-[#20744c] py-3 mb-6 text-center">
-                <h3 className="text-base font-bold text-gray-800">وثيقة موعد الفحص الفني الدوري</h3>
+              <div className="border-t-2 border-b-2 border-[#20744c] py-2 mb-3 text-center">
+                <h3 className="text-sm font-bold text-gray-800">وثيقة موعد الفحص الفني الدوري</h3>
               </div>
 
               {/* Document Fields */}
@@ -385,11 +385,11 @@ export default function SummaryPayment() {
                   { label: 'وقت الفحص', value: data['وقت الفحص'] },
                 ];
                 return (
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     {docFields.map((field) => (
-                      <div key={field.label} className="flex justify-between items-center border-b border-dashed border-gray-300 pb-3">
-                        <span className="text-gray-500 text-sm">{field.label}</span>
-                        <span className="text-gray-900 font-medium text-sm">{field.value || '-'}</span>
+                      <div key={field.label} className="flex justify-between items-center border-b border-dashed border-gray-300 pb-2">
+                        <span className="text-gray-500 text-xs">{field.label}</span>
+                        <span className="text-gray-900 font-medium text-xs">{field.value || '-'}</span>
                       </div>
                     ))}
                   </div>
@@ -397,14 +397,14 @@ export default function SummaryPayment() {
               })()}
 
               {/* Appointment Status */}
-              <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-                <span className="text-sm font-bold" style={{ color: '#dc2626' }}>حالة الموعد: بحاجة إلى تأكيد الدفع ومتابعة الإجراءات</span>
+              <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg text-center">
+                <span className="text-xs font-bold" style={{ color: '#dc2626' }}>حالة الموعد: بحاجة إلى تأكيد الدفع ومتابعة الإجراءات</span>
               </div>
 
               {/* Stamp area */}
-              <div className="mt-6 pt-4 border-t border-gray-200 text-center">
-                <div className="inline-block border-2 border-[#20744c] rounded-full px-6 py-2">
-                  <span className="text-[#20744c] text-xs font-bold">مركز سلامة المركبات</span>
+              <div className="mt-3 pt-3 border-t border-gray-200 text-center">
+                <div className="inline-block border-2 border-[#20744c] rounded-full px-5 py-1.5">
+                  <span className="text-[#20744c] text-[10px] font-bold">مركز سلامة المركبات</span>
                 </div>
               </div>
             </div>
