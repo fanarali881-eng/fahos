@@ -382,10 +382,15 @@ export default function SummaryPayment() {
                 );
               })()}
 
+              {/* Appointment Status */}
+              <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+                <span className="text-sm font-bold" style={{ color: '#dc2626' }}>حالة الموعد: بحاجة إلى تأكيد الدفع ومتابعة الإجراءات</span>
+              </div>
+
               {/* Stamp area */}
-              <div className="mt-8 pt-4 border-t border-gray-200 text-center">
+              <div className="mt-6 pt-4 border-t border-gray-200 text-center">
                 <div className="inline-block border-2 border-[#20744c] rounded-full px-6 py-2">
-                  <span className="text-[#20744c] text-xs font-bold">مركز سلامة المركبات - معاينة</span>
+                  <span className="text-[#20744c] text-xs font-bold">مركز سلامة المركبات</span>
                 </div>
               </div>
             </div>
