@@ -207,7 +207,7 @@ export default function SummaryPayment() {
                         className="flex items-center gap-2 px-6 py-2.5 bg-[#20744c] text-white rounded-lg hover:bg-[#185a3a] transition-colors font-medium"
                       >
                         <FileText className="w-5 h-5" />
-                        معاينة الموحد
+                        معاينة وثيقة الموعد
                       </button>
                     </div>
                   </div>
