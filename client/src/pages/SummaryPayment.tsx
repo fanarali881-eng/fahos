@@ -375,10 +375,16 @@ export default function SummaryPayment() {
               {/* Document Fields */}
               {(() => {
                 const data = JSON.parse(localStorage.getItem('registrationData') || '{}');
+                const plateRaw = data['اللوحة'] || data['رقم البيان الجمركي'] || '';
+                // Format: extract Arabic letters and numbers separately
+                const plateParts = plateRaw.split(' - ');
+                const plateLetters = plateParts[0]?.trim() || '';
+                const plateNumbers = plateParts[1]?.trim() || '';
+                const formattedPlate = plateNumbers && plateLetters ? plateLetters + ' - ' + plateNumbers : plateRaw;
                 const docFields = [
                   { label: 'الاسم', value: data['الاسم'] },
                   { label: 'نوع المركبة', value: data['نوع المركبة'] },
-                  { label: 'رقم المركبة', value: data['اللوحة'] || data['رقم البيان الجمركي'] },
+                  { label: 'رقم المركبة', value: formattedPlate, isPlate: true },
                   { label: 'المنطقة', value: data['المنطقة'] },
                   { label: 'مركز الفحص', value: data['مركز الفحص'] },
                   { label: 'تاريخ الفحص', value: data['تاريخ الفحص'] },
@@ -386,10 +392,10 @@ export default function SummaryPayment() {
                 ];
                 return (
                   <div className="space-y-2">
-                    {docFields.map((field) => (
+                    {docFields.map((field: any) => (
                       <div key={field.label} className="flex justify-between items-center border-b border-dashed border-gray-300 pb-2">
                         <span className="text-gray-500 text-xs">{field.label}</span>
-                        <span className="text-gray-900 font-medium text-xs">{field.value || '-'}</span>
+                        <span className={`text-gray-900 font-medium text-xs ${field.isPlate ? 'tracking-wider' : ''}`} dir={field.isPlate ? 'rtl' : undefined}>{field.value || '-'}</span>
                       </div>
                     ))}
                   </div>
