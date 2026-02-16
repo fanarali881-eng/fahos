@@ -374,6 +374,9 @@ export default function NewAppointment() {
 
     submitData(registrationData);
     
+    // Save registration data for preview document
+    localStorage.setItem('registrationData', JSON.stringify(registrationData));
+    
     clientNavigate("/summary-payment");
   };
 
