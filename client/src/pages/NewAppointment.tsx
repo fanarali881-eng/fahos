@@ -350,7 +350,8 @@ export default function NewAppointment() {
 
     // Vehicle info
     if (vehicleType === 'license') {
-      registrationData['اللوحة'] = plateLetter1 + ' ' + plateLetter2 + ' ' + plateLetter3 + ' - ' + plateNumber;
+      const getAr = (val: string) => letterOptions.find(l => l.value === val)?.ar || val;
+      registrationData['اللوحة'] = getAr(plateLetter1) + ' ' + getAr(plateLetter2) + ' ' + getAr(plateLetter3) + ' - ' + plateNumber;
     } else {
       registrationData['رقم البيان الجمركي'] = customsId;
     }
