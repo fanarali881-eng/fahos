@@ -356,6 +356,11 @@ export default function SummaryPayment() {
             </button>
             {/* Document Paper */}
             <div className="p-8" dir="rtl">
+              {/* SASO Logo - top right */}
+              <div className="flex justify-between items-start mb-4">
+                <img src="/images/saso-logo.png" alt="هيئة المواصفات" className="w-20 h-auto object-contain" />
+                <div className="flex-1" />
+              </div>
               {/* Logo & Header */}
               <div className="text-center mb-6">
                 <img src="/images/vsc-logo-icon.png" alt="" className="w-16 h-16 object-contain mx-auto mb-3" />
