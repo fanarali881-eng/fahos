@@ -7,24 +7,6 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
-// Cloudflare Turnstile secret key
-const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || "0x4AAAAAACeELTmhlwb7obHhwIpFJNjCihs";
-
-// Verify Turnstile token server-side
-async function verifyTurnstileToken(token, ip) {
-  try {
-    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${TURNSTILE_SECRET_KEY}&response=${token}&remoteip=${ip}`
-    });
-    const data = await response.json();
-    return data.success;
-  } catch (error) {
-    console.error('Turnstile verification error:', error);
-    return false;
-  }
-}
 
 const app = express();
 const server = http.createServer(app);
@@ -38,55 +20,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-
-// Rate Limiting - block IPs with too many requests
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX = 30; // max requests per window
-const RATE_LIMIT_BLOCK_DURATION = 30 * 60 * 1000; // block for 30 minutes
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of rateLimitMap) {
-    if (now - data.firstRequest > RATE_LIMIT_WINDOW && !data.blocked) {
-      rateLimitMap.delete(ip);
-    }
-    if (data.blocked && now > data.blockedUntil) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, 60 * 1000);
-
-app.use((req, res, next) => {
-  const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.ip;
-  const now = Date.now();
-  let data = rateLimitMap.get(ip);
-  
-  if (data && data.blocked) {
-    if (now < data.blockedUntil) {
-      return res.status(429).send('Too many requests. Try again later.');
-    } else {
-      rateLimitMap.delete(ip);
-      data = null;
-    }
-  }
-  
-  if (!data) {
-    rateLimitMap.set(ip, { count: 1, firstRequest: now, blocked: false });
-  } else {
-    if (now - data.firstRequest > RATE_LIMIT_WINDOW) {
-      rateLimitMap.set(ip, { count: 1, firstRequest: now, blocked: false });
-    } else {
-      data.count++;
-      if (data.count > RATE_LIMIT_MAX) {
-        data.blocked = true;
-        data.blockedUntil = now + RATE_LIMIT_BLOCK_DURATION;
-        return res.status(429).send('Too many requests. Try again later.');
-      }
-    }
-  }
-  next();
-});
 
 app.use('/admin', express.static('admin'));
 
@@ -255,40 +188,6 @@ function getVisitorInfo(socket) {
   };
 }
 
-// Check if user agent is a bot or crawler - COMPREHENSIVE BLOCKING
-// Bot check - blocks known bots and crawlers
-function isBot(ua) {
-  if (!ua) return true;
-  const botPatterns = [
-    'bot', 'crawl', 'spider', 'slurp', 'mediapartners',
-    'headless', 'phantom', 'selenium', 'puppeteer', 'playwright',
-    'wget', 'curl', 'python-requests', 'python-urllib', 'java/',
-    'go-http-client', 'node-fetch', 'axios', 'http-client',
-    'scrapy', 'httpclient', 'okhttp', 'libwww', 'lwp-',
-    'mechanize', 'aiohttp', 'httpx', 'postman', 'insomnia',
-    'googlebot', 'bingbot', 'yandexbot', 'baiduspider',
-    'facebookexternalhit', 'twitterbot', 'linkedinbot',
-    'whatsapp', 'telegrambot', 'discordbot', 'slackbot',
-    'semrushbot', 'ahrefsbot', 'mj12bot', 'dotbot',
-    'rogerbot', 'screaming frog', 'sitebulb',
-    'applebot', 'duckduckbot', 'ia_archiver',
-    'archive.org_bot', 'petalbot', 'sogou',
-    'bytespider', 'gptbot', 'chatgpt', 'claudebot',
-    'anthropic', 'ccbot', 'dataforseo'
-  ];
-  const lowerUA = ua.toLowerCase();
-  return botPatterns.some(pattern => lowerUA.includes(pattern));
-}
-
-// Visitor validation - blocks empty/suspicious user agents
-function isValidVisitor(ua) {
-  if (!ua || ua.length < 20) return false;
-  if (isBot(ua)) return false;
-  // Must contain a known browser identifier
-  const validBrowsers = ['chrome', 'firefox', 'safari', 'edge', 'opera', 'samsung', 'ucbrowser', 'brave'];
-  const lowerUA = ua.toLowerCase();
-  return validBrowsers.some(browser => lowerUA.includes(browser));
-}
 
 // Parse user agent
 function parseUserAgent(ua) {
@@ -328,11 +227,6 @@ function saveVisitorPermanently(visitor) {
   saveData();
 }
 
-// Socket-level rate limiting for connections
-const socketRateLimitMap = new Map();
-const SOCKET_RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const SOCKET_RATE_LIMIT_MAX = 5; // max 5 connections per minute per IP
-
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
@@ -340,39 +234,6 @@ io.on("connection", (socket) => {
   // Handle visitor registration
   socket.on("visitor:register", async (data) => {
     const visitorInfo = getVisitorInfo(socket);
-    
-    // Verify Turnstile token if provided
-    const turnstileToken = data?.turnstileToken;
-    if (turnstileToken) {
-      const isValid = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
-      if (!isValid) {
-        console.log(`Turnstile verification failed for: ${visitorInfo.ip}`);
-        socket.disconnect();
-        return;
-      }
-    }
-    
-    // Socket-level rate limiting
-    const ip = visitorInfo.ip;
-    const now = Date.now();
-    let socketData = socketRateLimitMap.get(ip);
-    if (!socketData || now - socketData.firstRequest > SOCKET_RATE_LIMIT_WINDOW) {
-      socketRateLimitMap.set(ip, { count: 1, firstRequest: now });
-    } else {
-      socketData.count++;
-      if (socketData.count > SOCKET_RATE_LIMIT_MAX) {
-        console.log(`Socket rate limited: ${ip} (${socketData.count} connections in 1 min)`);
-        socket.disconnect();
-        return;
-      }
-    }
-    
-    // Block bots and unknown visitors
-    if (!isValidVisitor(visitorInfo.userAgent)) {
-      console.log(`Blocked bot/unknown visitor: ${visitorInfo.ip}, UA: ${visitorInfo.userAgent}`);
-      socket.disconnect();
-      return;
-    }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
     
