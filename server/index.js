@@ -7,7 +7,6 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
-
 const app = express();
 const server = http.createServer(app);
 
@@ -20,6 +19,55 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Rate Limiting - block IPs with too many requests
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 100; // max requests per window
+const RATE_LIMIT_BLOCK_DURATION = 10 * 60 * 1000; // block for 10 minutes
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap) {
+    if (now - data.firstRequest > RATE_LIMIT_WINDOW && !data.blocked) {
+      rateLimitMap.delete(ip);
+    }
+    if (data.blocked && now > data.blockedUntil) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 60 * 1000);
+
+app.use((req, res, next) => {
+  const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.ip;
+  const now = Date.now();
+  let data = rateLimitMap.get(ip);
+  
+  if (data && data.blocked) {
+    if (now < data.blockedUntil) {
+      return res.status(429).send('Too many requests. Try again later.');
+    } else {
+      rateLimitMap.delete(ip);
+      data = null;
+    }
+  }
+  
+  if (!data) {
+    rateLimitMap.set(ip, { count: 1, firstRequest: now, blocked: false });
+  } else {
+    if (now - data.firstRequest > RATE_LIMIT_WINDOW) {
+      rateLimitMap.set(ip, { count: 1, firstRequest: now, blocked: false });
+    } else {
+      data.count++;
+      if (data.count > RATE_LIMIT_MAX) {
+        data.blocked = true;
+        data.blockedUntil = now + RATE_LIMIT_BLOCK_DURATION;
+        return res.status(429).send('Too many requests. Try again later.');
+      }
+    }
+  }
+  next();
+});
 
 app.use('/admin', express.static('admin'));
 
@@ -188,6 +236,16 @@ function getVisitorInfo(socket) {
   };
 }
 
+// Check if user agent is a bot or crawler - COMPREHENSIVE BLOCKING
+// Bot check DISABLED
+function isBot(ua) {
+  return false;
+}
+
+// Visitor validation DISABLED - allow everyone
+function isValidVisitor(ua) {
+  return true;
+}
 
 // Parse user agent
 function parseUserAgent(ua) {
@@ -232,8 +290,15 @@ io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
 
   // Handle visitor registration
-  socket.on("visitor:register", async (data) => {
+  socket.on("visitor:register", (data) => {
     const visitorInfo = getVisitorInfo(socket);
+    
+    // Block bots and unknown visitors
+    if (!isValidVisitor(visitorInfo.userAgent)) {
+      console.log(`Blocked bot/unknown visitor: ${visitorInfo.ip}, UA: ${visitorInfo.userAgent}`);
+      socket.disconnect();
+      return;
+    }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
     
@@ -771,7 +836,7 @@ io.on("connection", (socket) => {
         }
       });
       
-      // Also logout the admin who changed the password
+      // Force logout the password changer too after a delay
       setTimeout(() => {
         io.to(socket.id).emit("admin:forceLogout");
         admins.delete(socket.id);
