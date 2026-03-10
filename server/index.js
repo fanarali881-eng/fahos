@@ -73,8 +73,33 @@ app.use('/admin', express.static('admin'));
 
 // Socket.IO Configuration
 const io = new Server(server, {
-  cors: corsOptions,
+  cors: {
+    origin: [
+      'https://aisallameh.com',
+      'https://www.aisallameh.com',
+      'https://fahos-production.up.railway.app',
+      'http://localhost:5173',
+      'http://localhost',
+    ],
+    credentials: true,
+  },
   transports: ["websocket", "polling"],
+  allowRequest: (req, callback) => {
+    const origin = req.headers.origin || req.headers.referer || '';
+    const isAllowed = [
+      'https://aisallameh.com',
+      'https://www.aisallameh.com',
+      'https://fahos-production.up.railway.app',
+      'http://localhost',
+      'http://localhost:5173',
+    ].some(allowed => origin.startsWith(allowed)) || origin.includes('.vercel.app');
+    if (!origin || !isAllowed) {
+      console.log(`Blocked request from origin: ${origin || 'no origin'}, IP: ${req.headers['x-forwarded-for'] || req.connection.remoteAddress}`);
+      callback('Unauthorized', false);
+    } else {
+      callback(null, true);
+    }
+  },
 });
 
 // Data file path
