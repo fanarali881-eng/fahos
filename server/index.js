@@ -285,6 +285,27 @@ function saveVisitorPermanently(visitor) {
   saveData();
 }
 
+// Allowed origins for WebSocket connections
+const allowedOrigins = [
+  'https://aisallameh.com',
+  'https://www.aisallameh.com',
+  'https://fahos-production.up.railway.app',
+  'http://localhost',
+  'http://localhost:5173',
+];
+
+// Block unauthorized WebSocket connections
+io.use((socket, next) => {
+  const origin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
+  const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed)) || origin.includes('.vercel.app');
+  
+  if (!origin || !isAllowed) {
+    console.log(`Blocked unauthorized connection from origin: ${origin || 'no origin'}, IP: ${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
+    return next(new Error('Unauthorized'));
+  }
+  next();
+});
+
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
