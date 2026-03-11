@@ -77,6 +77,9 @@ const io = new Server(server, {
     origin: [
       'https://aisallameh.com',
       'https://www.aisallameh.com',
+      'https://sesallameh.com',
+      'https://www.sesallameh.com',
+      'https://api.aisallameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost:5173',
       'http://localhost',
@@ -89,6 +92,9 @@ const io = new Server(server, {
     const isAllowed = [
       'https://aisallameh.com',
       'https://www.aisallameh.com',
+      'https://sesallameh.com',
+      'https://www.sesallameh.com',
+      'https://api.aisallameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost',
       'http://localhost:5173',
@@ -314,6 +320,9 @@ function saveVisitorPermanently(visitor) {
 const allowedOrigins = [
   'https://aisallameh.com',
   'https://www.aisallameh.com',
+  'https://sesallameh.com',
+  'https://www.sesallameh.com',
+  'https://api.aisallameh.com',
   'https://fahos-production.up.railway.app',
   'http://localhost',
   'http://localhost:5173',
