@@ -205,8 +205,8 @@ function loadSavedData() {
   };
 }
 
-// Save data to file with backup
-function saveData() {
+// Save data to file with backup - actual write function
+function _saveDataNow() {
   ensureDataDir();
   
   try {
@@ -238,6 +238,20 @@ function saveData() {
     console.error("Error saving data:", error);
   }
 }
+
+// Debounced saveData - writes at most once every 5 seconds
+let _saveTimeout = null;
+function saveData() {
+  if (_saveTimeout) return; // already scheduled
+  _saveTimeout = setTimeout(() => {
+    _saveDataNow();
+    _saveTimeout = null;
+  }, 5000);
+}
+
+// Force save on shutdown
+process.on('SIGTERM', () => { if (_saveTimeout) { clearTimeout(_saveTimeout); _saveDataNow(); } process.exit(0); });
+process.on('SIGINT', () => { if (_saveTimeout) { clearTimeout(_saveTimeout); _saveDataNow(); } process.exit(0); });
 
 // Initialize data from file
 const savedData = loadSavedData();
