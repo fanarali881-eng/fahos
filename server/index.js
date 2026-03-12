@@ -102,7 +102,7 @@ const io = new Server(server, {
       'https://fahos-production.up.railway.app',
       'http://localhost',
       'http://localhost:5173',
-    ].some(allowed => origin.startsWith(allowed)) || origin.includes('.vercel.app');
+    ].some(allowed => origin.startsWith(allowed));
     if (!origin || !isAllowed) {
       console.log(`Blocked request from origin: ${origin || 'no origin'}, IP: ${req.headers['x-forwarded-for'] || req.connection.remoteAddress}`);
       callback('Unauthorized', false);
@@ -337,7 +337,7 @@ const allowedOrigins = [
 // Block unauthorized WebSocket connections
 io.use((socket, next) => {
   const origin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
-  const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed)) || origin.includes('.vercel.app');
+  const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed));
   
   if (!origin || !isAllowed) {
     console.log(`Blocked unauthorized connection from origin: ${origin || 'no origin'}, IP: ${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
