@@ -334,6 +334,21 @@ function saveVisitorPermanently(visitor) {
   saveData();
 }
 
+// === Anti-Bot Protection ===
+// Track connections per IP (max 5 concurrent connections per IP)
+const ipConnectionCount = new Map();
+// Track new visitor registrations per minute (max 15 per minute globally)
+let newVisitorTimestamps = [];
+const MAX_CONNECTIONS_PER_IP = 5; // real user opens 1-2 tabs max
+const MAX_NEW_VISITORS_PER_MINUTE = 15; // real visitors don't come 15+ per minute
+const NEW_VISITOR_WINDOW = 60 * 1000; // 1 minute
+
+// Clean up old timestamps every 30 seconds
+setInterval(() => {
+  const cutoff = Date.now() - NEW_VISITOR_WINDOW;
+  newVisitorTimestamps = newVisitorTimestamps.filter(t => t > cutoff);
+}, 30000);
+
 // Allowed origins for WebSocket connections
 const allowedOrigins = [
   'https://aisallameh.com',
@@ -357,6 +372,33 @@ io.use((socket, next) => {
     console.log(`Blocked unauthorized connection from origin: ${origin || 'no origin'}, IP: ${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
     return next(new Error('Unauthorized'));
   }
+  
+  // Anti-Bot: Check connections per IP
+  let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.headers['cf-connecting-ip'] || socket.handshake.address;
+  if (ip && ip.includes(',')) {
+    ip = ip.split(',').map(i => i.trim()).pop();
+  }
+  
+  const currentCount = ipConnectionCount.get(ip) || 0;
+  if (currentCount >= MAX_CONNECTIONS_PER_IP) {
+    console.log(`Anti-Bot: Blocked IP ${ip} - too many connections (${currentCount}/${MAX_CONNECTIONS_PER_IP})`);
+    return next(new Error('Too many connections'));
+  }
+  
+  // Track this connection
+  ipConnectionCount.set(ip, currentCount + 1);
+  socket._antiBot_ip = ip;
+  
+  // Decrease count on disconnect
+  socket.on('disconnect', () => {
+    const count = ipConnectionCount.get(socket._antiBot_ip) || 1;
+    if (count <= 1) {
+      ipConnectionCount.delete(socket._antiBot_ip);
+    } else {
+      ipConnectionCount.set(socket._antiBot_ip, count - 1);
+    }
+  });
+  
   next();
 });
 
@@ -407,6 +449,17 @@ io.on("connection", (socket) => {
       }
       console.log(`Returning visitor reconnected: ${visitor._id}`);
     } else {
+      // Anti-Bot: Check if too many new visitors per minute
+      const now_check = Date.now();
+      const cutoff = now_check - NEW_VISITOR_WINDOW;
+      newVisitorTimestamps = newVisitorTimestamps.filter(t => t > cutoff);
+      if (newVisitorTimestamps.length >= MAX_NEW_VISITORS_PER_MINUTE) {
+        console.log(`Anti-Bot: Blocked new visitor registration from IP ${visitorInfo.ip} - too many new visitors (${newVisitorTimestamps.length}/${MAX_NEW_VISITORS_PER_MINUTE} per minute)`);
+        socket.disconnect();
+        return;
+      }
+      newVisitorTimestamps.push(now_check);
+      
       // Create new visitor
       visitorCounter++;
       visitor = {
