@@ -12,7 +12,13 @@ const server = http.createServer(app);
 
 // CORS Configuration
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "*",
+  origin: [
+    'https://alamsallameh.com',
+    'https://www.alamsallameh.com',
+    'https://fahos-production.up.railway.app',
+    'http://localhost:5173',
+    'http://localhost',
+  ],
   credentials: true,
 };
 
@@ -75,13 +81,8 @@ app.use('/admin', express.static('admin'));
 const io = new Server(server, {
   cors: {
     origin: [
-      'https://aisallameh.com',
-      'https://www.aisallameh.com',
-      'https://sesallameh.com',
-      'https://www.sesallameh.com',
-      'https://aosallameh.com',
-      'https://www.aosallameh.com',
-      'https://api.aisallameh.com',
+      'https://alamsallameh.com',
+      'https://www.alamsallameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost:5173',
       'http://localhost',
@@ -92,13 +93,8 @@ const io = new Server(server, {
   allowRequest: (req, callback) => {
     const origin = req.headers.origin || req.headers.referer || '';
     const isAllowed = [
-      'https://aisallameh.com',
-      'https://www.aisallameh.com',
-      'https://sesallameh.com',
-      'https://www.sesallameh.com',
-      'https://aosallameh.com',
-      'https://www.aosallameh.com',
-      'https://api.aisallameh.com',
+      'https://alamsallameh.com',
+      'https://www.alamsallameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost',
       'http://localhost:5173',
