@@ -351,17 +351,8 @@ setInterval(() => {
 
 // Allowed origins for WebSocket connections
 const allowedOrigins = [
-  'https://aisallameh.com',
-  'https://www.aisallameh.com',
-  'https://sesallameh.com',
-  'https://www.sesallameh.com',
-  'https://aosallameh.com',
-  'https://www.aosallameh.com',
-  'https://alamsalameh.com',
-  'https://www.alamsalameh.com',
   'https://alamsallameh.com',
   'https://www.alamsallameh.com',
-  'https://api.aisallameh.com',
   'https://fahos-production.up.railway.app',
   'http://localhost',
   'http://localhost:5173',
