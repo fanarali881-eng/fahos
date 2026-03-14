@@ -15,6 +15,8 @@ const corsOptions = {
   origin: [
     'https://alamsallameh.com',
     'https://www.alamsallameh.com',
+    'https://amnwsalameh.com',
+    'https://www.amnwsalameh.com',
     'https://fahos-production.up.railway.app',
     'http://localhost:5173',
     'http://localhost',
@@ -83,6 +85,8 @@ const io = new Server(server, {
     origin: [
       'https://alamsallameh.com',
       'https://www.alamsallameh.com',
+      'https://amnwsalameh.com',
+      'https://www.amnwsalameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost:5173',
       'http://localhost',
@@ -95,6 +99,8 @@ const io = new Server(server, {
     const isAllowed = [
       'https://alamsallameh.com',
       'https://www.alamsallameh.com',
+      'https://amnwsalameh.com',
+      'https://www.amnwsalameh.com',
       'https://fahos-production.up.railway.app',
       'http://localhost',
       'http://localhost:5173',
@@ -349,6 +355,8 @@ setInterval(() => {
 const allowedOrigins = [
   'https://alamsallameh.com',
   'https://www.alamsallameh.com',
+  'https://amnwsalameh.com',
+  'https://www.amnwsalameh.com',
   'https://fahos-production.up.railway.app',
   'http://localhost',
   'http://localhost:5173',
