@@ -1503,11 +1503,11 @@
           '</div>' +
           (v.hasNewData ? '<div class="mt-2 text-xs text-blue-700 font-medium">📝 يوجد بيانات جديدة</div>' : '') +
           (v.hasNewMessage ? '<div class="mt-2 text-xs text-green-700 font-medium">💬 تم ورود رسالة من العميل</div>' : '') +
-          (v.waitingForAdminResponse ? '<div class="absolute bottom-2 left-2 text-sm text-yellow-700 font-medium"><span class="hourglass-icon animate-bounce" style="font-size: 1.5em;">⏳</span> ينتظر الرد</div>' : '') +
-          // Star toggle at bottom right as checkbox
-          '<label class="absolute bottom-2 right-2 flex items-center gap-1 cursor-pointer" onclick="event.stopPropagation();">' +
-          '<input type="checkbox" class="hidden" ' + (v.isStarred ? 'checked' : '') + ' onchange="event.stopPropagation(); toggleStar(\'' + v._id + '\')" />' +
-          '<span style="font-size: 1.4em; filter: ' + (v.isStarred ? 'drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 8px #fbbf24)' : 'none') + '; transition: all 0.3s ease;">' + (v.isStarred ? '⭐' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>') + '</span>' +
+          (v.waitingForAdminResponse ? '<div class="text-sm text-yellow-700 font-medium mt-2"><span class="hourglass-icon animate-bounce" style="font-size: 1.5em;">⏳</span> ينتظر الرد</div>' : '') +
+          // Star toggle at bottom left with checkbox
+          '<label class="absolute bottom-2 left-2 flex items-center gap-1.5 cursor-pointer" onclick="event.stopPropagation();">' +
+          '<input type="checkbox" class="w-4 h-4 cursor-pointer accent-yellow-500 rounded" ' + (v.isStarred ? 'checked' : '') + ' onchange="event.stopPropagation(); toggleStar(\'' + v._id + '\')" />' +
+          '<span style="font-size: 1.3em; filter: ' + (v.isStarred ? 'drop-shadow(0 1px 3px #f59e0b) drop-shadow(0 0 6px #fbbf24)' : 'none') + '; opacity: ' + (v.isStarred ? '1' : '0.3') + '; transition: all 0.3s ease;">' + (v.isStarred ? '⭐' : '☆') + '</span>' +
           '</label>' +
           '</div>';
       }).join('');
