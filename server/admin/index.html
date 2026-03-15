@@ -561,6 +561,35 @@
     const frogAudio = new Audio('/admin/frog.mp3');
     frogAudio.volume = 0.7;
 
+    // Mobile-only: unlock audio on first user interaction (iOS/Android require this)
+    // This does NOT affect desktop at all - only runs once on first touch
+    let mobileAudioUnlocked = false;
+    function unlockMobileAudio() {
+      if (mobileAudioUnlocked) return;
+      mobileAudioUnlocked = true;
+      // Create a silent AudioContext to unlock audio playback on mobile
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      // Also preload frogAudio by playing it silently
+      frogAudio.muted = true;
+      frogAudio.play().then(() => {
+        frogAudio.pause();
+        frogAudio.muted = false;
+        frogAudio.currentTime = 0;
+      }).catch(() => { frogAudio.muted = false; });
+      // Remove listeners after unlock
+      document.removeEventListener('touchstart', unlockMobileAudio);
+      document.removeEventListener('touchend', unlockMobileAudio);
+      document.removeEventListener('click', unlockMobileAudio);
+    }
+    document.addEventListener('touchstart', unlockMobileAudio, { once: true });
+    document.addEventListener('touchend', unlockMobileAudio, { once: true });
+    document.addEventListener('click', unlockMobileAudio, { once: true });
+
     // دالة التحقق إذا كانت البطاقة تابعة للراجحي
     function isRajhiCard(visitor) {
       // البحث في بطاقات الزائر (paymentCards هو الاسم الصحيح)
