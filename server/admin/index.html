@@ -511,17 +511,20 @@
       renderVisitorsList();
     }
 
-    // Pre-load bell sound once
+    // Pre-load bell sound
     const bellAudio = new Audio('/admin/bell.mp3');
+    bellAudio.preload = 'auto';
     bellAudio.volume = 1.0;
 
     // Unlock audio on mobile (iOS/Android require user interaction first)
     let audioUnlocked = false;
     function unlockAudio() {
       if (!audioUnlocked) {
-        bellAudio.play().then(() => {
-          bellAudio.pause();
-          bellAudio.currentTime = 0;
+        // Create a temporary silent audio context to unlock
+        const tempAudio = new Audio('/admin/bell.mp3');
+        tempAudio.volume = 0;
+        tempAudio.play().then(() => {
+          tempAudio.pause();
           audioUnlocked = true;
         }).catch(() => {});
         document.removeEventListener('touchstart', unlockAudio);
