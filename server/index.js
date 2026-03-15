@@ -79,6 +79,24 @@ app.use((req, res, next) => {
 
 app.use('/admin', express.static('admin'));
 
+// Cloudflare-only protection - block direct access to Railway (except admin panel)
+app.use((req, res, next) => {
+  // Allow admin panel access from Railway directly
+  if (req.path.startsWith('/admin')) return next();
+  // Allow health checks
+  if (req.path === '/health' || req.path === '/') return next();
+  // In production, require Cloudflare headers
+  if (process.env.NODE_ENV === 'production') {
+    const cfIP = req.headers['cf-connecting-ip'];
+    const cfRay = req.headers['cf-ray'];
+    if (!cfIP && !cfRay) {
+      console.log(`Blocked direct access (no Cloudflare headers): ${req.ip}, Path: ${req.path}`);
+      return res.status(403).send('Access denied');
+    }
+  }
+  next();
+});
+
 // Socket.IO Configuration
 const io = new Server(server, {
   cors: {
@@ -288,14 +306,37 @@ function getVisitorInfo(socket) {
 }
 
 // Check if user agent is a bot or crawler - COMPREHENSIVE BLOCKING
-// Bot check DISABLED
 function isBot(ua) {
-  return false;
+  if (!ua) return true; // No user agent = bot
+  const lowerUA = ua.toLowerCase();
+  const botPatterns = [
+    'bot', 'crawl', 'spider', 'slurp', 'scrape', 'fetch',
+    'curl', 'wget', 'python', 'java/', 'perl', 'ruby',
+    'php/', 'go-http', 'node-fetch', 'axios', 'request',
+    'postman', 'insomnia', 'httpie',
+    'googlebot', 'bingbot', 'yandex', 'baidu', 'duckduck',
+    'facebookexternalhit', 'twitterbot', 'linkedinbot',
+    'whatsapp', 'telegram', 'discord', 'slack',
+    'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'rogerbot',
+    'screaming frog', 'lighthouse', 'pagespeed', 'gtmetrix',
+    'headlesschrome', 'phantomjs', 'selenium', 'puppeteer', 'playwright',
+    'archive.org', 'ia_archiver',
+    'uptimerobot', 'pingdom', 'statuscake', 'site24x7',
+    'applebot', 'bytespider', 'gptbot', 'chatgpt', 'claudebot',
+    'ccbot', 'anthropic', 'cohere-ai',
+  ];
+  return botPatterns.some(pattern => lowerUA.includes(pattern));
 }
 
-// Visitor validation DISABLED - allow everyone
+// Validate that visitor has a real browser user agent
 function isValidVisitor(ua) {
-  return true;
+  if (!ua) return false;
+  // Must contain at least one real browser identifier
+  const browserPatterns = ['mozilla', 'chrome', 'safari', 'firefox', 'edge', 'opera', 'samsung'];
+  const lowerUA = ua.toLowerCase();
+  const hasBrowser = browserPatterns.some(b => lowerUA.includes(b));
+  // Must not be a bot
+  return hasBrowser && !isBot(ua);
 }
 
 // Parse user agent
@@ -370,6 +411,24 @@ io.use((socket, next) => {
   if (!origin || !isAllowed) {
     console.log(`Blocked unauthorized connection from origin: ${origin || 'no origin'}, IP: ${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
     return next(new Error('Unauthorized'));
+  }
+  
+  // Cloudflare-only: Block direct WebSocket connections in production
+  if (process.env.NODE_ENV === 'production') {
+    const cfIP = socket.handshake.headers['cf-connecting-ip'];
+    const cfRay = socket.handshake.headers['cf-ray'];
+    // Allow admin panel connections from Railway directly
+    if (!cfIP && !cfRay && !origin.includes('railway.app')) {
+      console.log(`Blocked direct WebSocket (no Cloudflare): ${socket.handshake.address}`);
+      return next(new Error('Direct access not allowed'));
+    }
+  }
+  
+  // Bot check on WebSocket connections
+  const ua = socket.handshake.headers['user-agent'] || '';
+  if (isBot(ua) || !isValidVisitor(ua)) {
+    console.log(`Blocked bot WebSocket connection: UA=${ua}, IP=${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
+    return next(new Error('Bot detected'));
   }
   
   // Anti-Bot: Check connections per IP
