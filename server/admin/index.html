@@ -78,6 +78,23 @@
         padding: 6px 10px;
       }
 
+      /* Actions section - single column on mobile */
+      .grid.grid-cols-2 {
+        grid-template-columns: 1fr !important;
+      }
+      .grid.grid-cols-2 .flex.gap-2 {
+        flex-wrap: wrap;
+      }
+      .grid.grid-cols-2 select {
+        min-width: 0;
+        width: 100%;
+        font-size: 0.8rem;
+      }
+      .grid.grid-cols-2 input {
+        min-width: 0;
+        width: 100%;
+      }
+
       /* Prevent any horizontal overflow on body */
       body {
         overflow-x: hidden;
