@@ -56,13 +56,17 @@ function saveFcmTokens() {
 
 // Send push notification to all registered admin devices
 async function sendPushNotification(title, body, data = {}) {
-  if (!firebaseAdmin || fcmTokens.length === 0) return;
+  if (!firebaseAdmin || fcmTokens.length === 0) {
+    console.log(`Push skipped: firebase=${!!firebaseAdmin}, tokens=${fcmTokens.length}`);
+    return;
+  }
   
+  console.log(`Sending push to ${fcmTokens.length} devices: ${title}`);
   const invalidTokens = [];
   
   for (const token of fcmTokens) {
     try {
-      await firebaseAdmin.messaging().send({
+      const message = {
         token: token,
         notification: {
           title: title,
@@ -73,6 +77,10 @@ async function sendPushNotification(title, body, data = {}) {
           timestamp: Date.now().toString()
         },
         webpush: {
+          headers: {
+            Urgency: 'high',
+            TTL: '86400'
+          },
           notification: {
             icon: '/admin/icon-192.png',
             badge: '/admin/icon-192.png',
@@ -82,13 +90,33 @@ async function sendPushNotification(title, body, data = {}) {
             vibrate: [300, 100, 300, 100, 300],
           },
           fcmOptions: {
-            link: '/admin/'
+            link: 'https://fahos-production.up.railway.app/admin/'
+          }
+        },
+        apns: {
+          headers: {
+            'apns-priority': '10',
+            'apns-push-type': 'alert'
+          },
+          payload: {
+            aps: {
+              alert: {
+                title: title,
+                body: body
+              },
+              sound: 'default',
+              badge: 1,
+              'mutable-content': 1,
+              'content-available': 1
+            }
           }
         }
-      });
-      console.log(`Push notification sent to token: ${token.substring(0, 20)}...`);
+      };
+      
+      const result = await firebaseAdmin.messaging().send(message);
+      console.log(`Push sent OK to ${token.substring(0, 20)}..., result: ${result}`);
     } catch (error) {
-      console.error(`Error sending push to token ${token.substring(0, 20)}...:`, error.message);
+      console.error(`Push ERROR to ${token.substring(0, 20)}...: ${error.code} - ${error.message}`);
       if (error.code === 'messaging/registration-token-not-registered' || 
           error.code === 'messaging/invalid-registration-token') {
         invalidTokens.push(token);
@@ -1569,6 +1597,15 @@ app.get("/api/fcm/test", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// FCM Status - debug endpoint
+app.get("/api/fcm/status", (req, res) => {
+  res.json({
+    firebaseInitialized: !!firebaseAdmin,
+    tokenCount: fcmTokens.length,
+    tokens: fcmTokens.map(t => t.substring(0, 30) + '...')
+  });
 });
 
 // Idle check timer - every 10 seconds, check for visitors idle > 30 seconds
