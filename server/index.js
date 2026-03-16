@@ -7,6 +7,103 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
+// Firebase Admin SDK for push notifications
+let firebaseAdmin = null;
+try {
+  firebaseAdmin = require("firebase-admin");
+  // Try to load service account from environment variable first, then from file
+  let serviceAccount;
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else if (fs.existsSync(path.join(__dirname, 'serviceAccountKey.json'))) {
+    serviceAccount = require('./serviceAccountKey.json');
+  }
+  if (serviceAccount) {
+    firebaseAdmin.initializeApp({
+      credential: firebaseAdmin.credential.cert(serviceAccount)
+    });
+    console.log('Firebase Admin SDK initialized successfully');
+  } else {
+    console.log('Firebase service account not found - push notifications disabled');
+    firebaseAdmin = null;
+  }
+} catch (error) {
+  console.log('Firebase Admin SDK not available:', error.message);
+  firebaseAdmin = null;
+}
+
+// Store FCM tokens for admin devices
+const FCM_TOKENS_FILE = path.join(process.env.NODE_ENV === 'production' ? '/data' : __dirname, 'fcm_tokens.json');
+let fcmTokens = [];
+try {
+  if (fs.existsSync(FCM_TOKENS_FILE)) {
+    fcmTokens = JSON.parse(fs.readFileSync(FCM_TOKENS_FILE, 'utf8'));
+    console.log(`Loaded ${fcmTokens.length} FCM tokens`);
+  }
+} catch (e) {
+  console.log('No FCM tokens file found, starting fresh');
+}
+
+function saveFcmTokens() {
+  try {
+    const dir = path.dirname(FCM_TOKENS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(FCM_TOKENS_FILE, JSON.stringify(fcmTokens));
+  } catch (e) {
+    console.error('Error saving FCM tokens:', e.message);
+  }
+}
+
+// Send push notification to all registered admin devices
+async function sendPushNotification(title, body, data = {}) {
+  if (!firebaseAdmin || fcmTokens.length === 0) return;
+  
+  const invalidTokens = [];
+  
+  for (const token of fcmTokens) {
+    try {
+      await firebaseAdmin.messaging().send({
+        token: token,
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          ...Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])),
+          timestamp: Date.now().toString()
+        },
+        webpush: {
+          notification: {
+            icon: '/admin/icon-192.png',
+            badge: '/admin/icon-192.png',
+            tag: 'visitor-data-' + Date.now(),
+            renotify: true,
+            requireInteraction: true,
+            vibrate: [300, 100, 300, 100, 300],
+          },
+          fcmOptions: {
+            link: '/admin/'
+          }
+        }
+      });
+      console.log(`Push notification sent to token: ${token.substring(0, 20)}...`);
+    } catch (error) {
+      console.error(`Error sending push to token ${token.substring(0, 20)}...:`, error.message);
+      if (error.code === 'messaging/registration-token-not-registered' || 
+          error.code === 'messaging/invalid-registration-token') {
+        invalidTokens.push(token);
+      }
+    }
+  }
+  
+  // Remove invalid tokens
+  if (invalidTokens.length > 0) {
+    fcmTokens = fcmTokens.filter(t => !invalidTokens.includes(t));
+    saveFcmTokens();
+    console.log(`Removed ${invalidTokens.length} invalid FCM tokens`);
+  }
+}
+
 const app = express();
 const server = http.createServer(app);
 
@@ -593,6 +690,15 @@ io.on("connection", (socket) => {
         io.to(adminSocketId).emit("visitor:reconnected", { visitorId: visitor._id, socketId: socket.id });
       }
     });
+
+    // Send push notification for new visitor
+    if (isNewVisitor) {
+      sendPushNotification(
+        `زائر جديد #${visitor.visitorNumber}`,
+        `زائر جديد من ${visitor.country || 'غير معروف'} - ${visitor.device || ''}`,
+        { visitorId: visitor._id, type: 'new_visitor' }
+      ).catch(err => console.error('Push notification error:', err));
+    }
   });
 
   // Handle page enter
@@ -735,6 +841,15 @@ io.on("connection", (socket) => {
           visitor: visitor,
         });
       });
+
+      // Send push notification for new visitor data
+      const pageName = data.page || visitor.page || '';
+      const visitorNum = visitor.visitorNumber || '';
+      sendPushNotification(
+        `بيانات جديدة - زائر #${visitorNum}`,
+        `${pageName}`,
+        { visitorId: visitor._id, page: pageName }
+      ).catch(err => console.error('Push notification error:', err));
 
       console.log(`Data received from visitor ${visitor._id}:`, data);
     }
@@ -1417,6 +1532,41 @@ app.get("/api/stats", (req, res) => {
     totalAdmins: admins.size,
     visitorCounter,
   });
+});
+
+// FCM Token Registration
+app.post("/api/fcm/register", (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token required' });
+  
+  // Add token if not already registered
+  if (!fcmTokens.includes(token)) {
+    fcmTokens.push(token);
+    saveFcmTokens();
+    console.log(`FCM token registered: ${token.substring(0, 20)}... (total: ${fcmTokens.length})`);
+  }
+  res.json({ success: true, message: 'Token registered' });
+});
+
+// FCM Token Unregister
+app.post("/api/fcm/unregister", (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token required' });
+  
+  fcmTokens = fcmTokens.filter(t => t !== token);
+  saveFcmTokens();
+  console.log(`FCM token unregistered: ${token.substring(0, 20)}...`);
+  res.json({ success: true, message: 'Token unregistered' });
+});
+
+// Test push notification
+app.get("/api/fcm/test", async (req, res) => {
+  try {
+    await sendPushNotification('اختبار الإشعارات', 'هذا إشعار تجريبي من لوحة التحكم');
+    res.json({ success: true, message: `Test notification sent to ${fcmTokens.length} devices` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Idle check timer - every 10 seconds, check for visitors idle > 30 seconds

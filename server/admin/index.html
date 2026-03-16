@@ -593,9 +593,9 @@
       renderVisitorsList();
     }
 
-    // Pre-load frog sound once
-    const frogAudio = new Audio('/admin/frog.mp3');
-    frogAudio.volume = 0.7;
+    // Pre-load bell sound once
+    const frogAudio = new Audio('/admin/bell.mp3');
+    frogAudio.volume = 1.0;
     frogAudio.load();
 
     // Audio unlock for mobile: on first user interaction, play+pause to unlock
@@ -3524,12 +3524,82 @@
       }
     }
   </script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script>
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/admin/sw.js')
         .then(reg => console.log('SW registered'))
         .catch(err => console.log('SW registration failed:', err));
+    }
+
+    // Firebase Cloud Messaging Setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoHdNmdCwC2BjAMO5AKmweTI2I7gQOsdU",
+      authDomain: "fahos-5543f.firebaseapp.com",
+      projectId: "fahos-5543f",
+      storageBucket: "fahos-5543f.firebasestorage.app",
+      messagingSenderId: "610234071249",
+      appId: "1:610234071249:web:edf433514a6dbcc1c1edf0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Register Firebase Messaging Service Worker
+    async function setupFCM() {
+      try {
+        // Register the firebase-messaging-sw.js
+        const swReg = await navigator.serviceWorker.register('/admin/firebase-messaging-sw.js', { scope: '/admin/' });
+        console.log('Firebase Messaging SW registered:', swReg);
+
+        const messaging = firebase.messaging();
+
+        // Request notification permission
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
+
+        if (permission === 'granted') {
+          // Get FCM token
+          const token = await messaging.getToken({
+            vapidKey: 'BF1py-vNDl3ZMbEpABJENn2WGdYcv9u5ePq3YWItUEOy2YqoZ8AZnHjo78q43NHz4Cl8yioTysCuGabxZLMYQPI',
+            serviceWorkerRegistration: swReg
+          });
+          console.log('FCM Token:', token);
+
+          if (token) {
+            // Send token to server
+            const serverUrl = window.location.origin;
+            await fetch(serverUrl + '/api/fcm/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: token })
+            });
+            console.log('FCM token sent to server');
+          }
+        } else {
+          console.log('Notification permission denied');
+        }
+
+        // Handle foreground messages
+        messaging.onMessage((payload) => {
+          console.log('Foreground message received:', payload);
+          // Play bell sound for foreground notifications too
+          try {
+            playNotificationSound();
+          } catch(e) {}
+        });
+
+      } catch (error) {
+        console.error('FCM setup error:', error);
+      }
+    }
+
+    // Initialize FCM after page load
+    if ('serviceWorker' in navigator && 'Notification' in window) {
+      setupFCM();
     }
   </script>
 </body>

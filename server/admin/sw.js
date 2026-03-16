@@ -1,9 +1,9 @@
-const CACHE_NAME = 'admin-panel-v1';
+const CACHE_NAME = 'admin-panel-v2';
 const urlsToCache = [
   '/admin/',
   '/admin/icon-192.png',
   '/admin/icon-512.png',
-  '/admin/frog.mp3'
+  '/admin/bell.mp3'
 ];
 
 self.addEventListener('install', (event) => {
@@ -30,6 +30,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Skip firebase messaging SW requests
+  if (event.request.url.includes('firebase-messaging-sw.js')) {
+    return;
+  }
   // Network first, fallback to cache
   event.respondWith(
     fetch(event.request)
