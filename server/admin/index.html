@@ -2981,16 +2981,9 @@
       }
     }
 
-    // Notification
+    // Notification - disabled on desktop, only used on mobile via FCM
     function showNotification(message) {
-      if (Notification.permission === 'granted') {
-        new Notification('لوحة التحكم', { body: message });
-      }
-    }
-
-    // Request notification permission
-    if ('Notification' in window) {
-      Notification.requestPermission();
+      // Desktop notifications disabled - FCM handles mobile notifications
     }
 
     // Settings menu functions
