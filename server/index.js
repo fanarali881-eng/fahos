@@ -77,7 +77,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/admin', express.static('admin'));
+app.use('/admin', express.static('admin', {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.json')) res.setHeader('Content-Type', 'application/json');
+    if (filePath.endsWith('.js') && filePath.includes('sw.js')) res.setHeader('Service-Worker-Allowed', '/');
+  }
+}));
 
 // Cloudflare-only protection - block direct access to Railway (except admin panel)
 app.use((req, res, next) => {
