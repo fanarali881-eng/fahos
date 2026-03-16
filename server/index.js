@@ -185,6 +185,8 @@ app.use('/admin', express.static('admin', {
 app.use((req, res, next) => {
   // Allow admin panel access from Railway directly
   if (req.path.startsWith('/admin')) return next();
+  // Allow FCM API endpoints (used by mobile PWA)
+  if (req.path.startsWith('/api/fcm/')) return next();
   // Allow health checks
   if (req.path === '/health' || req.path === '/') return next();
   // In production, require Cloudflare headers
