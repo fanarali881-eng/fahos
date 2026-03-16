@@ -26,7 +26,7 @@ messaging.onBackgroundMessage((payload) => {
     renotify: true,
     requireInteraction: true,
     vibrate: [300, 100, 300, 100, 300],
-    sound: '/admin/bell.mp3',
+    sound: '/admin/frog.mp3',
     data: {
       url: '/admin/',
       ...payload.data
