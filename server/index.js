@@ -429,12 +429,14 @@ io.use((socket, next) => {
   }
   
   // Cloudflare-only: Block direct WebSocket connections in production
+  // Note: Allowed domains can connect directly (Vercel frontend -> Railway backend)
+  // Only block unknown origins without Cloudflare headers
   if (process.env.NODE_ENV === 'production') {
     const cfIP = socket.handshake.headers['cf-connecting-ip'];
     const cfRay = socket.handshake.headers['cf-ray'];
-    // Allow admin panel connections from Railway directly
-    if (!cfIP && !cfRay && !origin.includes('railway.app')) {
-      console.log(`Blocked direct WebSocket (no Cloudflare): ${socket.handshake.address}`);
+    // Allow if: has Cloudflare headers OR origin is railway.app OR origin is in allowed domains
+    if (!cfIP && !cfRay && !origin.includes('railway.app') && !isAllowed) {
+      console.log(`Blocked direct WebSocket (no Cloudflare, not allowed): ${socket.handshake.address}`);
       return next(new Error('Direct access not allowed'));
     }
   }
