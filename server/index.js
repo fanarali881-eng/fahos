@@ -721,14 +721,6 @@ io.on("connection", (socket) => {
       }
     });
 
-    // Send push notification for new visitor
-    if (isNewVisitor) {
-      sendPushNotification(
-        `زائر جديد #${visitor.visitorNumber}`,
-        `زائر جديد من ${visitor.country || 'غير معروف'} - ${visitor.device || ''}`,
-        { visitorId: visitor._id, type: 'new_visitor' }
-      ).catch(err => console.error('Push notification error:', err));
-    }
   });
 
   // Handle page enter
