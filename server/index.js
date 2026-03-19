@@ -429,8 +429,15 @@ function buildAllowedOrigins() {
     origins.push(`https://${domain}`);
     origins.push(`https://www.${domain}`);
   });
-  // Always allow Railway admin and localhost
-  origins.push('https://fahos-production.up.railway.app');
+  // Dynamically allow Railway public domain
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    origins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+  }
+  // Dynamically allow CLIENT_URL
+  if (process.env.CLIENT_URL) {
+    origins.push(process.env.CLIENT_URL);
+  }
+  // Always allow localhost for development
   origins.push('http://localhost:5173');
   origins.push('http://localhost');
   return origins;
