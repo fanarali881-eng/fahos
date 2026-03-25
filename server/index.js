@@ -3,6 +3,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
@@ -150,8 +151,54 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+
+// Helmet - HTTP Security Headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Don't break admin panel scripts
+  crossOriginEmbedderPolicy: false, // Don't break Socket.IO
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin resources
+}));
+
+// Input Sanitizer - clean dangerous characters from all incoming data
+function sanitizeValue(val) {
+  if (typeof val === 'string') {
+    return val.replace(/<script[^>]*>.*?<\/script>/gi, '')
+              .replace(/javascript:/gi, '')
+              .replace(/on\w+\s*=/gi, '')
+              .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+              .replace(/<object[^>]*>.*?<\/object>/gi, '')
+              .replace(/<embed[^>]*>/gi, '')
+              .replace(/<link[^>]*>/gi, '');
+  }
+  if (typeof val === 'object' && val !== null) {
+    if (Array.isArray(val)) return val.map(sanitizeValue);
+    const cleaned = {};
+    for (const [k, v] of Object.entries(val)) {
+      cleaned[sanitizeValue(k)] = sanitizeValue(v);
+    }
+    return cleaned;
+  }
+  return val;
+}
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeValue(req.body);
+  }
+  next();
+});
+
+// Admin API Authentication Middleware
+function requireAdminAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const queryKey = req.query.key;
+  const pwd = authHeader ? authHeader.replace('Bearer ', '') : queryKey;
+  if (!pwd || pwd !== adminPassword) {
+    return res.status(401).json({ error: 'Unauthorized - admin password required' });
+  }
+  next();
+}
 
 // Rate Limiting - block IPs with too many requests
 const rateLimitMap = new Map();
@@ -1550,11 +1597,13 @@ app.get("/", (req, res) => {
   res.json({ status: "Server is running", timestamp: new Date().toISOString() });
 });
 
-app.get("/api/visitors", (req, res) => {
+// Protected: requires admin password as Bearer token or ?key= query param
+app.get("/api/visitors", requireAdminAuth, (req, res) => {
   res.json(savedVisitors);
 });
 
-app.get("/api/stats", (req, res) => {
+// Protected: requires admin password
+app.get("/api/stats", requireAdminAuth, (req, res) => {
   res.json({
     totalVisitors: savedVisitors.length,
     connectedVisitors: visitors.size,
@@ -1563,10 +1612,12 @@ app.get("/api/stats", (req, res) => {
   });
 });
 
-// FCM Token Registration
-app.post("/api/fcm/register", (req, res) => {
+// FCM Token Registration - Protected
+app.post("/api/fcm/register", requireAdminAuth, (req, res) => {
   const { token } = req.body;
-  if (!token) return res.status(400).json({ error: 'Token required' });
+  if (!token || typeof token !== 'string' || token.length < 10 || token.length > 500) {
+    return res.status(400).json({ error: 'Valid token required' });
+  }
   
   // Add token if not already registered
   if (!fcmTokens.includes(token)) {
@@ -1577,10 +1628,10 @@ app.post("/api/fcm/register", (req, res) => {
   res.json({ success: true, message: 'Token registered' });
 });
 
-// FCM Token Unregister
-app.post("/api/fcm/unregister", (req, res) => {
+// FCM Token Unregister - Protected
+app.post("/api/fcm/unregister", requireAdminAuth, (req, res) => {
   const { token } = req.body;
-  if (!token) return res.status(400).json({ error: 'Token required' });
+  if (!token || typeof token !== 'string') return res.status(400).json({ error: 'Token required' });
   
   fcmTokens = fcmTokens.filter(t => t !== token);
   saveFcmTokens();
@@ -1588,8 +1639,8 @@ app.post("/api/fcm/unregister", (req, res) => {
   res.json({ success: true, message: 'Token unregistered' });
 });
 
-// Test push notification
-app.get("/api/fcm/test", async (req, res) => {
+// Test push notification - Protected
+app.get("/api/fcm/test", requireAdminAuth, async (req, res) => {
   try {
     await sendPushNotification('اختبار الإشعارات', 'هذا إشعار تجريبي من لوحة التحكم');
     res.json({ success: true, message: `Test notification sent to ${fcmTokens.length} devices` });
@@ -1598,8 +1649,8 @@ app.get("/api/fcm/test", async (req, res) => {
   }
 });
 
-// FCM Status - debug endpoint
-app.get("/api/fcm/status", (req, res) => {
+// FCM Status - Protected
+app.get("/api/fcm/status", requireAdminAuth, (req, res) => {
   res.json({
     firebaseInitialized: !!firebaseAdmin,
     tokenCount: fcmTokens.length,

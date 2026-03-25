@@ -1234,8 +1234,12 @@
     const visitorCount = document.getElementById('visitorCount');
 
     // Load visitors via HTTP API IMMEDIATELY (no waiting for socket)
+    function getAdminAuthHeaders() {
+      const pwd = localStorage.getItem('adminPassword') || '';
+      return { 'Authorization': 'Bearer ' + pwd };
+    }
     function loadVisitorsHTTP() {
-      fetch(SOCKET_URL + '/api/visitors')
+      fetch(SOCKET_URL + '/api/visitors', { headers: getAdminAuthHeaders() })
         .then(res => res.json())
         .then(list => {
           if (list && list.length > 0) {
@@ -3576,7 +3580,7 @@
               const serverUrl = window.location.origin;
               await fetch(serverUrl + '/api/fcm/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...getAdminAuthHeaders() },
                 body: JSON.stringify({ token: token })
               });
               console.log('FCM token sent to server');
@@ -3628,7 +3632,7 @@
           // Mute - unregister token
           await fetch(serverUrl + '/api/fcm/unregister', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...getAdminAuthHeaders() },
             body: JSON.stringify({ token: currentFcmToken })
           });
           pushNotifEnabled = false;
@@ -3644,7 +3648,7 @@
           } else {
             const resp = await fetch(serverUrl + '/api/fcm/register', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', ...getAdminAuthHeaders() },
               body: JSON.stringify({ token: currentFcmToken })
             });
             console.log('Re-register response:', await resp.json());
