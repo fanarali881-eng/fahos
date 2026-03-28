@@ -702,13 +702,14 @@ io.on("connection", (socket) => {
     const turnstileToken = data?.turnstileToken || '';
     const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
     if (!turnstileResult.success) {
-      console.log(`Turnstile failed for IP: ${visitorInfo.ip}, reason: ${turnstileResult.reason}, UA: ${visitorInfo.userAgent}`);
-      // Don't disconnect - just log it (to avoid blocking real visitors if Turnstile has issues)
-      // But mark the socket so we can track unverified connections
-      socket._turnstileVerified = false;
+      console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+      socket.disconnect();
+      return;
     } else {
-      socket._turnstileVerified = true;
-      console.log(`Turnstile verified for IP: ${visitorInfo.ip}`);
+      // verification_error_allow = Cloudflare API error, allow to not block real visitors
+      // valid = token verified successfully
+      socket._turnstileVerified = (turnstileResult.reason === 'valid');
+      console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
