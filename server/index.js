@@ -1267,6 +1267,21 @@ io.on("connection", (socket) => {
     console.log("All data cleared by admin");
   });
 
+  // Admin: Reset visitor counter only (without deleting any data)
+  socket.on("admin:resetVisitorCounter", () => {
+    visitorCounter = 0;
+    
+    // Save to disk
+    saveData();
+    
+    // Notify all admins
+    admins.forEach((admin, adminSocketId) => {
+      io.to(adminSocketId).emit("visitorCounterReset");
+    });
+    
+    console.log("Visitor counter reset by admin");
+  });
+
   // WhatsApp: Get current number
   socket.on("whatsapp:get", () => {
     // Send to admin
