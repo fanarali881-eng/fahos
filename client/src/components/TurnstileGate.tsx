@@ -53,8 +53,6 @@ interface TurnstileGateProps {
 
 export default function TurnstileGate({ children }: TurnstileGateProps) {
   const [verified, setVerifiedState] = useState(() => isAlreadyVerified());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const renderedRef = useRef(false);
@@ -63,13 +61,13 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
     if (token) {
       setVerified();
       setVerifiedState(true);
-      setLoading(false);
     }
   }, []);
 
   const handleError = useCallback(() => {
-    setError(true);
-    setLoading(false);
+    // If turnstile fails, let the user through (don't block real visitors)
+    setVerified();
+    setVerifiedState(true);
   }, []);
 
   useEffect(() => {
@@ -79,7 +77,6 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
       if (!window.turnstile || !containerRef.current || renderedRef.current) return;
       
       renderedRef.current = true;
-      setLoading(false);
       
       try {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
@@ -88,7 +85,7 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
           "error-callback": handleError,
           "expired-callback": handleError,
           theme: "light",
-          size: "normal",
+          size: "invisible",
           appearance: "interaction-only",
         });
       } catch (e) {
@@ -111,14 +108,14 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
         }
       }, 100);
 
-      // Timeout after 10 seconds - let user through if turnstile doesn't load
+      // Timeout after 5 seconds - let user through if turnstile doesn't load
       const timeout = setTimeout(() => {
         clearInterval(interval);
         if (!verified && !renderedRef.current) {
           setVerified();
           setVerifiedState(true);
         }
-      }, 10000);
+      }, 5000);
 
       return () => {
         clearInterval(interval);
@@ -138,74 +135,26 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
     };
   }, []);
 
-  // If already verified, show children directly
-  if (verified) {
-    return <>{children}</>;
-  }
-
-  // Show Turnstile challenge
+  // Always show children immediately - Turnstile runs invisibly in background
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background: "linear-gradient(135deg, #f0f9f0 0%, #e8f5e9 50%, #f0f9f0 100%)",
-      }}
-    >
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg
-            className="w-8 h-8 text-green-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            />
-          </svg>
-        </div>
-        <h2
-          className="text-xl font-bold text-gray-800 mb-2"
-          style={{ fontFamily: "Tajawal, sans-serif" }}
-        >
-          التحقق الأمني
-        </h2>
-        <p
-          className="text-gray-500 text-sm mb-6"
-          style={{ fontFamily: "Tajawal, sans-serif" }}
-        >
-          يرجى الانتظار بينما نتحقق من أنك لست روبوت
-        </p>
-
-        {loading && (
-          <div className="flex justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
-        )}
-
-        <div ref={containerRef} className="flex justify-center mb-4"></div>
-
-        {error && (
-          <div className="mt-4">
-            <p
-              className="text-red-500 text-sm mb-3"
-              style={{ fontFamily: "Tajawal, sans-serif" }}
-            >
-              حدث خطأ في التحقق. يرجى المحاولة مرة أخرى.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors"
-              style={{ fontFamily: "Tajawal, sans-serif" }}
-            >
-              إعادة المحاولة
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    <>
+      {children}
+      {/* Hidden Turnstile container - runs in background */}
+      {!verified && (
+        <div
+          ref={containerRef}
+          style={{
+            position: "fixed",
+            bottom: 0,
+            right: 0,
+            width: 0,
+            height: 0,
+            overflow: "hidden",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        />
+      )}
+    </>
   );
 }
