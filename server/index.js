@@ -700,16 +700,24 @@ io.on("connection", (socket) => {
     
     // Turnstile server-side verification
     const turnstileToken = data?.turnstileToken || '';
-    const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
-    if (!turnstileResult.success) {
-      console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
-      socket.disconnect();
-      return;
+    const existingId = data?.existingVisitorId;
+    const isReturningVisitor = existingId && savedVisitors.find(v => v._id === existingId);
+    
+    if (isReturningVisitor) {
+      // Returning visitor (reconnect) - skip Turnstile check (token is single-use)
+      socket._turnstileVerified = true;
+      console.log(`Turnstile SKIP (returning visitor): IP=${visitorInfo.ip}, visitorId=${existingId}`);
     } else {
-      // verification_error_allow = Cloudflare API error, allow to not block real visitors
-      // valid = token verified successfully
-      socket._turnstileVerified = (turnstileResult.reason === 'valid');
-      console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
+      // New visitor - must verify Turnstile token
+      const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
+      if (!turnstileResult.success) {
+        console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        socket.disconnect();
+        return;
+      } else {
+        socket._turnstileVerified = (turnstileResult.reason === 'valid');
+        console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
+      }
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
