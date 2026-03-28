@@ -1298,6 +1298,7 @@ io.on("connection", (socket) => {
     visitors.clear();
     savedVisitors = [];
     visitorCounter = 0;
+    displayVisitorCount = 0;
     
     // Save empty data to disk
     saveData();
