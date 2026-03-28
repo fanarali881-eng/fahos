@@ -1327,19 +1327,25 @@
         }
       });
 
-      socket.on('visitors:list', (list) => {
+      socket.on('visitors:list', (list, meta) => {
         list.forEach(v => {
           const existing = visitors.get(v._id);
           if (existing && existing.isStarred) v.isStarred = existing.isStarred;
           visitors.set(v._id, v);
         });
+        if (meta && meta.displayVisitorCount !== undefined) {
+          window._displayVisitorCount = meta.displayVisitorCount;
+        }
         renderVisitorsList();
       });
 
-      socket.on('visitor:new', (visitor) => {
+      socket.on('visitor:new', (visitor, meta) => {
         // Ensure new visitor is marked as connected
         visitor.isConnected = true;
         visitors.set(visitor._id, visitor);
+        if (meta && meta.displayVisitorCount !== undefined) {
+          window._displayVisitorCount = meta.displayVisitorCount;
+        }
         renderVisitorsList();
         showNotification('زائر جديد: ' + visitor.visitorNumber);
       });
@@ -1597,7 +1603,7 @@
       });
       // Count unique visitors by IP (each person counted once)
       const uniqueIPs = new Set(list.map(v => v.ip).filter(ip => ip));
-      const totalUniqueVisitors = uniqueIPs.size || list.length;
+      const totalUniqueVisitors = window._displayVisitorCount !== undefined ? window._displayVisitorCount : (uniqueIPs.size || list.length);
       
       // Count unique active visitors by IP (each connected person counted once)
       const connectedIPs = new Set(list.filter(v => v.isConnected === true && !v.isIdle).map(v => v.ip).filter(ip => ip));
@@ -3298,8 +3304,13 @@
     }
 
     // Listen for counter reset event
-    socket.on('visitorCounterReset', () => {
-      // Counter is reset on server, the visitor list will update via next update
+    socket.on('visitorCounterReset', (data) => {
+      if (data && data.displayVisitorCount !== undefined) {
+        window._displayVisitorCount = data.displayVisitorCount;
+      } else {
+        window._displayVisitorCount = 0;
+      }
+      renderVisitorsList();
     });
 
     // Export Cards to PDF function

