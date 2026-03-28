@@ -202,8 +202,9 @@ export function initializeSocket() {
     console.log("Socket connected successfully!");
     // Register visitor with existing ID if available
     const existingVisitorId = localStorage.getItem("visitorId");
+    const turnstileToken = localStorage.getItem("turnstile_token") || "";
     console.log("Registering visitor...", existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)");
-    s.emit("visitor:register", { existingVisitorId });
+    s.emit("visitor:register", { existingVisitorId, turnstileToken });
   });
 
   s.on("connect_error", (error) => {

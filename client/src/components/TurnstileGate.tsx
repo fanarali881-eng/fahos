@@ -23,6 +23,7 @@ declare global {
 
 const TURNSTILE_SITE_KEY = "0x4AAAAAACxQZyFr8fJ02f5b";
 const VERIFIED_KEY = "turnstile_verified";
+const TURNSTILE_TOKEN_KEY = "turnstile_token";
 const VERIFIED_EXPIRY = 30 * 60 * 1000; // 30 minutes
 
 function isAlreadyVerified(): boolean {
@@ -40,11 +41,14 @@ function isAlreadyVerified(): boolean {
   }
 }
 
-function setVerified(): void {
+function setVerified(token?: string): void {
   localStorage.setItem(
     VERIFIED_KEY,
     JSON.stringify({ timestamp: Date.now() })
   );
+  if (token) {
+    localStorage.setItem(TURNSTILE_TOKEN_KEY, token);
+  }
 }
 
 interface TurnstileGateProps {
@@ -59,7 +63,7 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
 
   const handleSuccess = useCallback((token: string) => {
     if (token) {
-      setVerified();
+      setVerified(token);
       setVerifiedState(true);
     }
   }, []);

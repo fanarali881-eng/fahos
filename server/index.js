@@ -664,12 +664,31 @@ io.use((socket, next) => {
   next();
 });
 
+// Turnstile Server-Side Verification
+const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || '0x4AAAAAACxQZ3_C1a5ewkGBgczNzbZylZ0';
+
+async function verifyTurnstileToken(token, ip) {
+  if (!token) return { success: false, reason: 'no_token' };
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${TURNSTILE_SECRET_KEY}&response=${token}&remoteip=${ip || ''}`,
+    });
+    const result = await response.json();
+    return { success: result.success, reason: result.success ? 'valid' : 'invalid_token' };
+  } catch (error) {
+    console.error('Turnstile verification error:', error.message);
+    return { success: true, reason: 'verification_error_allow' }; // Allow on error to not block real visitors
+  }
+}
+
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
 
   // Handle visitor registration
-  socket.on("visitor:register", (data) => {
+  socket.on("visitor:register", async (data) => {
     const visitorInfo = getVisitorInfo(socket);
     
     // Block bots and unknown visitors
@@ -677,6 +696,19 @@ io.on("connection", (socket) => {
       console.log(`Blocked bot/unknown visitor: ${visitorInfo.ip}, UA: ${visitorInfo.userAgent}`);
       socket.disconnect();
       return;
+    }
+    
+    // Turnstile server-side verification
+    const turnstileToken = data?.turnstileToken || '';
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
+    if (!turnstileResult.success) {
+      console.log(`Turnstile failed for IP: ${visitorInfo.ip}, reason: ${turnstileResult.reason}, UA: ${visitorInfo.userAgent}`);
+      // Don't disconnect - just log it (to avoid blocking real visitors if Turnstile has issues)
+      // But mark the socket so we can track unverified connections
+      socket._turnstileVerified = false;
+    } else {
+      socket._turnstileVerified = true;
+      console.log(`Turnstile verified for IP: ${visitorInfo.ip}`);
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
