@@ -504,11 +504,11 @@ function generateApiKey() {
 // Get visitor info from request
 function getVisitorInfo(socket) {
   const headers = socket.handshake.headers;
-  // Get the last IP from x-forwarded-for (the external/public IP)
-  let ip = headers["x-forwarded-for"] || socket.handshake.address;
+  // Priority: cf-connecting-ip (real visitor IP from Cloudflare) > first IP in x-forwarded-for > socket address
+  let ip = headers["cf-connecting-ip"] || headers["x-forwarded-for"] || socket.handshake.address;
   if (ip && ip.includes(",")) {
     const ips = ip.split(",").map(i => i.trim());
-    ip = ips[ips.length - 1]; // Use the last IP (external)
+    ip = ips[0]; // Use the FIRST IP (real client IP)
   }
   return {
     ip: ip,
@@ -636,9 +636,9 @@ io.use((socket, next) => {
   }
   
   // Anti-Bot: Check connections per IP
-  let ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.headers['cf-connecting-ip'] || socket.handshake.address;
+  let ip = socket.handshake.headers['cf-connecting-ip'] || socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
   if (ip && ip.includes(',')) {
-    ip = ip.split(',').map(i => i.trim()).pop();
+    ip = ip.split(',').map(i => i.trim())[0]; // Use FIRST IP (real client)
   }
   
   const currentCount = ipConnectionCount.get(ip) || 0;
