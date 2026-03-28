@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { initializeSocket, disconnectSocket, socket, setNavigateCallback } from "./lib/store";
 import { useLocation } from "wouter";
 import AmerChat from "./components/AmerChat";
+import TurnstileGate from "./components/TurnstileGate";
 
 // Main Pages (Vehicle Inspection)
 import FahsHome from "./pages/FahsHome";
@@ -244,17 +245,19 @@ function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <ScrollToTop />
-          <PageTitleUpdater />
-          <AmerChat />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <TurnstileGate>
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="light">
+          <TooltipProvider>
+            <Toaster />
+            <ScrollToTop />
+            <PageTitleUpdater />
+            <AmerChat />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </TurnstileGate>
   );
 }
 
