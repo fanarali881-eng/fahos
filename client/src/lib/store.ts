@@ -200,11 +200,22 @@ export function initializeSocket() {
 
   s.on("connect", () => {
     console.log("Socket connected successfully!");
-    // Register visitor with existing ID if available
+    // Wait for fresh Turnstile token before registering
     const existingVisitorId = localStorage.getItem("visitorId");
-    const turnstileToken = localStorage.getItem("turnstile_token") || "";
-    console.log("Registering visitor...", existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)");
-    s.emit("visitor:register", { existingVisitorId, turnstileToken });
+    
+    const tryRegister = (attempt: number = 0) => {
+      const turnstileToken = localStorage.getItem("turnstile_token") || "";
+      if (turnstileToken || attempt >= 30) {
+        // Token available or timeout (6 seconds) - register now
+        console.log("Registering visitor...", existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
+        s.emit("visitor:register", { existingVisitorId, turnstileToken });
+      } else {
+        // Wait 200ms and try again
+        setTimeout(() => tryRegister(attempt + 1), 200);
+      }
+    };
+    
+    tryRegister();
   });
 
   s.on("connect_error", (error) => {
