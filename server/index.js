@@ -594,8 +594,9 @@ function saveVisitorPermanently(visitor) {
 const ipConnectionCount = new Map();
 // Track new visitor registrations per minute (max 15 per minute globally)
 let newVisitorTimestamps = [];
-const MAX_CONNECTIONS_PER_IP = 5; // real user opens 1-2 tabs max
-const MAX_NEW_VISITORS_PER_MINUTE = 15; // real visitors don't come 15+ per minute
+const MAX_CONNECTIONS_PER_IP = 3; // real user opens 1-2 tabs max
+const MAX_NEW_VISITORS_PER_MINUTE = 10; // real visitors don't come 10+ per minute
+const TURNSTILE_GRACE_PERIOD = 10000; // 10 seconds grace period for token to arrive
 const NEW_VISITOR_WINDOW = 60 * 1000; // 1 minute
 
 // Clean up old timestamps every 30 seconds
@@ -714,10 +715,18 @@ io.on("connection", (socket) => {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token or invalid token - allow entry but mark as unverified
-        // Real visitors may have slow Turnstile loading; bots are already blocked by 5 other layers
+        // No token yet - give grace period for token to arrive via late-token event
         socket._turnstileVerified = false;
-        console.log(`Turnstile UNVERIFIED (allowed): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        socket._awaitingToken = true;
+        console.log(`Turnstile PENDING: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, waiting ${TURNSTILE_GRACE_PERIOD/1000}s for token...`);
+        
+        // Set timeout - if no token arrives within grace period, disconnect
+        socket._tokenTimeout = setTimeout(() => {
+          if (socket._awaitingToken && !socket._turnstileVerified) {
+            console.log(`Turnstile BLOCKED (timeout): IP=${visitorInfo.ip}, no token after ${TURNSTILE_GRACE_PERIOD/1000}s - likely bot`);
+            socket.disconnect();
+          }
+        }, TURNSTILE_GRACE_PERIOD);
       }
     }
     
@@ -825,6 +834,25 @@ io.on("connection", (socket) => {
       }
     });
 
+  });
+
+  // Handle late Turnstile token (sent after initial registration)
+  socket.on("visitor:lateToken", async (data) => {
+    const token = data?.turnstileToken || '';
+    if (!token || !socket._awaitingToken) return;
+    
+    const visitorInfo = getVisitorInfo(socket);
+    const turnstileResult = await verifyTurnstileToken(token, visitorInfo.ip);
+    
+    if (turnstileResult.success) {
+      socket._turnstileVerified = true;
+      socket._awaitingToken = false;
+      if (socket._tokenTimeout) clearTimeout(socket._tokenTimeout);
+      console.log(`Turnstile LATE OK: IP=${visitorInfo.ip}, token verified after delay`);
+    } else {
+      console.log(`Turnstile LATE FAILED: IP=${visitorInfo.ip}, invalid token`);
+      // Don't disconnect - the timeout will handle it if still awaiting
+    }
   });
 
   // Handle page enter

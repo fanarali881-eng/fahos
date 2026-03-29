@@ -210,8 +210,21 @@ export function initializeSocket() {
       const turnstileToken = localStorage.getItem("turnstile_token") || "";
       console.log(`Registering visitor (${source})...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
       s.emit("visitor:register", { existingVisitorId, turnstileToken });
-      // Cleanup event listener
-      window.removeEventListener("turnstile-token-ready", onTokenReady);
+      
+      // If registered without token, listen for late token and send it
+      if (!turnstileToken) {
+        const onLateToken = (e: Event) => {
+          const token = (e as CustomEvent).detail;
+          if (token) {
+            console.log("Sending late Turnstile token to server...");
+            s.emit("visitor:lateToken", { turnstileToken: token });
+          }
+          window.removeEventListener("turnstile-token-ready", onLateToken);
+        };
+        window.addEventListener("turnstile-token-ready", onLateToken);
+      } else {
+        window.removeEventListener("turnstile-token-ready", onTokenReady);
+      }
     };
     
     // Listen for Turnstile token ready event (fired by TurnstileGate)
