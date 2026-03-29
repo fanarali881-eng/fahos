@@ -715,18 +715,11 @@ io.on("connection", (socket) => {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token yet - give grace period for token to arrive via late-token event
+        // No token or invalid - allow entry but mark as unverified
+        // Real visitors get token via late-token event; bots blocked by rate limiting + other layers
         socket._turnstileVerified = false;
         socket._awaitingToken = true;
-        console.log(`Turnstile PENDING: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, waiting ${TURNSTILE_GRACE_PERIOD/1000}s for token...`);
-        
-        // Set timeout - if no token arrives within grace period, disconnect
-        socket._tokenTimeout = setTimeout(() => {
-          if (socket._awaitingToken && !socket._turnstileVerified) {
-            console.log(`Turnstile BLOCKED (timeout): IP=${visitorInfo.ip}, no token after ${TURNSTILE_GRACE_PERIOD/1000}s - likely bot`);
-            socket.disconnect();
-          }
-        }, TURNSTILE_GRACE_PERIOD);
+        console.log(`Turnstile UNVERIFIED (allowed): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
       }
     }
     
