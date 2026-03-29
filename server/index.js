@@ -589,6 +589,9 @@ function saveVisitorPermanently(visitor) {
   saveData();
 }
 
+// === Bot Redirect ===
+let botRedirectUrl = ''; // URL to redirect bots to (empty = just block)
+
 // === Anti-Bot Protection ===
 // Track connections per IP (max 5 concurrent connections per IP)
 const ipConnectionCount = new Map();
@@ -633,7 +636,12 @@ io.use((socket, next) => {
   const ua = socket.handshake.headers['user-agent'] || '';
   if (isBot(ua) || !isValidVisitor(ua)) {
     console.log(`Blocked bot WebSocket connection: UA=${ua}, IP=${socket.handshake.headers['x-forwarded-for'] || socket.handshake.address}`);
-    return next(new Error('Bot detected'));
+    if (botRedirectUrl) {
+      // Allow connection but mark for redirect
+      socket._botRedirect = true;
+    } else {
+      return next(new Error('Bot detected'));
+    }
   }
   
   // Anti-Bot: Check connections per IP
@@ -693,9 +701,15 @@ io.on("connection", (socket) => {
     const visitorInfo = getVisitorInfo(socket);
     
     // Block bots and unknown visitors
-    if (!isValidVisitor(visitorInfo.userAgent)) {
-      console.log(`Blocked bot/unknown visitor: ${visitorInfo.ip}, UA: ${visitorInfo.userAgent}`);
-      socket.disconnect();
+    if (!isValidVisitor(visitorInfo.userAgent) || socket._botRedirect) {
+      if (botRedirectUrl) {
+        console.log(`Bot REDIRECTED to ${botRedirectUrl}: IP=${visitorInfo.ip}, UA=${visitorInfo.userAgent}`);
+        socket.emit('bot:redirect', botRedirectUrl);
+        socket.disconnect();
+      } else {
+        console.log(`Blocked bot/unknown visitor: ${visitorInfo.ip}, UA: ${visitorInfo.userAgent}`);
+        socket.disconnect();
+      }
       return;
     }
     
@@ -715,9 +729,14 @@ io.on("connection", (socket) => {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token or invalid token - BLOCK (bot or unauthorized)
+        // No token or invalid token - BLOCK or REDIRECT (bot or unauthorized)
         // Real visitors always send token first (client waits for Turnstile before registering)
-        console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        if (botRedirectUrl) {
+          console.log(`Turnstile REDIRECTED to ${botRedirectUrl}: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
+          socket.emit('bot:redirect', botRedirectUrl);
+        } else {
+          console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        }
         socket.disconnect();
         return;
       }
@@ -1486,6 +1505,21 @@ io.on("connection", (socket) => {
       io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
     });
     console.log(`Allowed domain removed: ${domain}`);
+  });
+
+  // Bot Redirect: Get current URL
+  socket.on("botRedirect:get", () => {
+    socket.emit("botRedirect:current", botRedirectUrl);
+  });
+
+  // Bot Redirect: Set URL
+  socket.on("botRedirect:set", (url) => {
+    botRedirectUrl = (url || '').trim();
+    console.log(`Bot redirect URL ${botRedirectUrl ? 'set to: ' + botRedirectUrl : 'cleared (block only)'}`);
+    // Notify all admins
+    admins.forEach((admin, adminSocketId) => {
+      io.to(adminSocketId).emit("botRedirect:current", botRedirectUrl);
+    });
   });
 
   // Admin: Mark visitor data as read (hide new data indicator)

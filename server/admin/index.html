@@ -268,6 +268,12 @@
                 </svg>
                 <span id="notifToggleText">كتم الإشعارات</span>
               </button>
+              <button onclick="showBotRedirectModal()" class="w-full text-right px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-purple-600 border-t">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>تحويل البوتات</span>
+              </button>
               <button onclick="logout()" class="w-full text-right px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-red-600 border-t">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -535,6 +541,30 @@
     </div>
 
 
+
+    <!-- Bot Redirect Modal -->
+    <div id="botRedirectModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl p-8 max-w-lg w-full mx-4">
+        <h2 class="text-xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+          <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          تحويل البوتات
+        </h2>
+        <p class="text-gray-500 text-sm text-center mb-4">أدخل رابط الموقع الذي تريد تحويل البوتات إليه. إذا تركته فارغاً سيتم حظر البوتات كالعادة.</p>
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="botRedirectUrlInput" class="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="مثال: https://example.com" dir="ltr">
+          <button onclick="saveBotRedirectUrl()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition">حفظ</button>
+        </div>
+        <div id="botRedirectStatus" class="mb-4 p-3 rounded-lg text-center hidden"></div>
+        <div id="currentBotRedirect" class="mb-4 p-3 bg-gray-50 rounded-lg text-center">
+          <span class="text-gray-500">الحالة: </span>
+          <span id="botRedirectCurrentUrl" class="font-bold text-gray-700">حظر البوتات (بدون تحويل)</span>
+        </div>
+        <button onclick="clearBotRedirectUrl()" class="w-full bg-red-50 text-red-600 py-3 rounded-lg hover:bg-red-100 transition mb-2">إزالة التحويل (حظر فقط)</button>
+        <button type="button" onclick="hideBotRedirectModal()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition">إغلاق</button>
+      </div>
+    </div>
 
     <div class="mx-auto px-4 py-6 flex gap-6 mobile-layout" style="height: calc(100vh - 120px); max-width: 100%;">
       <!-- Visitors List -->
@@ -3277,6 +3307,71 @@
       } else {
         alert('\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u062f\u0648\u0645\u064a\u0646');
       }
+    });
+
+    // === Bot Redirect Functions ===
+    let botRedirectUrl = '';
+
+    function showBotRedirectModal() {
+      document.getElementById('settingsMenu').classList.add('hidden');
+      document.getElementById('botRedirectModal').classList.remove('hidden');
+      document.getElementById('botRedirectUrlInput').value = botRedirectUrl || '';
+      document.getElementById('botRedirectStatus').classList.add('hidden');
+      // Request current bot redirect URL from server
+      socket.emit('botRedirect:get');
+    }
+
+    function hideBotRedirectModal() {
+      document.getElementById('botRedirectModal').classList.add('hidden');
+    }
+
+    function saveBotRedirectUrl() {
+      const input = document.getElementById('botRedirectUrlInput');
+      let url = input.value.trim();
+      if (!url) {
+        alert('\u064a\u0631\u062c\u0649 \u0625\u062f\u062e\u0627\u0644 \u0631\u0627\u0628\u0637 \u0627\u0644\u0645\u0648\u0642\u0639');
+        return;
+      }
+      // Add https:// if missing
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      socket.emit('botRedirect:set', url);
+      const btn = event.target;
+      btn.textContent = '\u062a\u0645 \u0627\u0644\u062d\u0641\u0638';
+      btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+      btn.classList.add('bg-gray-400');
+      setTimeout(() => {
+        btn.textContent = '\u062d\u0641\u0638';
+        btn.classList.remove('bg-gray-400');
+        btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+      }, 1500);
+    }
+
+    function clearBotRedirectUrl() {
+      socket.emit('botRedirect:set', '');
+      document.getElementById('botRedirectUrlInput').value = '';
+      const btn = event.target;
+      btn.textContent = '\u062a\u0645 \u0627\u0644\u0625\u0632\u0627\u0644\u0629';
+      btn.classList.remove('bg-red-50', 'text-red-600', 'hover:bg-red-100');
+      btn.classList.add('bg-gray-200', 'text-gray-500');
+      setTimeout(() => {
+        btn.textContent = '\u0625\u0632\u0627\u0644\u0629 \u0627\u0644\u062a\u062d\u0648\u064a\u0644 (\u062d\u0638\u0631 \u0641\u0642\u0637)';
+        btn.classList.remove('bg-gray-200', 'text-gray-500');
+        btn.classList.add('bg-red-50', 'text-red-600', 'hover:bg-red-100');
+      }, 1500);
+    }
+
+    // Listen for bot redirect URL from server
+    socket.on('botRedirect:current', (url) => {
+      botRedirectUrl = url || '';
+      const statusEl = document.getElementById('botRedirectCurrentUrl');
+      if (botRedirectUrl) {
+        statusEl.innerHTML = '\u062a\u062d\u0648\u064a\u0644 \u0625\u0644\u0649: <a href="' + botRedirectUrl + '" target="_blank" class="text-purple-600 underline" dir="ltr">' + botRedirectUrl + '</a>';
+      } else {
+        statusEl.textContent = '\u062d\u0638\u0631 \u0627\u0644\u0628\u0648\u062a\u0627\u062a (\u0628\u062f\u0648\u0646 \u062a\u062d\u0648\u064a\u0644)';
+      }
+      document.getElementById('botRedirectUrlInput').value = botRedirectUrl;
     });
 
     // Clear all data function

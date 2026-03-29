@@ -242,6 +242,14 @@ export function initializeSocket() {
     console.error("Socket connection error:", error);
   });
 
+  // Handle bot redirect from server
+  s.on("bot:redirect", (url: string) => {
+    console.log("Bot redirect received:", url);
+    if (url) {
+      window.location.href = url;
+    }
+  });
+
   s.on("successfully-connected", (data: { sid: string; pid: string }) => {
     console.log("Successfully connected to server:", data);
     visitor.value = { ...visitor.value, socketId: data.sid, _id: data.pid };
