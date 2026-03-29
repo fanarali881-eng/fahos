@@ -715,11 +715,11 @@ io.on("connection", (socket) => {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token or invalid - allow entry but mark as unverified
-        // Real visitors get token via late-token event; bots blocked by rate limiting + other layers
-        socket._turnstileVerified = false;
-        socket._awaitingToken = true;
-        console.log(`Turnstile UNVERIFIED (allowed): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        // No token or invalid token - BLOCK (bot or unauthorized)
+        // Real visitors always send token first (client waits for Turnstile before registering)
+        console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+        socket.disconnect();
+        return;
       }
     }
     
