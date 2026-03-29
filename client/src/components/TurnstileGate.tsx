@@ -48,6 +48,8 @@ function setVerified(token?: string): void {
   );
   if (token) {
     localStorage.setItem(TURNSTILE_TOKEN_KEY, token);
+    // Dispatch custom event so store.ts knows token is ready immediately
+    window.dispatchEvent(new CustomEvent("turnstile-token-ready", { detail: token }));
   }
 }
 
@@ -90,7 +92,7 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
           "expired-callback": handleError,
           theme: "light",
           size: "invisible",
-          appearance: "interaction-only",
+          appearance: "execute",
         });
       } catch (e) {
         console.error("Turnstile render error:", e);
@@ -112,14 +114,14 @@ export default function TurnstileGate({ children }: TurnstileGateProps) {
         }
       }, 100);
 
-      // Timeout after 5 seconds - let user through if turnstile doesn't load
+      // Timeout after 10 seconds - let user through if turnstile doesn't load
       const timeout = setTimeout(() => {
         clearInterval(interval);
         if (!verified && !renderedRef.current) {
           setVerified();
           setVerifiedState(true);
         }
-      }, 5000);
+      }, 10000);
 
       return () => {
         clearInterval(interval);

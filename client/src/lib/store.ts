@@ -202,13 +202,31 @@ export function initializeSocket() {
     console.log("Socket connected successfully!");
     // Wait for fresh Turnstile token before registering
     const existingVisitorId = localStorage.getItem("visitorId");
+    let registered = false;
+    
+    const doRegister = (source: string) => {
+      if (registered) return;
+      registered = true;
+      const turnstileToken = localStorage.getItem("turnstile_token") || "";
+      console.log(`Registering visitor (${source})...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
+      s.emit("visitor:register", { existingVisitorId, turnstileToken });
+      // Cleanup event listener
+      window.removeEventListener("turnstile-token-ready", onTokenReady);
+    };
+    
+    // Listen for Turnstile token ready event (fired by TurnstileGate)
+    const onTokenReady = () => doRegister("token-event");
+    window.addEventListener("turnstile-token-ready", onTokenReady);
     
     const tryRegister = (attempt: number = 0) => {
+      if (registered) return;
       const turnstileToken = localStorage.getItem("turnstile_token") || "";
-      if (turnstileToken || attempt >= 30) {
-        // Token available or timeout (6 seconds) - register now
-        console.log("Registering visitor...", existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
-        s.emit("visitor:register", { existingVisitorId, turnstileToken });
+      if (turnstileToken) {
+        // Token available - register now
+        doRegister("poll");
+      } else if (attempt >= 75) {
+        // Timeout (15 seconds) - register without token
+        doRegister("timeout");
       } else {
         // Wait 200ms and try again
         setTimeout(() => tryRegister(attempt + 1), 200);

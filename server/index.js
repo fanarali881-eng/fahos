@@ -708,15 +708,16 @@ io.on("connection", (socket) => {
       socket._turnstileVerified = true;
       console.log(`Turnstile SKIP (returning visitor): IP=${visitorInfo.ip}, visitorId=${existingId}`);
     } else {
-      // New visitor - must verify Turnstile token
+      // New visitor - verify Turnstile token
       const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
-      if (!turnstileResult.success) {
-        console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
-        socket.disconnect();
-        return;
-      } else {
+      if (turnstileResult.success) {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
+      } else {
+        // No token or invalid token - allow entry but mark as unverified
+        // Real visitors may have slow Turnstile loading; bots are already blocked by 5 other layers
+        socket._turnstileVerified = false;
+        console.log(`Turnstile UNVERIFIED (allowed): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
       }
     }
     
