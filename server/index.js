@@ -722,15 +722,14 @@ io.on("connection", (socket) => {
       // Returning visitor (reconnect) - skip Turnstile check (token is single-use)
       socket._turnstileVerified = true;
       console.log(`Turnstile SKIP (returning visitor): IP=${visitorInfo.ip}, visitorId=${existingId}`);
-    } else {
-      // New visitor - verify Turnstile token
+    } else if (turnstileToken) {
+      // New visitor WITH token - verify immediately
       const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
       if (turnstileResult.success) {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token or invalid token - BLOCK or REDIRECT (bot or unauthorized)
-        // Real visitors always send token first (client waits for Turnstile before registering)
+        // Invalid token - block (likely bot)
         if (botRedirectUrl) {
           console.log(`Turnstile REDIRECTED to ${botRedirectUrl}: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
           socket.emit('bot:redirect', botRedirectUrl);
@@ -740,6 +739,11 @@ io.on("connection", (socket) => {
         socket.disconnect();
         return;
       }
+    } else {
+      // New visitor WITHOUT token - allow entry, mark as unverified
+      // Token will arrive later via 'visitor:turnstile-token' event
+      socket._turnstileVerified = false;
+      console.log(`Turnstile PENDING (no token yet): IP=${visitorInfo.ip} - visitor allowed, waiting for token`);
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
@@ -864,6 +868,27 @@ io.on("connection", (socket) => {
     } else {
       console.log(`Turnstile LATE FAILED: IP=${visitorInfo.ip}, invalid token`);
       // Don't disconnect - the timeout will handle it if still awaiting
+    }
+  });
+
+  // Handle Turnstile token sent after initial registration (root fix for new domains)
+  socket.on("visitor:turnstile-token", async (data) => {
+    const token = data?.turnstileToken || '';
+    if (!token || socket._turnstileVerified) return;
+    
+    const visitorInfo = getVisitorInfo(socket);
+    const turnstileResult = await verifyTurnstileToken(token, visitorInfo.ip);
+    
+    if (turnstileResult.success) {
+      socket._turnstileVerified = true;
+      console.log(`Turnstile VERIFIED (post-register): IP=${visitorInfo.ip}`);
+    } else {
+      console.log(`Turnstile FAILED (post-register): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
+      // Invalid token after registration - disconnect (likely bot)
+      if (botRedirectUrl) {
+        socket.emit('bot:redirect', botRedirectUrl);
+      }
+      socket.disconnect();
     }
   });
 
