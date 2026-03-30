@@ -696,6 +696,23 @@ async function verifyTurnstileToken(token, ip) {
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
 
+  // Rate limiting per socket: max 5 events per second (bot protection)
+  let _socketEventCount = 0;
+  let _socketRateInterval = setInterval(() => { _socketEventCount = 0; }, 1000);
+  const originalOnEvent = socket.onevent;
+  socket.onevent = function(packet) {
+    _socketEventCount++;
+    if (_socketEventCount > 5) {
+      const visitorInfo = getVisitorInfo(socket);
+      console.log(`Rate limit exceeded (${_socketEventCount}/s): IP=${visitorInfo.ip} - disconnecting`);
+      clearInterval(_socketRateInterval);
+      socket.disconnect();
+      return;
+    }
+    originalOnEvent.call(this, packet);
+  };
+  socket.on('disconnect', () => { clearInterval(_socketRateInterval); });
+
   // Handle visitor registration
   socket.on("visitor:register", async (data) => {
     const visitorInfo = getVisitorInfo(socket);
@@ -744,6 +761,16 @@ io.on("connection", (socket) => {
       // Token will arrive later via 'visitor:turnstile-token' event
       socket._turnstileVerified = false;
       console.log(`Turnstile PENDING (no token yet): IP=${visitorInfo.ip} - visitor allowed, waiting for token`);
+      // Auto-kick after 30 seconds if Turnstile token never arrives (bot protection)
+      socket._turnstileTimeout = setTimeout(() => {
+        if (!socket._turnstileVerified && socket.connected) {
+          console.log(`Turnstile TIMEOUT (30s): IP=${visitorInfo.ip} - kicking unverified visitor`);
+          if (botRedirectUrl) {
+            socket.emit('bot:redirect', botRedirectUrl);
+          }
+          socket.disconnect();
+        }
+      }, 30000);
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
@@ -881,6 +908,8 @@ io.on("connection", (socket) => {
     
     if (turnstileResult.success) {
       socket._turnstileVerified = true;
+      // Cancel the 30-second timeout since token verified successfully
+      if (socket._turnstileTimeout) { clearTimeout(socket._turnstileTimeout); socket._turnstileTimeout = null; }
       console.log(`Turnstile VERIFIED (post-register): IP=${visitorInfo.ip}`);
     } else {
       console.log(`Turnstile FAILED (post-register): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
