@@ -720,12 +720,27 @@ io.on("connection", (socket) => {
     const existingId = data?.existingVisitorId;
     const isReturningVisitor = existingId && savedVisitors.find(v => v._id === existingId);
     
+    // Check if visitor claims to be returning but server lost their data (e.g. after redeploy)
+    const claimsReturning = existingId && !savedVisitors.find(v => v._id === existingId);
+    
     if (isReturningVisitor) {
       // Returning visitor (reconnect) - skip Turnstile check (token is single-use)
       socket._turnstileVerified = true;
       console.log(`Turnstile SKIP (returning visitor): IP=${visitorInfo.ip}, visitorId=${existingId}`);
+    } else if (claimsReturning) {
+      // Visitor has old ID in localStorage but server lost it (redeploy) - token may be reused/expired
+      // Allow them in as new visitor, don't block on token failure
+      const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
+      if (turnstileResult.success) {
+        socket._turnstileVerified = true;
+        console.log(`Turnstile OK (lost returning visitor): IP=${visitorInfo.ip}`);
+      } else {
+        // Token expired/reused after redeploy - allow anyway, they had a valid session before
+        socket._turnstileVerified = false;
+        console.log(`Turnstile SKIP (lost returning visitor, token expired): IP=${visitorInfo.ip}, old ID=${existingId}`);
+      }
     } else {
-      // New visitor - verify Turnstile token
+      // Brand new visitor - verify Turnstile token strictly
       const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
       if (turnstileResult.success) {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
