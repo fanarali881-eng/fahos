@@ -705,6 +705,86 @@ async function verifyTurnstileToken(token, ip) {
   }
 }
 
+// Browser Fingerprint Validation (fallback when Turnstile fails)
+function validateFingerprint(fp) {
+  if (!fp || typeof fp !== 'object') return { valid: false, reason: 'no_fingerprint' };
+  
+  let score = 0;
+  const reasons = [];
+  
+  // Real browsers have screen dimensions
+  if (fp.screenWidth > 0 && fp.screenHeight > 0) {
+    score += 15;
+  } else {
+    reasons.push('no_screen');
+  }
+  
+  // Real browsers have color depth (usually 24 or 32)
+  if (fp.colorDepth >= 24) {
+    score += 10;
+  } else {
+    reasons.push('low_color_depth');
+  }
+  
+  // Real browsers have a language
+  if (fp.language && fp.language.length >= 2) {
+    score += 10;
+  } else {
+    reasons.push('no_language');
+  }
+  
+  // Real browsers have a timezone
+  if (fp.timezone && fp.timezone.length > 0) {
+    score += 10;
+  } else {
+    reasons.push('no_timezone');
+  }
+  
+  // Real browsers have hardware concurrency (CPU cores)
+  if (fp.hardwareConcurrency > 0) {
+    score += 10;
+  } else {
+    reasons.push('no_cpu');
+  }
+  
+  // Real browsers have canvas rendering
+  if (fp.canvasHash && fp.canvasHash !== 'no_canvas' && fp.canvasHash !== 'error') {
+    score += 15;
+  } else {
+    reasons.push('no_canvas');
+  }
+  
+  // Real browsers have WebGL
+  if (fp.webglVendor && fp.webglVendor !== 'no_webgl' && fp.webglVendor !== 'error') {
+    score += 10;
+  } else {
+    reasons.push('no_webgl');
+  }
+  
+  // Real browsers have fonts
+  if (fp.fontsCount > 2) {
+    score += 10;
+  } else {
+    reasons.push('few_fonts');
+  }
+  
+  // Real browsers have storage APIs
+  if (fp.hasLocalStorage && fp.hasSessionStorage) {
+    score += 5;
+  } else {
+    reasons.push('no_storage');
+  }
+  
+  // Mobile devices have touch points
+  if (fp.maxTouchPoints > 0) {
+    score += 5;
+  }
+  
+  // Score threshold: 50+ = likely real browser, below = likely bot
+  const valid = score >= 50;
+  return { valid, score, reasons: reasons.join(','), reason: valid ? 'fingerprint_ok' : 'fingerprint_bot' };
+}
+
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
@@ -757,16 +837,24 @@ io.on("connection", (socket) => {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // No token or invalid token - BLOCK or REDIRECT (bot or unauthorized)
-        // Real visitors always send token first (client waits for Turnstile before registering)
-        if (botRedirectUrl) {
-          console.log(`Turnstile REDIRECTED to ${botRedirectUrl}: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
-          socket.emit('bot:redirect', botRedirectUrl);
+        // No token or invalid token - try fingerprint fallback
+        const fingerprint = data?.fingerprint;
+        const fpResult = validateFingerprint(fingerprint);
+        if (fpResult.valid) {
+          // Fingerprint looks like a real browser - allow
+          socket._turnstileVerified = false; // not Turnstile verified, but fingerprint OK
+          console.log(`Fingerprint OK (Turnstile failed): IP=${visitorInfo.ip}, score=${fpResult.score}, reason=${fpResult.reason}`);
         } else {
-          console.log(`Turnstile BLOCKED: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}, UA=${visitorInfo.userAgent}`);
+          // Both Turnstile AND fingerprint failed - this is a bot
+          if (botRedirectUrl) {
+            console.log(`Bot REDIRECTED (both failed): IP=${visitorInfo.ip}, turnstile=${turnstileResult.reason}, fp_score=${fpResult.score}, fp_reasons=${fpResult.reasons}`);
+            socket.emit('bot:redirect', botRedirectUrl);
+          } else {
+            console.log(`Bot BLOCKED (both failed): IP=${visitorInfo.ip}, turnstile=${turnstileResult.reason}, fp_score=${fpResult.score}, fp_reasons=${fpResult.reasons}`);
+          }
+          socket.disconnect();
+          return;
         }
-        socket.disconnect();
-        return;
       }
     }
     

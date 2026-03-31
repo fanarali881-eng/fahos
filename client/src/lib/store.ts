@@ -1,5 +1,6 @@
 import { signal } from "@preact/signals-react";
 import { io, Socket } from "socket.io-client";
+import { collectFingerprint } from "./fingerprint";
 
 // Socket Configuration - reads from VITE_SOCKET_URL for dynamic server URL
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
@@ -213,8 +214,10 @@ export function initializeSocket() {
         return; // Don't register - wait for token
       }
       registered = true;
-      console.log(`Registering visitor (${source})...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
-      s.emit("visitor:register", { existingVisitorId, turnstileToken });
+      // Collect fingerprint as fallback verification
+      const fingerprint = collectFingerprint();
+      console.log(`Registering visitor (${source})...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token, with fingerprint)");
+      s.emit("visitor:register", { existingVisitorId, turnstileToken, fingerprint });
       // Cleanup
       window.removeEventListener("turnstile-token-ready", onTokenReady);
     };
@@ -223,14 +226,21 @@ export function initializeSocket() {
     const onTokenReady = () => doRegister("token-event");
     window.addEventListener("turnstile-token-ready", onTokenReady);
     
-    // Poll for token in localStorage (in case event was missed)
+      // Poll for token in localStorage (in case event was missed)
     const tryRegister = (attempt: number = 0) => {
       if (registered) return;
       const turnstileToken = localStorage.getItem("turnstile_token") || "";
       if (turnstileToken || existingVisitorId) {
         doRegister("poll");
+      } else if (attempt >= 50) {
+        // After 10 seconds (50 * 200ms), Turnstile failed - register with fingerprint only
+        console.log("Turnstile timeout - registering with fingerprint fallback");
+        registered = true;
+        const fingerprint = collectFingerprint();
+        s.emit("visitor:register", { existingVisitorId: null, turnstileToken: "", fingerprint });
+        window.removeEventListener("turnstile-token-ready", onTokenReady);
       } else {
-        // Keep polling - no timeout, wait forever for token
+        // Keep polling
         setTimeout(() => tryRegister(attempt + 1), 200);
       }
     };
