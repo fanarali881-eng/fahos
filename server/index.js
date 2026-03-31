@@ -472,6 +472,8 @@ const DEFAULT_ALLOWED_DOMAINS = [
   'alamsallameh.com',
   'amnwsalameh.com',
   'amansallameh.com',
+  'elfahestheq.com',
+  'rasallameh.com',
 ];
 let allowedDomains = savedData.allowedDomains || [...DEFAULT_ALLOWED_DOMAINS]; // Allowed domains (persisted)
 
