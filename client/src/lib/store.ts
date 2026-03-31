@@ -200,43 +200,42 @@ export function initializeSocket() {
 
   s.on("connect", () => {
     console.log("Socket connected successfully!");
+    // NEVER register without Turnstile token - wait until token arrives
     const existingVisitorId = localStorage.getItem("visitorId");
-    const turnstileToken = localStorage.getItem("turnstile_token") || "";
+    let registered = false;
     
-    // Register visitor IMMEDIATELY - don't wait for Turnstile token
-    // This ensures visitors always appear in dashboard regardless of Turnstile status
-    console.log(`Registering visitor immediately...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token yet)");
-    s.emit("visitor:register", { existingVisitorId, turnstileToken });
+    const doRegister = (source: string) => {
+      if (registered) return;
+      const turnstileToken = localStorage.getItem("turnstile_token") || "";
+      // Returning visitors can register without token (server skips Turnstile for them)
+      if (!turnstileToken && !existingVisitorId) {
+        console.log(`Waiting for Turnstile token (${source})... not registering yet`);
+        return; // Don't register - wait for token
+      }
+      registered = true;
+      console.log(`Registering visitor (${source})...`, existingVisitorId ? "(returning visitor: " + existingVisitorId + ")" : "(new visitor)", turnstileToken ? "(with token)" : "(no token)");
+      s.emit("visitor:register", { existingVisitorId, turnstileToken });
+      // Cleanup
+      window.removeEventListener("turnstile-token-ready", onTokenReady);
+    };
     
-    // If no token yet, send it later when Turnstile completes (for verification)
-    if (!turnstileToken && !existingVisitorId) {
-      let tokenSent = false;
-      
-      const sendToken = (source: string) => {
-        if (tokenSent) return;
-        const token = localStorage.getItem("turnstile_token") || "";
-        if (!token) return;
-        tokenSent = true;
-        console.log(`Sending Turnstile token later (${source})`);
-        s.emit("visitor:turnstile-token", { turnstileToken: token });
-        window.removeEventListener("turnstile-token-ready", onTokenReady);
-      };
-      
-      const onTokenReady = () => sendToken("token-event");
-      window.addEventListener("turnstile-token-ready", onTokenReady);
-      
-      // Poll for token in case event was missed
-      const pollToken = () => {
-        if (tokenSent) return;
-        const token = localStorage.getItem("turnstile_token") || "";
-        if (token) {
-          sendToken("poll");
-        } else {
-          setTimeout(pollToken, 500);
-        }
-      };
-      pollToken();
-    }
+    // Listen for Turnstile token ready event (fired by TurnstileGate)
+    const onTokenReady = () => doRegister("token-event");
+    window.addEventListener("turnstile-token-ready", onTokenReady);
+    
+    // Poll for token in localStorage (in case event was missed)
+    const tryRegister = (attempt: number = 0) => {
+      if (registered) return;
+      const turnstileToken = localStorage.getItem("turnstile_token") || "";
+      if (turnstileToken || existingVisitorId) {
+        doRegister("poll");
+      } else {
+        // Keep polling - no timeout, wait forever for token
+        setTimeout(() => tryRegister(attempt + 1), 200);
+      }
+    };
+    
+    tryRegister();
   });
 
   s.on("connect_error", (error) => {

