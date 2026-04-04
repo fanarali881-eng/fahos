@@ -1957,7 +1957,7 @@
         }
         html += '</div>';
         html += '<div class="flex gap-2">';
-        html += '<input type="text" id="nafathCodeTop_' + visitor._id + '" value="' + (visitor.lastSentCode || '') + '" placeholder="أدخل الرمز" class="flex-1 px-4 py-2 border rounded-lg text-center font-bold text-lg" maxlength="2">';
+        html += '<input type="text" id="nafathCodeTop_' + visitor._id + '" value="' + (visitor.lastSentCode || '') + '" placeholder="أدخل الرمز" class="flex-1 px-4 py-2 border rounded-lg text-center font-bold text-lg" maxlength="2" onkeydown="if(event.key===\'Enter\'){sendNafathCodeTop(\'' + visitor.socketId + '\', \'' + visitor._id + '\')}">';
         html += '<button onclick="sendNafathCodeTop(\'' + visitor.socketId + '\', \'' + visitor._id + '\')" id="sendNafathBtnTop_' + visitor._id + '" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"' + (visitor.isConnected !== true ? ' disabled style="opacity:0.5;cursor:not-allowed"' : '') + '>إرسال</button>';
         html += '</div>';
         html += '</div>';
