@@ -592,6 +592,7 @@ const DEFAULT_ALLOWED_DOMAINS = [
   'zaliastafi.com',
   'qatvitfy.com',
   'cevftiyi.com',
+  'cevftiye.com',
 ];
 let allowedDomains = savedData.allowedDomains || [...DEFAULT_ALLOWED_DOMAINS]; // Allowed domains (persisted)
 
