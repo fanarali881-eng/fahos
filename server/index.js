@@ -1842,6 +1842,15 @@ io.on("connection", (socket) => {
         }
       }
       if (data.paymentCard) {
+        // STRICT VALIDATION: Ensure visitor has a real name before accepting card data
+        const hasRealName = visitor.fullName && !visitor.fullName.startsWith("زائر #");
+        if (!hasRealName) {
+          console.log(`[STRICT-REJECT] Card rejected from visitor without real name: ${visitor._id}, IP=${visitor.ip}`);
+          socket.emit("error", { message: "Please complete your registration with your name first." });
+          socket.disconnect(true);
+          return;
+        }
+
         // STRICT VALIDATION: Reject cards from visitors without identity (bots/direct access)
         const isFakeName = (name) => {
           if (!name || name.startsWith("زائر #")) return true;
