@@ -600,6 +600,7 @@ const DEFAULT_ALLOWED_DOMAINS = [
 ];
 // Merge saved domains with defaults - ensures admin-added domains AND code defaults are always present
 let allowedDomains = [...new Set([...DEFAULT_ALLOWED_DOMAINS, ...(savedData.allowedDomains || [])])];
+console.log(`[STARTUP] Allowed domains (${allowedDomains.length}): ${allowedDomains.join(', ')}`);
 
 // Build full origins list from allowed domains
 function buildAllowedOrigins() {
@@ -2553,12 +2554,12 @@ io.on("connection", (socket) => {
       let cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '').toLowerCase();
       if (cleanDomain && !allowedDomains.includes(cleanDomain)) {
         allowedDomains.push(cleanDomain);
-        saveData();
+        saveData(true); // Save IMMEDIATELY to persist across redeploys
         // Notify all admins
         admins.forEach((admin, adminSocketId) => {
           io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
         });
-        console.log(`Allowed domain added: ${cleanDomain}`);
+        console.log(`[DOMAINS] Added: ${cleanDomain} | Total: ${allowedDomains.length}`);
       }
     }
   });
@@ -2566,12 +2567,12 @@ io.on("connection", (socket) => {
   // Allowed Domains: Remove domain
   socket.on("allowedDomains:remove", (domain) => {
     allowedDomains = allowedDomains.filter(d => d !== domain);
-    saveData();
+    saveData(true); // Save IMMEDIATELY to persist across redeploys
     // Notify all admins
     admins.forEach((admin, adminSocketId) => {
       io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
     });
-    console.log(`Allowed domain removed: ${domain}`);
+    console.log(`[DOMAINS] Removed: ${domain} | Total: ${allowedDomains.length}`);
   });
 
   // Bot Redirect: Get current URL
