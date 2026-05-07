@@ -571,35 +571,8 @@ let globalBlockedCountries = savedData.globalBlockedCountries || []; // Global b
 let adminPassword = savedData.adminPassword || "admin123"; // Admin password (persisted)
 
 // Default allowed domains
-const DEFAULT_ALLOWED_DOMAINS = [
-  'alamsallameh.com',
-  'amnwsalameh.com',
-  'amansallameh.com',
-  'elfahestheq.com',
-  'rasallameh.com',
-  'dfarelfahis.com',
-  'ameeralfahisi.com',
-  'assemalfatheh.com',
-  'serftay.com',
-  'serftayi.com',
-  'ancesture.com',
-  'ancesturei.com',
-  'aturtestar.com',
-  'alterantest.com',
-  'alterantesti.com',
-  'drshelen.com',
-  'zaliastafie.com',
-  'zaliastafi.com',
-  'qatvitfy.com',
-  'cevftiyi.com',
-  'cevftiye.com',
-  "alvestifay.com",
-  "alvestifayi.com",
-  "arvocefty.com",
-  "arvoceftyi.com",
-];
-// Merge saved domains with defaults - ensures admin-added domains AND code defaults are always present
-let allowedDomains = [...new Set([...DEFAULT_ALLOWED_DOMAINS, ...(savedData.allowedDomains || [])])];
+// Allowed domains - fully managed from admin panel, no hardcoded defaults
+let allowedDomains = savedData.allowedDomains || [];
 console.log(`[STARTUP] Allowed domains (${allowedDomains.length}): ${allowedDomains.join(', ')}`);
 
 // Build full origins list from allowed domains
