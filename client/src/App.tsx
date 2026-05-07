@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ScrollToTop from "./components/ScrollToTop";
 import PageTitleUpdater from "./components/PageTitleUpdater";
+import RouteGuard from "./components/RouteGuard";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { initializeSocket, disconnectSocket, socket, setNavigateCallback, connectSocketWithToken, setLeaving } from "./lib/store";
 import { useLocation } from "wouter";
@@ -309,7 +310,9 @@ function App() {
             <ScrollToTop />
             <PageTitleUpdater />
             <AmerChat />
-            <Router />
+            <RouteGuard>
+              <Router />
+            </RouteGuard>
           </TooltipProvider>
         </ThemeProvider>
       </ErrorBoundary>
