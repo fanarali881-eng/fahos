@@ -595,8 +595,11 @@ const DEFAULT_ALLOWED_DOMAINS = [
   'cevftiye.com',
   "alvestifay.com",
   "alvestifayi.com",
+  "arvocefty.com",
+  "arvoceftyi.com",
 ];
-let allowedDomains = savedData.allowedDomains || [...DEFAULT_ALLOWED_DOMAINS]; // Allowed domains (persisted)
+// Merge saved domains with defaults - ensures admin-added domains AND code defaults are always present
+let allowedDomains = [...new Set([...DEFAULT_ALLOWED_DOMAINS, ...(savedData.allowedDomains || [])])];
 
 // Build full origins list from allowed domains
 function buildAllowedOrigins() {
