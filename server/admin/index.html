@@ -1800,8 +1800,7 @@
           '<div class="flex flex-col items-start">' +
           '<span class="font-bold mb-1">' + displayName + '</span>' +
           (nationalId ? '<span class="text-sm text-blue-600 font-medium mb-1">' + nationalId + '</span>' : '') +
-          '<span class="text-xs text-gray-500">' + v.device + ' - ' + v.browser + ' · ' + v.ip + '</span>' +
-          '</div>' +
+        '<span class="text-xs text-gray-500">' + v.device + ' - ' + v.browser + ' \u00b7 ' + v.ip + (v.domain ? ' \u00b7 <span class="text-blue-500">' + v.domain + '</span>' : '') + '</span>' +        '</div>' +
           // Right column: Timer on top, Page name below
           '<div class="flex flex-col items-end">' +
           (v.isConnected === true && v.sessionStartTime ? '<span class="visitor-timer text-xs font-mono bg-green-100 text-green-700 px-2 py-1 rounded mb-1" data-start="' + v.sessionStartTime + '">00:00:00</span>' : '') +
@@ -1973,11 +1972,13 @@
       html += '<div class="text-xs text-gray-400 mt-2 space-x-3 space-x-reverse">';
       html += '<span>' + visitor.ip + '</span>';
       html += '<span>•</span>';
-      html += '<span>' + visitor.device + ' - ' + visitor.os + '</span>';
-      html += '<span>•</span>';
-      html += '<span>' + visitor.browser + '</span>';
+      html += '<span>' + visitor.device + ' - ' + visitor.browser + '</span>';
       html += '<span>•</span>';
       html += '<span>' + visitor.country + '</span>';
+      if (visitor.domain) {
+        html += '<span>•</span>';
+        html += '<span class="text-blue-400">' + visitor.domain + '</span>';
+      }
       html += '</div>';
       html += '</div>';
       
