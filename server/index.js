@@ -384,7 +384,7 @@ app.use((req, res, next) => {
 // Socket.IO Configuration
 const io = new Server(server, {
   maxHttpBufferSize: 10000, // 10KB max message size - prevents large payload attacks
-  pingTimeout: 15000, // 15s - disconnect dead connections faster
+  pingTimeout: 30000, // 30s - give more time for admin connections through Cloudflare
   pingInterval: 10000, // 10s - check connections more frequently
   cors: {
     origin: function (origin, callback) {
