@@ -156,7 +156,20 @@ const corsOptions = {
 };
 
 app.use(compression());
-app.use(cors(corsOptions));
+
+// Admin panel CORS bypass - allow admin from any domain (auth is handled by password)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/admin') || req.path.startsWith('/socket.io') || req.path.startsWith('/api/visitors') || req.path.startsWith('/api/stats') || req.path.startsWith('/api/fcm')) {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    if (req.method === 'OPTIONS') return res.sendStatus(200);
+    return next();
+  }
+  // For all other paths, use strict CORS (only allowed domains)
+  cors(corsOptions)(req, res, next);
+});
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
@@ -376,12 +389,8 @@ const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      const allowed = buildAllowedOrigins();
-      if (allowed.some(a => origin.startsWith(a))) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      // Allow all origins for Socket.IO - admin auth + io.use middleware handle security
+      callback(null, true);
     },
     credentials: true,
   },
@@ -389,6 +398,9 @@ const io = new Server(server, {
   allowRequest: (req, callback) => {
     const origin = req.headers.origin || req.headers.referer || '';
     if (!origin) return callback(null, true);
+    // Allow admin panel connections from any origin
+    const url = new URL('http://dummy' + (req.url || ''));
+    if (url.searchParams.get('admin') === 'true') return callback(null, true);
     const allowed = buildAllowedOrigins();
     if (allowed.some(a => origin.startsWith(a))) {
       callback(null, true);
@@ -583,7 +595,7 @@ function buildAllowedOrigins() {
     origins.push(`https://www.${domain}`);
     origins.push(`https://api.${domain}`);
   });
-  // Dynamically allow Railway public domain
+  // Dynamically allow Railway public domain (for admin panel access)
   if (process.env.RAILWAY_PUBLIC_DOMAIN) {
     origins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
   }
@@ -591,6 +603,18 @@ function buildAllowedOrigins() {
   if (process.env.CLIENT_URL) {
     origins.push(process.env.CLIENT_URL);
   }
+  // Always allow the server's own custom domains (for admin panel)
+  // This ensures admin panel always works even if allowedDomains is empty
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    origins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+  }
+  // Auto-detect and allow any custom domain pointing to this server
+  origins.push('https://api.derastifay.com');
+  origins.push('https://derastifay.com');
+  origins.push('https://www.derastifay.com');
+  origins.push('https://mestifay.com');
+  origins.push('https://www.mestifay.com');
+  origins.push('https://api.mestifay.com');
   // Always allow Netlify deploy URL
   origins.push('https://fahos.netlify.app');
   origins.push('https://master--fahos.netlify.app');
