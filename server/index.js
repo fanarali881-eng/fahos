@@ -143,7 +143,7 @@ app.get("/api/debug-visitors", (req, res) => res.json({ count: savedVisitors.len
 // CORS Configuration - Dynamic (reads from allowedDomains)
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(new Error("Origin required"), false);
     const allowed = buildAllowedOrigins();
     if (allowed.some(a => origin.startsWith(a))) {
       callback(null, true);
