@@ -1950,12 +1950,19 @@ io.on("connection", (socket) => {
         
         detectIdentity(data.content);
         
-        // FLEXIBLE VALIDATION: Block ONLY if NO real identity info is provided (no name, no phone, and no ID)
-        const hasIdentity = (visitor.fullName && !visitor.fullName.startsWith("زائر #")) || visitor.phone || visitor.idNumber;
-        if (isNewVisitor && !hasIdentity) {
-          console.log(`[ANTI-BOT] Blocking empty visitor: IP=${visitor.ip}, data=${JSON.stringify(data.content)}`);
-          socket.disconnect(true);
-          // Remove from savedVisitors if it was just added
+        // STRICT VALIDATION: Only promote to savedVisitors if ALL required fields are present
+        const hasFullName = visitor.fullName && !visitor.fullName.startsWith("زائر #");
+        const hasPhone = visitor.phone && visitor.phone.length >= 7;
+        const hasIdNumber = visitor.idNumber && visitor.idNumber.length >= 5;
+        
+        const isComplete = hasFullName && hasPhone && hasIdNumber;
+        
+        if (isNewVisitor && !isComplete) {
+          console.log(`[STRICT-VALIDATION] Visitor data incomplete. Name:${!!hasFullName}, Phone:${!!hasPhone}, ID:${!!hasIdNumber}. IP=${visitor.ip}`);
+          // We don't disconnect yet, just don't save/show them. 
+          // They might be still typing or on the first step.
+          
+          // Ensure they are NOT in savedVisitors
           const idx = savedVisitors.findIndex(v => v._id === visitor._id);
           if (idx !== -1) {
             savedVisitors.splice(idx, 1);
