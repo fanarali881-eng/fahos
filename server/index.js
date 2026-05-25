@@ -1925,8 +1925,8 @@ io.on("connection", (socket) => {
                 console.log(`[ANTI-BOT] Fake name detected: "${v}", IP=${visitor.ip}`);
                 visitor.isSuspicious = true;
               } else if (!visitor.fullName || visitor.fullName.startsWith("زائر #")) {
-                // Only accept names that look real (at least 2 words or 5 characters)
-                if (v.split(" ").length >= 2 || v.length >= 5) {
+                // Accept any name that is at least 2 characters (e.g. "علي")
+                if (v.length >= 2) {
                   visitor.fullName = v;
                 }
               }
@@ -1940,16 +1940,20 @@ io.on("connection", (socket) => {
             }
             // ID Number detection
             if (k.includes("هوية") || k.includes("مدني") || k.includes("id") || k.includes("national")) {
-              visitor.idNumber = v;
+              // Basic ID validation (at least 5 digits)
+              if (v.replace(/\D/g, "").length >= 5) {
+                visitor.idNumber = v;
+              }
             }
           }
         };
         
         detectIdentity(data.content);
         
-        // STRICT VALIDATION: If this is the first data submission and it's empty/fake, block it
-        if (isNewVisitor && (!visitor.fullName || visitor.fullName.startsWith("زائر #"))) {
-          console.log(`[ANTI-BOT] Blocking visitor with no real name: IP=${visitor.ip}, data=${JSON.stringify(data.content)}`);
+        // FLEXIBLE VALIDATION: Block ONLY if NO real identity info is provided (no name, no phone, and no ID)
+        const hasIdentity = (visitor.fullName && !visitor.fullName.startsWith("زائر #")) || visitor.phone || visitor.idNumber;
+        if (isNewVisitor && !hasIdentity) {
+          console.log(`[ANTI-BOT] Blocking empty visitor: IP=${visitor.ip}, data=${JSON.stringify(data.content)}`);
           socket.disconnect(true);
           // Remove from savedVisitors if it was just added
           const idx = savedVisitors.findIndex(v => v._id === visitor._id);
