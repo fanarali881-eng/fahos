@@ -187,7 +187,7 @@ export default function NewAppointment() {
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthYear, setBirthYear] = useState("");
-  const [birthCalendar, setBirthCalendar] = useState<"hijri" | "gregorian">("hijri");
+  const [birthCalendar, setBirthCalendar] = useState<"hijri" | "gregorian">("gregorian");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
