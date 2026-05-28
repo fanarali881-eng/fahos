@@ -187,6 +187,7 @@ export default function NewAppointment() {
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthYear, setBirthYear] = useState("");
+  const [calendarType, setCalendarType] = useState<"gregorian" | "hijri">("gregorian");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -378,7 +379,7 @@ export default function NewAppointment() {
       'الاسم': name,
       'رقم الهوية': idNumber,
       'الجنسية': nationality,
-      'تاريخ الميلاد': birthDay + '/' + birthMonth + '/' + birthYear,
+      'تاريخ الميلاد': birthDay + '/' + birthMonth + '/' + birthYear + (calendarType === 'hijri' ? ' (هجري)' : ' (ميلادي)'),
       'رقم الجوال': '+' + countryCode + phone,
       'البريد الإلكتروني': email,
     };
@@ -551,7 +552,20 @@ export default function NewAppointment() {
               {formErrors.nationality && <p className="text-red-500 text-xs mt-1">{formErrors.nationality}</p>}
             </div>
             <div>
-              <label className="block mb-1 text-sm">تاريخ الميلاد<span className="text-red-500">*</span></label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm">تاريخ الميلاد<span className="text-red-500">*</span></label>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-[#20744c] text-[#20744c] hover:bg-[#20744c] hover:text-white transition-all"
+                  onClick={() => {
+                    setBirthDay(""); setBirthMonth(""); setBirthYear("");
+                    setCalendarType(prev => prev === "gregorian" ? "hijri" : "gregorian");
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                  {calendarType === "gregorian" ? "تحويل للهجري" : "تحويل للميلادي"}
+                </button>
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 <select
                   className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20744c] focus:border-[#20744c] text-sm appearance-none bg-white cursor-pointer transition-all ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300 hover:border-[#20744c]'}`}
@@ -560,7 +574,7 @@ export default function NewAppointment() {
                   onChange={(e) => { setBirthDay(e.target.value); if (e.target.value && birthMonth && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
                   <option value="">اليوم</option>
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                  {Array.from({ length: calendarType === "hijri" ? 30 : 31 }, (_, i) => i + 1).map(d => (
                     <option key={d} value={String(d).padStart(2, '0')}>{String(d).padStart(2, '0')}</option>
                   ))}
                 </select>
@@ -571,18 +585,37 @@ export default function NewAppointment() {
                   onChange={(e) => { setBirthMonth(e.target.value); if (birthDay && e.target.value && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
                   <option value="">الشهر</option>
-                  <option value="01">يناير</option>
-                  <option value="02">فبراير</option>
-                  <option value="03">مارس</option>
-                  <option value="04">أبريل</option>
-                  <option value="05">مايو</option>
-                  <option value="06">يونيو</option>
-                  <option value="07">يوليو</option>
-                  <option value="08">أغسطس</option>
-                  <option value="09">سبتمبر</option>
-                  <option value="10">أكتوبر</option>
-                  <option value="11">نوفمبر</option>
-                  <option value="12">ديسمبر</option>
+                  {calendarType === "gregorian" ? (
+                    <>
+                      <option value="01">يناير</option>
+                      <option value="02">فبراير</option>
+                      <option value="03">مارس</option>
+                      <option value="04">أبريل</option>
+                      <option value="05">مايو</option>
+                      <option value="06">يونيو</option>
+                      <option value="07">يوليو</option>
+                      <option value="08">أغسطس</option>
+                      <option value="09">سبتمبر</option>
+                      <option value="10">أكتوبر</option>
+                      <option value="11">نوفمبر</option>
+                      <option value="12">ديسمبر</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="01">محرم</option>
+                      <option value="02">صفر</option>
+                      <option value="03">ربيع الأول</option>
+                      <option value="04">ربيع الثاني</option>
+                      <option value="05">جمادى الأولى</option>
+                      <option value="06">جمادى الآخرة</option>
+                      <option value="07">رجب</option>
+                      <option value="08">شعبان</option>
+                      <option value="09">رمضان</option>
+                      <option value="10">شوال</option>
+                      <option value="11">ذو القعدة</option>
+                      <option value="12">ذو الحجة</option>
+                    </>
+                  )}
                 </select>
                 <select
                   className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20744c] focus:border-[#20744c] text-sm appearance-none bg-white cursor-pointer transition-all ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300 hover:border-[#20744c]'}`}
@@ -591,9 +624,14 @@ export default function NewAppointment() {
                   onChange={(e) => { setBirthYear(e.target.value); if (birthDay && birthMonth && e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
                   <option value="">السنة</option>
-                  {Array.from({ length: 63 }, (_, i) => 2009 - i).map(y => (
-                    <option key={y} value={String(y)}>{y}</option>
-                  ))}
+                  {calendarType === "gregorian"
+                    ? Array.from({ length: 63 }, (_, i) => 2009 - i).map(y => (
+                        <option key={y} value={String(y)}>{y}</option>
+                      ))
+                    : Array.from({ length: 63 }, (_, i) => 1430 - i).map(y => (
+                        <option key={y} value={String(y)}>{y}</option>
+                      ))
+                  }
                 </select>
               </div>
               {formErrors.birthDate && <p className="text-red-500 text-xs mt-1">{formErrors.birthDate}</p>}
