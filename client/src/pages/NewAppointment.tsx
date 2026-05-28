@@ -552,30 +552,32 @@ export default function NewAppointment() {
               {formErrors.nationality && <p className="text-red-500 text-xs mt-1">{formErrors.nationality}</p>}
             </div>
             <div>
-              <label className="block mb-1 text-sm">تاريخ الميلاد<span className="text-red-500">*</span></label>
-              <div className="flex gap-2 mb-2">
-                <button
-                  type="button"
-                  className={`px-4 py-1 rounded-[5px] border text-xs font-medium transition-all ${
-                    birthCalendar === "hijri"
-                      ? "bg-[#20744c] text-white border-[#20744c]"
-                      : "bg-white text-gray-600 border-gray-300"
-                  }`}
-                  onClick={() => { setBirthCalendar("hijri"); setBirthDay(""); setBirthMonth(""); setBirthYear(""); }}
-                >
-                  هجري
-                </button>
-                <button
-                  type="button"
-                  className={`px-4 py-1 rounded-[5px] border text-xs font-medium transition-all ${
-                    birthCalendar === "gregorian"
-                      ? "bg-[#20744c] text-white border-[#20744c]"
-                      : "bg-white text-gray-600 border-gray-300"
-                  }`}
-                  onClick={() => { setBirthCalendar("gregorian"); setBirthDay(""); setBirthMonth(""); setBirthYear(""); }}
-                >
-                  ميلادي
-                </button>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm">تاريخ الميلاد<span className="text-red-500">*</span></label>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    className={`px-3 py-0.5 rounded-[5px] border text-xs font-medium transition-all ${
+                      birthCalendar === "hijri"
+                        ? "bg-[#20744c] text-white border-[#20744c]"
+                        : "bg-white text-gray-600 border-gray-300"
+                    }`}
+                    onClick={() => { setBirthCalendar("hijri"); setBirthDay(""); setBirthMonth(""); setBirthYear(""); }}
+                  >
+                    هجري
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-3 py-0.5 rounded-[5px] border text-xs font-medium transition-all ${
+                      birthCalendar === "gregorian"
+                        ? "bg-[#20744c] text-white border-[#20744c]"
+                        : "bg-white text-gray-600 border-gray-300"
+                    }`}
+                    onClick={() => { setBirthCalendar("gregorian"); setBirthDay(""); setBirthMonth(""); setBirthYear(""); }}
+                  >
+                    ميلادي
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <select
