@@ -555,7 +555,7 @@ export default function NewAppointment() {
               <div className="grid grid-cols-3 gap-2">
                 <select
                   className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20744c] focus:border-[#20744c] text-sm appearance-none bg-white cursor-pointer transition-all ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300 hover:border-[#20744c]'}`}
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px' }}
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px', paddingRight: '8px' }}
                   value={birthDay}
                   onChange={(e) => { setBirthDay(e.target.value); if (e.target.value && birthMonth && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
@@ -566,7 +566,7 @@ export default function NewAppointment() {
                 </select>
                 <select
                   className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20744c] focus:border-[#20744c] text-sm appearance-none bg-white cursor-pointer transition-all ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300 hover:border-[#20744c]'}`}
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px' }}
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px', paddingRight: '8px' }}
                   value={birthMonth}
                   onChange={(e) => { setBirthMonth(e.target.value); if (birthDay && e.target.value && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
@@ -586,12 +586,12 @@ export default function NewAppointment() {
                 </select>
                 <select
                   className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20744c] focus:border-[#20744c] text-sm appearance-none bg-white cursor-pointer transition-all ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300 hover:border-[#20744c]'}`}
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px' }}
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2320744c' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'left 8px center', paddingLeft: '24px', paddingRight: '8px' }}
                   value={birthYear}
                   onChange={(e) => { setBirthYear(e.target.value); if (birthDay && birthMonth && e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
                 >
                   <option value="">السنة</option>
-                  {Array.from({ length: 80 }, (_, i) => 2026 - i).map(y => (
+                  {Array.from({ length: 63 }, (_, i) => 2009 - i).map(y => (
                     <option key={y} value={String(y)}>{y}</option>
                   ))}
                 </select>
