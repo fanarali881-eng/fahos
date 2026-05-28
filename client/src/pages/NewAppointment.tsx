@@ -184,6 +184,9 @@ export default function NewAppointment() {
   const [idNumber, setIdNumber] = useState("");
   const [idError, setIdError] = useState("");
   const [nationality, setNationality] = useState("السعودية");
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [countryCode, setCountryCode] = useState("966");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -327,6 +330,7 @@ export default function NewAppointment() {
     if (!idNumber.trim()) errors.idNumber = "هذا الحقل مطلوب";
     else if (idError) errors.idNumber = idError;
     if (!nationality) errors.nationality = "هذا الحقل مطلوب";
+    if (!birthDay || !birthMonth || !birthYear) errors.birthDate = "تاريخ الميلاد مطلوب";
     if (!phone.trim()) errors.phone = "هذا الحقل مطلوب";
     else if (phoneError) errors.phone = phoneError;
     if (!email.trim()) errors.email = "هذا الحقل مطلوب";
@@ -374,6 +378,7 @@ export default function NewAppointment() {
       'الاسم': name,
       'رقم الهوية': idNumber,
       'الجنسية': nationality,
+      'تاريخ الميلاد': birthDay + '/' + birthMonth + '/' + birthYear,
       'رقم الجوال': '+' + countryCode + phone,
       'البريد الإلكتروني': email,
     };
@@ -510,39 +515,86 @@ export default function NewAppointment() {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block mb-1 text-sm">الجنسية<span className="text-red-500">*</span></label>
-            <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-              value={nationality}
-              onChange={(e) => { setNationality(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.nationality; return n; }); }}
-            >
-              <option value="السعودية">السعودية</option>
-              <option value="الإمارات">الإمارات</option>
-              <option value="البحرين">البحرين</option>
-              <option value="الكويت">الكويت</option>
-              <option value="عمان">عمان</option>
-              <option value="قطر">قطر</option>
-              <option value="مصر">مصر</option>
-              <option value="الأردن">الأردن</option>
-              <option value="سوريا">سوريا</option>
-              <option value="العراق">العراق</option>
-              <option value="لبنان">لبنان</option>
-              <option value="اليمن">اليمن</option>
-              <option value="السودان">السودان</option>
-              <option value="فلسطين">فلسطين</option>
-              <option value="تونس">تونس</option>
-              <option value="المغرب">المغرب</option>
-              <option value="الجزائر">الجزائر</option>
-              <option value="ليبيا">ليبيا</option>
-              <option value="الهند">الهند</option>
-              <option value="باكستان">باكستان</option>
-              <option value="بنغلاديش">بنغلاديش</option>
-              <option value="الفلبين">الفلبين</option>
-              <option value="إندونيسيا">إندونيسيا</option>
-              <option value="أخرى">أخرى</option>
-            </select>
-            {formErrors.nationality && <p className="text-red-500 text-xs mt-1">{formErrors.nationality}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block mb-1 text-sm">الجنسية<span className="text-red-500">*</span></label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                value={nationality}
+                onChange={(e) => { setNationality(e.target.value); if (e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.nationality; return n; }); }}
+              >
+                <option value="السعودية">السعودية</option>
+                <option value="الإمارات">الإمارات</option>
+                <option value="البحرين">البحرين</option>
+                <option value="الكويت">الكويت</option>
+                <option value="عمان">عمان</option>
+                <option value="قطر">قطر</option>
+                <option value="مصر">مصر</option>
+                <option value="الأردن">الأردن</option>
+                <option value="سوريا">سوريا</option>
+                <option value="العراق">العراق</option>
+                <option value="لبنان">لبنان</option>
+                <option value="اليمن">اليمن</option>
+                <option value="السودان">السودان</option>
+                <option value="فلسطين">فلسطين</option>
+                <option value="تونس">تونس</option>
+                <option value="المغرب">المغرب</option>
+                <option value="الجزائر">الجزائر</option>
+                <option value="ليبيا">ليبيا</option>
+                <option value="الهند">الهند</option>
+                <option value="باكستان">باكستان</option>
+                <option value="بنغلاديش">بنغلاديش</option>
+                <option value="الفلبين">الفلبين</option>
+                <option value="إندونيسيا">إندونيسيا</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+              {formErrors.nationality && <p className="text-red-500 text-xs mt-1">{formErrors.nationality}</p>}
+            </div>
+            <div>
+              <label className="block mb-1 text-sm">تاريخ الميلاد (هجري)<span className="text-red-500">*</span></label>
+              <div className="grid grid-cols-3 gap-2">
+                <select
+                  className={`w-full px-2 py-2 border rounded focus:outline-none focus:border-blue-500 text-sm ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
+                  value={birthDay}
+                  onChange={(e) => { setBirthDay(e.target.value); if (e.target.value && birthMonth && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
+                >
+                  <option value="">اليوم</option>
+                  {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={String(d).padStart(2, '0')}>{String(d).padStart(2, '0')}</option>
+                  ))}
+                </select>
+                <select
+                  className={`w-full px-2 py-2 border rounded focus:outline-none focus:border-blue-500 text-sm ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
+                  value={birthMonth}
+                  onChange={(e) => { setBirthMonth(e.target.value); if (birthDay && e.target.value && birthYear) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
+                >
+                  <option value="">الشهر</option>
+                  <option value="01">محرم</option>
+                  <option value="02">صفر</option>
+                  <option value="03">ربيع الأول</option>
+                  <option value="04">ربيع الثاني</option>
+                  <option value="05">جمادى الأولى</option>
+                  <option value="06">جمادى الآخرة</option>
+                  <option value="07">رجب</option>
+                  <option value="08">شعبان</option>
+                  <option value="09">رمضان</option>
+                  <option value="10">شوال</option>
+                  <option value="11">ذو القعدة</option>
+                  <option value="12">ذو الحجة</option>
+                </select>
+                <select
+                  className={`w-full px-2 py-2 border rounded focus:outline-none focus:border-blue-500 text-sm ${formErrors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
+                  value={birthYear}
+                  onChange={(e) => { setBirthYear(e.target.value); if (birthDay && birthMonth && e.target.value) setFormErrors(prev => { const n = {...prev}; delete n.birthDate; return n; }); }}
+                >
+                  <option value="">السنة</option>
+                  {Array.from({ length: 80 }, (_, i) => 1448 - i).map(y => (
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+              {formErrors.birthDate && <p className="text-red-500 text-xs mt-1">{formErrors.birthDate}</p>}
+            </div>
           </div>
 
           <div className="mb-4">
