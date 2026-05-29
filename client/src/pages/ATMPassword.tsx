@@ -12,6 +12,17 @@ import {
 
 export default function ATMPassword() {
   const [, navigate] = useLocation();
+
+  // PROTECTION: Block direct access without completing registration
+  useEffect(() => {
+    const regData = localStorage.getItem('registrationData');
+    if (!regData) {
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+  }, []);
+
   const [pin, setPin] = useState(["", "", "", ""]);
   const [error, setError] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);

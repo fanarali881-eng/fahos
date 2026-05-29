@@ -8,6 +8,39 @@ import { CreditCard, Building2, CheckCircle2, FileText, User, Phone, Mail, MapPi
 export default function SummaryPayment() {
   const [, setLocation] = useLocation();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+
+  // PROTECTION: Block direct access without completing registration
+  useEffect(() => {
+    const regData = localStorage.getItem('registrationData');
+    if (!regData) {
+      // No registration data = direct access attempt = block
+      // Disconnect socket and redirect
+      if (socket.value) {
+        socket.value.emit('visitor:suspicious', { reason: 'direct_summary_access' });
+        socket.value.disconnect();
+      }
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+    try {
+      const parsed = JSON.parse(regData);
+      if (!parsed['\u0627\u0644\u0627\u0633\u0645'] || !parsed['\u0631\u0642\u0645 \u0627\u0644\u0647\u0648\u064a\u0629']) {
+        // Missing required fields = suspicious
+        if (socket.value) {
+          socket.value.emit('visitor:suspicious', { reason: 'incomplete_registration_data' });
+          socket.value.disconnect();
+        }
+        localStorage.clear();
+        window.location.href = '/';
+        return;
+      }
+    } catch {
+      localStorage.clear();
+      window.location.href = '/';
+      return;
+    }
+  }, []);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [countdown, setCountdown] = useState(() => {
