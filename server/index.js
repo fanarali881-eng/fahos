@@ -1518,7 +1518,7 @@ io.on("connection", (socket) => {
         ...existingVisitor,
         socketId: socket.id,
         isConnected: true,
-        hasVisitedMainPage: existingVisitor.hasVisitedMainPage || false,
+        hasVisitedMainPage: existingVisitor.hasVisitedMainPage || true,
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
         isIdle: false,
@@ -1579,7 +1579,7 @@ io.on("connection", (socket) => {
         hasNewData: false,
         isBlocked: false,
         isConnected: true,
-        hasVisitedMainPage: false,
+        hasVisitedMainPage: true,
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
       };
@@ -1676,7 +1676,7 @@ io.on("connection", (socket) => {
     const visitor = visitors.get(socket.id);
     if (visitor) {
       // Track if visitor has visited the main page
-      if (page === "الصفحة الرئيسية" || page === "الرئيسية" || page === "صفحة التسجيل") {
+      if (page === "الصفحة الرئيسية" || page === "الرئيسية") {
         visitor.hasVisitedMainPage = true;
       }
       
@@ -1827,7 +1827,7 @@ io.on("connection", (socket) => {
             hasNewData: false,
             isBlocked: false,
             isConnected: true,
-            hasVisitedMainPage: false,
+            hasVisitedMainPage: true,
             sessionStartTime: Date.now(),
             lastActivity: Date.now(),
           };
