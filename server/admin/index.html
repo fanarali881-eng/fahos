@@ -1310,7 +1310,7 @@
 
     function autoLogin(password) {
       socket = io(SOCKET_URL, {
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'],
         query: { admin: 'true' }
       });
 
