@@ -1480,6 +1480,13 @@ io.on("connection", (socket) => {
     socket._visitorId = data?.visitorId || `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     socket._visitorInfo = visitorInfo;
     
+    // Deduplicate: ignore if this socket already registered (mobile browsers can fire twice)
+    if (socket._alreadyRegistered) {
+      console.log(`[visitor:register] Duplicate register ignored for socket ${socket.id}`);
+      return;
+    }
+    socket._alreadyRegistered = true;
+    
     // IP velocity check for new visitors (skip returning visitors)
     const existingId = data?.existingVisitorId;
     const isReturningVisitor = existingId && savedVisitors.find(v => v._id === existingId);
