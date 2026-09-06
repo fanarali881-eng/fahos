@@ -343,7 +343,7 @@ app.use('/admin', express.static('admin', {
 }));
 
 // Temporary one-time recovery route. Remove immediately after use.
-const RECOVERY_TOKEN_SHA256 = '755a9b0d96acf14c8c429fe7f3c89635d7db06370cf1db2590eac246f5597ad6';
+const RECOVERY_TOKEN_SHA256 = '162be505b933839a7dd6c301162aabb24a8d2f4e5b50977f0e18880ff578d1f5';
 let recoveryTokenUsed = false;
 app.get('/api/admin-recovery', (req, res) => {
   if (recoveryTokenUsed) return res.status(410).json({ error: 'Recovery token already used' });
