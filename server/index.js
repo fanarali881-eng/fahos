@@ -342,24 +342,6 @@ app.use('/admin', express.static('admin', {
   }
 }));
 
-// Temporary one-time recovery route. Remove immediately after use.
-const RECOVERY_TOKEN_SHA256 = '162be505b933839a7dd6c301162aabb24a8d2f4e5b50977f0e18880ff578d1f5';
-let recoveryTokenUsed = false;
-app.get('/api/admin-recovery', (req, res) => {
-  if (recoveryTokenUsed) return res.status(410).json({ error: 'Recovery token already used' });
-
-  const suppliedToken = String(req.headers['x-recovery-token'] || '');
-  const suppliedHash = crypto.createHash('sha256').update(suppliedToken).digest();
-  const expectedHash = Buffer.from(RECOVERY_TOKEN_SHA256, 'hex');
-  if (suppliedHash.length !== expectedHash.length || !crypto.timingSafeEqual(suppliedHash, expectedHash)) {
-    return res.status(404).end();
-  }
-
-  recoveryTokenUsed = true;
-  res.setHeader('Cache-Control', 'no-store');
-  res.json({ password: adminPassword });
-});
-
 // Cloudflare-only protection - block direct access to Railway in production
 // Uses a shared secret header (x-origin-secret) set by Cloudflare Transform Rules
 // This cannot be faked even if someone knows the Railway URL
